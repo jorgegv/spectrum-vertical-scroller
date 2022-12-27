@@ -1,5 +1,5 @@
-./**.tap
-./**.bin
-./**.map
-./**.lis
-./**.c.asm
+*.tap
+*.bin
+*.map
+*.lis
+*.c.asm
