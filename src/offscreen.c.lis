@@ -1,0 +1,2745 @@
+/tmp/tmpXXSlX1Jb.asm:
+     1                          MODULE offscreen_c
+     2                          LINE 0, "offscreen.c"
+offscreen.c:
+                                
+     1                          ;* * * * *  Small-C/Plus z88dk * * * * *
+     2                          ;  Version: 19544-c6b5d49d7-20220522
+     3                          ;
+     4                          ;	Reconstructed for z80 Module Assembler
+     5                          ;
+     6                          ;	Module compile time: Tue Dec 27 13:43:14 2022
+     7                          
+     8                          
+     9                          ;#line 1 "offscreen.c"
+    10                          	C_LINE	1,"/tmp/tmpXXSlX1Jb.i"
+/tmp/tmpXXSlX1Jb.i:
+     1                          	C_LINE	0,"offscreen.c"
+offscreen.c:
+                                
+                                	MODULE	offscreen_c
+                                
+                                
+                                	INCLUDE "z80_crt0.hdr"
+/home/jorgegv/src/spectrum/z88dk/lib/config/../../lib/z80_crt0.hdr:
+     1                          ;
+     2                          ;	Header file which contains all required variables from the
+     3                          ;	startup that need to be exposed to individual C files
+     4                          ;
+     5                          ;	Stick in this file any routines which are needed or implicitly
+     6                          ;	implied by sccz80.
+     7                          ;
+     8                          ;	This file is included by every module
+     9                          ;	To handle multi module programs which use floating point
+    10                          ;	routines in different modules, we have got rid of
+    11                          ;	the conditional assembly around the float routines
+    12                          
+    13                          
+    14                          	EXTERN	base_graphics	; Address of graphics screen
+    15                          
+    16                          	EXTERN	_cpfar2near	; Far->near conversion (z88)
+    17                          	EXTERN	packintrout	; Process interrupt (z88 apps)
+    18                          
+    19                          	EXTERN	l_dcal		; jp(hl)
+    20                          	EXTERN	cleanup		; cleanup before program exit
+    21                          
+    22                          
+    23                          	EXTERN	l_jphl		; another jp(hl)
+    24                          	EXTERN	l_jpix		; jp(ix)
+    25                          	EXTERN	l_jpiy		; jp(iy)
+    26                          
+    27                          	EXTERN	l_ldi
+    28                          	EXTERN	l_ldi_128
+    29                          	EXTERN	l_ldi_256
+    30                          
+    31                          	EXTERN	l_outi
+    32                          	EXTERN	l_outi_128
+    33                          	EXTERN	l_outi_256
+    34                          
+    35                          	EXTERN	l_ini
+    36                          	EXTERN	l_ini_128
+    37                          	EXTERN	l_ini_256
+    38                          	EXTERN	l_ini_512
+    39                          
+    40                          
+    41                          	; Used for banked calls for __banked for sccz80 + sdcc
+    42                          	EXTERN	banked_call
+    43                          
+    44                          
+    45                          ;------------------------------------
+    46                          ; Scopes for integer library routines
+    47                          ;------------------------------------
+    48                          
+    49                          	EXTERN	l_getptr	;Get 3 byte pointer
+    50                          	EXTERN	l_putptr	;Put 3 byte pointer
+    51                          	EXTERN	l_gchar		;Get signed char
+    52                          	EXTERN	l_gcharsp	;Get signed char  (peephole opt)
+    53                          	EXTERN	l_gcharspsp	;Get signed char and push  (peephole opt)
+    54                          	EXTERN	l_g2charspsp	;Get 2 signed char and push  (peephole opt)
+    55                          	EXTERN	l_sxt		;Sign extend char
+    56                          	EXTERN	l_gint		;Get int ld hl,(hl)
+    57                          	EXTERN	l_gintsp	;Get int (peephole opt)
+    58                          	EXTERN	l_gintspchar	;Get int,char (peephole opt)
+    59                          	EXTERN	l_gintspsp	;Get int and push (peephole opt)
+    60                          	EXTERN	l_g2intspsp	;Get 2 int and push (peephole opt)
+    61                          	EXTERN	l_gintsp2de	;Get int, multiply by 2 and add from SP by de
+    62                          	EXTERN	l_gint7de	;Get int, multiply by 7 and add from SP by de
+    63                          	EXTERN	l_gint_eq	;Get int and test == 0
+    64                          	EXTERN	l_ghtonsint	;Get reverse order int
+    65                          	EXTERN	l_pint		;Put int: ld (de),hl
+    66                          	EXTERN	l_pint_eq	;Put int and test == 0
+    67                          	EXTERN	l_pint_pop	;Put int and pop place address
+    68                          	EXTERN	l_or		;Int logical or
+    69                          	EXTERN	l_xor		;Int logical xor
+    70                          	EXTERN	l_and		;Int logical and
+    71                          	EXTERN	l_eq		;Int equality
+    72                          	EXTERN	l_ne		;Int inequality
+    73                          	EXTERN	l_gt		;Int signed de >  hl
+    74                          	EXTERN	l_le		;Int signed de <= hl
+    75                          	EXTERN	l_ge		;Int signed de >= hl
+    76                          	EXTERN	l_lt		;Int signed de <  hl
+    77                          	EXTERN	l_uge		;Int unsigned de >= hl
+    78                          	EXTERN	l_ult		;Int unsigned de <  hl
+    79                          	EXTERN	l_ugt		;Int unsigned de >  hl
+    80                          	EXTERN	l_ule		;Int unsigned de <= hl
+    81                          	EXTERN	l_cmp		;Int signed compare
+    82                          	EXTERN	l_ucmp		;Int unsigned compare
+    83                          	EXTERN	l_asr		;Int signed de >> hl
+    84                          	EXTERN	l_asr_hl_by_e	;Int signed hl >> e
+    85                          	EXTERN	l_asr_u		;Int unsigned de >> hl
+    86                          	EXTERN	l_asr_u_hl_by_e	;Int unsigned hl >> e
+    87                          	EXTERN	l_asl		;Int de << hl
+    88                          	EXTERN	l_sub		;Int subtract hl = de - hl
+    89                          	EXTERN	l_neg		;Int negate
+    90                          	EXTERN	l_com		;Int ~
+    91                          	EXTERN	l_lneg		;Int logical negate
+    92                          	EXTERN	l_bool		;Int boolean test
+    93                          	EXTERN	l_cm_de	;
+    94                          	EXTERN	l_cm_bc
+    95                          	EXTERN	l_deneg
+    96                          	EXTERN	l_bcneg
+    97                          	EXTERN	l_case		;Integer case
+    98                          	EXTERN	l_mult		;Integer hl = hl * de
+    99                          	EXTERN	l_mult_u	;Integer unsigned *
+   100                          	EXTERN	l_div		;Integer signed / hl=de/hl, de=de%hl
+   101                          	EXTERN	l_div_u		;Integer unsigned /
+   102                          	EXTERN	l_mod		;Integer % (for gbz80) hl=de%hl
+   103                          	EXTERN	l_mod_u		;Integer unsigned % (for gbz80)
+   104                          
+   105                          ;------------------
+   106                          ;Long functions now
+   107                          ;------------------
+   108                          
+   109                          	EXTERN	lpush2		;Push a long under the stack
+   110                          	EXTERN	l_int2long_s	;Int->long signed conversion
+   111                          	EXTERN	l_int2long_s_float	;Int->long->float signed conversion (optimizer: use -O3)
+   112                          	EXTERN	l_int2long_u_float	;uInt->ulong->float signed conversion
+   113                          	EXTERN	l_glong		;Get long
+   114                          	EXTERN	l_glongsp	;Get long (peephole opt)
+   115                          	EXTERN	l_glonghlp	;Get pointer, then get long
+   116                          	EXTERN	l_glong2sp	;Get long and copy on stack (peephole opt)
+   117                          	EXTERN	l_glong2sp_hlp
+   118                          	EXTERN	l_long_add
+   119                          	EXTERN	l_long_and
+   120                          	EXTERN	l_long_asl
+   121                          	EXTERN	l_long_asr
+   122                          	EXTERN	l_long_aslo	;Long << shift in c
+   123                          	EXTERN	l_long_asro	;Long >> shift in c (signed)
+   124                          	EXTERN	l_long_bool
+   125                          	EXTERN	l_long_cmp
+   126                          	EXTERN	l_long_com
+   127                          	EXTERN	l_long_eq
+   128                          	EXTERN	l_long_ge
+   129                          	EXTERN	l_long_gt
+   130                          	EXTERN	l_long_le
+   131                          	EXTERN	l_long_lneg
+   132                          	EXTERN	l_long_lt
+   133                          	EXTERN	l_long_ne
+   134                          	EXTERN	l_long_neg
+   135                          	EXTERN	l_long_or
+   136                          	EXTERN	l_long_sub
+   137                          	EXTERN	l_long_ucmp
+   138                          	EXTERN	l_long_uge
+   139                          	EXTERN	l_long_ugt
+   140                          	EXTERN	l_long_ule
+   141                          	EXTERN	l_long_ult
+   142                          	EXTERN	l_long_xor
+   143                          	EXTERN	l_plong
+   144                          	EXTERN	l_inclong	;Increment long
+   145                          	EXTERN	l_declong	;Decrement long
+   146                          	EXTERN	l_long_div
+   147                          	EXTERN	l_long_div_u
+   148                          	EXTERN	l_long_mod
+   149                          	EXTERN	l_long_mod_u
+   150                          	EXTERN	l_long_mult
+   151                          	EXTERN	l_long_mult_u
+   152                          	EXTERN	l_long_asr_u	;Long unsigned >>
+   153                          	EXTERN	l_long_asr_uo	;Long unsigned >> shift in c
+   154                          	EXTERN	l_long_case
+   155                          
+   156                          ;--------------------------------------------------------------
+   157                          ; Floating point support routines, mostly in library
+   158                          ;--------------------------------------------------------------
+   159                          
+   160                          	EXTERN	dadd
+   161                          	EXTERN	ddiv
+   162                          	EXTERN	dsub
+   163                          	EXTERN	dmul
+   164                          
+   165                          	EXTERN	dge
+   166                          	EXTERN	dgt
+   167                          	EXTERN	dleq
+   168                          	EXTERN	dlt
+   169                          	EXTERN	deq
+   170                          	EXTERN	dne
+   171                          
+   172                          	EXTERN	minusfa		;FA=-FA
+   173                          
+   174                          	EXTERN	dswap		;Exchange FA with top of stack
+   175                          	EXTERN	float		;Convert int to float
+   176                          	EXTERN	ufloat		;unsigned int to float
+   177                          	EXTERN	ifix		;Convert float to int
+   178                          
+   179                          	EXTERN	dstore		;FA->(de)
+   180                          	EXTERN	dload		;FA<-(hl)
+   181                          	EXTERN	dldpsh		;(hl)->(stack)
+   182                          	EXTERN	dpush		;FA->(stack)
+   183                          	EXTERN	dpush2		;FA->(stack under)
+   184                          	EXTERN	dpush3		;FA->(stack under,long)
+   185                          
+   186                          	EXTERN	fa		;may not be needed in this file
+   187                          	EXTERN	extra		;ditto
+   188                          	EXTERN	__atof2		;string->fa conversion
+   189                          	EXTERN	l_f48_ldexp	;FA * pow2(N)
+   190                          	EXTERN	l_f48_f16tof	;Convert _Float16 to float
+   191                          	EXTERN	l_f48_ftof16	;Convert float to _Float16
+   192                          
+   193                          	; 16 bit float ABI
+   194                          	EXTERN	l_f16_add
+   195                          	EXTERN	l_f16_sub
+   196                          	EXTERN	l_f16_mul
+   197                          	EXTERN	l_f16_div
+   198                          	EXTERN	l_f16_le
+   199                          	EXTERN	l_f16_lt
+   200                          	EXTERN	l_f16_ge
+   201                          	EXTERN	l_f16_gt
+   202                          	EXTERN	l_f16_eq
+   203                          	EXTERN	l_f16_ne
+   204                          	EXTERN	l_f16_swap
+   205                          	EXTERN	l_f16_schar2f
+   206                          	EXTERN	l_f16_uchar2f
+   207                          	EXTERN	l_f16_sint2f
+   208                          	EXTERN	l_f16_uint2f
+   209                          	EXTERN	l_f16_slong2f
+   210                          	EXTERN	l_f16_ulong2f
+   211                          	EXTERN	l_f16_f2sint
+   212                          	EXTERN	l_f16_f2uint
+   213                          	EXTERN	l_f16_f2slong
+   214                          	EXTERN	l_f16_f2ulong
+   215                          	EXTERN	l_f16_ldexp
+   216                          	EXTERN	l_f16_invf	;Only for ieee16
+   217                          	EXTERN	l_f16_f16tof	;A noop
+   218                          	EXTERN	l_f16_ftof16	;A noop
+   219                          
+   220                          	; 32 bit float ABI
+   221                          	EXTERN	l_f32_add
+   222                          	EXTERN	l_f32_sub
+   223                          	EXTERN	l_f32_mul
+   224                          	EXTERN	l_f32_div
+   225                          	EXTERN	l_f32_le
+   226                          	EXTERN	l_f32_lt
+   227                          	EXTERN	l_f32_ge
+   228                          	EXTERN	l_f32_gt
+   229                          	EXTERN	l_f32_eq
+   230                          	EXTERN	l_f32_ne
+   231                          	EXTERN	l_f32_swap
+   232                          	EXTERN	l_f32_negate
+   233                          	EXTERN	l_f32_schar2f
+   234                          	EXTERN	l_f32_uchar2f
+   235                          	EXTERN	l_f32_sint2f
+   236                          	EXTERN	l_f32_uint2f
+   237                          	EXTERN	l_f32_slong2f
+   238                          	EXTERN	l_f32_ulong2f
+   239                          	EXTERN	l_f32_f2sint
+   240                          	EXTERN	l_f32_f2uint
+   241                          	EXTERN	l_f32_f2slong
+   242                          	EXTERN	l_f32_f2ulong
+   243                          	EXTERN	l_f32_ldexp
+   244                          	EXTERN	l_f32_invf	;Only for math32
+   245                          	EXTERN	l_f32_f16tof	;Convert _Float16 to float
+   246                          	EXTERN	l_f32_ftof16	;Convert float to _Float16
+   247                          
+   248                          	; 64 bit float ABI
+   249                          	EXTERN	l_f64_load
+   250                          	EXTERN	l_f64_add
+   251                          	EXTERN	l_f64_sub
+   252                          	EXTERN	l_f64_mul
+   253                          	EXTERN	l_f64_div
+   254                          	EXTERN	l_f64_le
+   255                          	EXTERN	l_f64_lt
+   256                          	EXTERN	l_f64_ge
+   257                          	EXTERN	l_f64_gt
+   258                          	EXTERN	l_f64_eq
+   259                          	EXTERN	l_f64_ne
+   260                          	EXTERN	l_f64_negate
+   261                          	EXTERN	l_f64_swap
+   262                          	EXTERN	l_f64_store
+   263                          	EXTERN	l_f64_dpush
+   264                          	EXTERN	l_f64_dldpsh
+   265                          	EXTERN	l_f64_dpush2
+   266                          	EXTERN	l_f64_dpush3
+   267                          	EXTERN	l_f64_schar2f
+   268                          	EXTERN	l_f64_uchar2f
+   269                          	EXTERN	l_f64_sint2f
+   270                          	EXTERN	l_f64_uint2f
+   271                          	EXTERN	l_f64_slong2f
+   272                          	EXTERN	l_f64_ulong2f
+   273                          	EXTERN	l_f64_f2sint
+   274                          	EXTERN	l_f64_f2uint
+   275                          	EXTERN	l_f64_f2slong
+   276                          	EXTERN	l_f64_f2ulong
+   277                          	EXTERN	l_f64_ldexp
+   278                          	EXTERN	l_f64_f16tof	;Convert _Float16 to float
+   279                          	EXTERN	l_f64_ftof16	;Convert float to _Float16
+   280                          
+   281                          
+   282                          ;--------------------------------------------------
+   283                          ; Routines for picking up variables from far memory
+   284                          ;--------------------------------------------------
+   285                          
+   286                          	EXTERN	lp_gchar
+   287                          	EXTERN	lp_gdoub
+   288                          	EXTERN	lp_gint
+   289                          	EXTERN	lp_glong
+   290                          	EXTERN	lp_gptr
+   291                          	EXTERN	lp_pchar
+   292                          	EXTERN	lp_pdoub
+   293                          	EXTERN	lp_pint
+   294                          	EXTERN	lp_plong
+   295                          	EXTERN	lp_pptr
+   296                          
+   297                          	EXTERN	l_farcall	; Long call
+   298                          
+   299                          
+   300                          ;--------------------------------------------------
+   301                          ; Routines for handling 64 bit integers for sccz80
+   302                          ;--------------------------------------------------
+   303                          
+   304                          	EXTERN	__i64_acc
+   305                          	EXTERN	l_i64_load
+   306                          	EXTERN	l_i64_store
+   307                          	EXTERN	l_i64_push
+   308                          	EXTERN	l_i64_add
+   309                          	EXTERN	l_i64_sub
+   310                          	EXTERN	l_i64_mult
+   311                          	EXTERN	l_i64_mult_u
+   312                          	EXTERN	l_i64_mod
+   313                          	EXTERN	l_i64_mod_u
+   314                          	EXTERN	l_i64_div
+   315                          	EXTERN	l_i64_div_u
+   316                          	EXTERN	l_i64_or
+   317                          	EXTERN	l_i64_xor
+   318                          	EXTERN	l_i64_and
+   319                          	EXTERN	l_i64_asr_u
+   320                          	EXTERN	l_i64_asr_uo
+   321                          	EXTERN	l_i64_asr
+   322                          	EXTERN	l_i64_asro
+   323                          	EXTERN	l_i64_asl
+   324                          	EXTERN	l_i64_aslo
+   325                          	EXTERN	l_i64_inc
+   326                          	EXTERN	l_i64_dec
+   327                          	EXTERN	l_i64_eq0
+   328                          	EXTERN	l_i64_eq
+   329                          	EXTERN	l_i64_ne
+   330                          	EXTERN	l_i64_ge
+   331                          	EXTERN	l_i64_gt
+   332                          	EXTERN	l_i64_uge
+   333                          	EXTERN	l_i64_ugt
+   334                          	EXTERN	l_i64_le
+   335                          	EXTERN	l_i64_lt
+   336                          	EXTERN	l_i64_ule
+   337                          	EXTERN	l_i64_ult
+   338                          	EXTERN	l_i64_lneg
+   339                          	EXTERN	l_i64_neg
+   340                          	EXTERN	l_i64_com
+   341                          	EXTERN	l_i64_case
+   342                          	EXTERN	l_i64_push_under_int
+   343                          	EXTERN	l_i64_push_under_int_mhl
+   344                          	EXTERN	l_i64_copy
+   345                          	EXTERN	l_i64_slong2i64
+   346                          	EXTERN	l_i64_ulong2i64
+   347                          	EXTERN	l_i64_sint2i64
+   348                          	EXTERN	l_i64_uint2i64
+   349                          	EXTERN	l_i64_u64_toi32
+   350                          
+   351                          
+   352                          ;-------------------
+   353                          ; Routines for SDCC
+   354                          ;-------------------
+   355                          
+   356                          	EXTERN	__divsint_rrx_s
+   357                          	EXTERN	__divsint_rrx_hds
+   358                          	EXTERN	__divuint_rrx_s
+   359                          	EXTERN	__divuint_rrx_hds
+   360                          	EXTERN	__divsuchar_rrx_s
+   361                          	EXTERN	__divuschar_rrx_s
+   362                          	EXTERN	__divuchar_rrx_s
+   363                          	EXTERN	__divuchar_rrx_hds
+   364                          	EXTERN	__moduchar_rrx_s
+   365                          	EXTERN	__moduchar_rrx_hds
+   366                          	EXTERN	__moduschar_rrx_s
+   367                          	EXTERN	__modsuchar_rrx_s
+   368                          	EXTERN	__modschar_rrx_s
+   369                          	EXTERN	__modschar_rrx_hds
+   370                          	EXTERN	__modsint_rrx_s
+   371                          	EXTERN	__modsint_rrx_hds
+   372                          	EXTERN	__moduint_rrx_s
+   373                          	EXTERN	__moduint_rrx_hds
+   374                          	EXTERN	__get_remainder
+   375                          	EXTERN	__divunsigned
+   376                          	EXTERN	__div_signexte
+   377                          	EXTERN	__divu16
+   378                          	EXTERN	__div16
+   379                          	EXTERN	__div8
+   380                          	EXTERN	__muluchar_rrx_s
+   381                          	EXTERN	__muluchar_rrx_hds
+   382                          	EXTERN	__mulsuchar_rrx_s
+   383                          	EXTERN	__muluschar_rrx_s
+   384                          	EXTERN	__mulschar_rrx_s
+   385                          	EXTERN	__mulschar_rrx_hds
+   386                          	EXTERN	__mulint_rrx_s
+   387                          	EXTERN	__mulint_rrx_hds
+   388                          	EXTERN	__mul16
+   389                          	EXTERN	__rrulong_rrx_s
+   390                          	EXTERN	__rrslong_rrx_s
+   391                          	EXTERN	__rlslong_rrx_s
+   392                          	EXTERN	__rlulong_rrx_s
+   393                          	EXTERN	__muluchar
+   394                          	EXTERN	__mulschar
+   395                          
+   396                          	EXTERN	l_push_di
+   397                          	EXTERN	l_pop_ei
+   398                          
+   399                          	EXTERN	l_debug_push_frame
+   400                          	EXTERN	l_debug_pop_frame
+   401                          
+   402                          
+offscreen.c:
+                                
+                                
+                                ;#line 1 "/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+                                	C_LINE	1,"offscreen.c"
+     1                          	C_LINE	0,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h:
+                                ;
+                                ;#line 1 "/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/compiler.h"
+                                	C_LINE	10,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    10                          	C_LINE	0,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/compiler.h"
+/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/compiler.h:
+                                ;
+                                ;
+                                ;#line 11 "/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+                                	C_LINE	73,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/compiler.h"
+    73                          	C_LINE	10,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h:
+    10                          ;#line 1 "/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    10                          	C_LINE	11,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    11                          	C_LINE	0,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h:
+                                ;
+                                ;typedef double float_t;
+                                	C_LINE	17,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    17                          	C_LINE	17,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    17                          ;typedef double double_t;
+    17                          	C_LINE	26,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    26                          	C_LINE	26,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    26                          ;
+    26                          ;typedef _Float16 half_t;
+    26                          	C_LINE	35,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    35                          	C_LINE	35,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    35                          ;typedef unsigned int size_t;
+    35                          	C_LINE	40,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    40                          	C_LINE	40,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    40                          ;typedef signed int ssize_t;
+    40                          	C_LINE	45,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    45                          	C_LINE	45,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    45                          ;typedef unsigned long clock_t;
+    45                          	C_LINE	50,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    50                          	C_LINE	50,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    50                          ;typedef signed int pid_t;
+    50                          	C_LINE	55,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    55                          	C_LINE	55,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    55                          ;typedef unsigned char bool_t;
+    55                          	C_LINE	60,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    60                          	C_LINE	60,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    60                          ;typedef unsigned int ino_t;
+    60                          	C_LINE	65,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    65                          	C_LINE	65,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    65                          ;typedef unsigned long nseconds_t;
+    65                          	C_LINE	70,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    70                          	C_LINE	70,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    70                          ;typedef long time_t;
+    70                          	C_LINE	75,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    75                          	C_LINE	75,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    75                          ;typedef short wild_t;
+    75                          	C_LINE	80,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    80                          	C_LINE	80,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    80                          ;typedef unsigned long fpos_t;
+    80                          	C_LINE	85,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    85                          	C_LINE	85,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    85                          ;typedef unsigned char   u8_t;
+    85                          	C_LINE	89,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    89                          	C_LINE	89,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    89                          ;typedef unsigned short u16_t;
+    89                          	C_LINE	90,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    90                          	C_LINE	90,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    90                          ;typedef unsigned long  u32_t;
+    90                          	C_LINE	91,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    91                          	C_LINE	91,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    91                          ;typedef char            i8_t;
+    91                          	C_LINE	93,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    93                          	C_LINE	93,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    93                          ;typedef short          i16_t;
+    93                          	C_LINE	94,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    94                          	C_LINE	94,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    94                          ;typedef long           i32_t;
+    94                          	C_LINE	95,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    95                          	C_LINE	95,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+    95                          ;
+    95                          ;   typedef unsigned char uchar;
+    95                          	C_LINE	101,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+   101                          	C_LINE	101,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+   101                          ;   typedef unsigned int uint;
+   101                          	C_LINE	106,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+   106                          	C_LINE	106,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+   106                          ;
+   106                          ;#line 12 "/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+   106                          	C_LINE	121,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/sys/types.h"
+   121                          	C_LINE	11,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h:
+    11                          ;typedef signed char            int8_t;
+    11                          	C_LINE	13,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    13                          	C_LINE	13,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    13                          ;typedef signed int             int16_t;
+    13                          	C_LINE	14,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    14                          	C_LINE	14,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    14                          ;typedef signed long            int32_t;
+    14                          	C_LINE	15,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    15                          	C_LINE	15,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    15                          ;typedef unsigned char          uint8_t;
+    15                          	C_LINE	17,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    17                          	C_LINE	17,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    17                          ;typedef unsigned int           uint16_t;
+    17                          	C_LINE	18,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    18                          	C_LINE	18,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    18                          ;typedef unsigned long          uint32_t;
+    18                          	C_LINE	19,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    19                          	C_LINE	19,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    19                          ;typedef signed char            int_least8_t;
+    19                          	C_LINE	21,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    21                          	C_LINE	21,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    21                          ;typedef signed int             int_least16_t;
+    21                          	C_LINE	22,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    22                          	C_LINE	22,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    22                          ;typedef signed long            int_least32_t;
+    22                          	C_LINE	23,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    23                          	C_LINE	23,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    23                          ;typedef unsigned char          uint_least8_t;
+    23                          	C_LINE	25,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    25                          	C_LINE	25,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    25                          ;typedef unsigned int           uint_least16_t;
+    25                          	C_LINE	26,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    26                          	C_LINE	26,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    26                          ;typedef unsigned long          uint_least32_t;
+    26                          	C_LINE	27,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    27                          	C_LINE	27,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    27                          ;typedef signed int             int_fast8_t;
+    27                          	C_LINE	29,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    29                          	C_LINE	29,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    29                          ;typedef signed int             int_fast16_t;
+    29                          	C_LINE	30,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    30                          	C_LINE	30,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    30                          ;typedef signed long            int_fast32_t;
+    30                          	C_LINE	31,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    31                          	C_LINE	31,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    31                          ;typedef unsigned int           uint_fast8_t;
+    31                          	C_LINE	33,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    33                          	C_LINE	33,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    33                          ;typedef unsigned int           uint_fast16_t;
+    33                          	C_LINE	34,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    34                          	C_LINE	34,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    34                          ;typedef unsigned long          uint_fast32_t;
+    34                          	C_LINE	35,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    35                          	C_LINE	35,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    35                          ;typedef long long              int64_t;
+    35                          	C_LINE	37,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    37                          	C_LINE	37,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    37                          ;typedef unsigned long long     uint64_t;
+    37                          	C_LINE	38,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    38                          	C_LINE	38,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    38                          ;typedef long long              int_least64_t;
+    38                          	C_LINE	40,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    40                          	C_LINE	40,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    40                          ;typedef unsigned long long     uint_least64_t;
+    40                          	C_LINE	41,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    41                          	C_LINE	41,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    41                          ;typedef long long              int_fast64_t;
+    41                          	C_LINE	43,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    43                          	C_LINE	43,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    43                          ;typedef unsigned long long     uint_fast64_t;
+    43                          	C_LINE	44,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    44                          	C_LINE	44,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    44                          ;typedef int                    intptr_t;
+    44                          	C_LINE	49,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    49                          	C_LINE	49,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    49                          ;typedef unsigned int           uintptr_t;
+    49                          	C_LINE	52,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    52                          	C_LINE	52,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    52                          ;typedef long                   intmax_t;
+    52                          	C_LINE	54,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    54                          	C_LINE	54,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    54                          ;typedef unsigned long          uintmax_t;
+    54                          	C_LINE	55,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    55                          	C_LINE	55,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+    55                          ;
+    55                          ;
+    55                          ;
+    55                          ;
+    55                          ;#line 2 "offscreen.c"
+    55                          	C_LINE	131,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/stdint.h"
+   131                          	C_LINE	1,"offscreen.c"
+offscreen.c:
+     1                          ;#line 1 "/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+     1                          	C_LINE	2,"offscreen.c"
+     2                          	C_LINE	0,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h:
+                                ;extern int __LIB__ bcmp(const void *b1,const void *b2,size_t len) __smallc;
+                                	C_LINE	7,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+     7                          	C_LINE	7,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+     7                          ;extern int __LIB__ bcmp_callee(const void *b1,const void *b2,size_t len) __smallc __z88dk_callee;
+     7                          	C_LINE	8,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+     8                          	C_LINE	8,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+     8                          ;extern void __LIB__ bcopy(const void *src,void *dst,size_t len) __smallc;
+     8                          	C_LINE	12,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    12                          	C_LINE	12,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    12                          ;extern void __LIB__ bcopy_callee(const void *src,void *dst,size_t len) __smallc __z88dk_callee;
+    12                          	C_LINE	14,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    14                          	C_LINE	14,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    14                          ;extern void __LIB__ bzero(void *mem,size_t n) __smallc;
+    14                          	C_LINE	19,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    19                          	C_LINE	19,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    19                          ;extern void __LIB__ bzero_callee(void *mem,size_t n) __smallc __z88dk_callee;
+    19                          	C_LINE	20,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    20                          	C_LINE	20,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    20                          ;extern char __LIB__ *index(const char *s,int c) __smallc;
+    20                          	C_LINE	24,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    24                          	C_LINE	24,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    24                          ;extern char __LIB__ *index_callee(const char *s,int c) __smallc __z88dk_callee;
+    24                          	C_LINE	25,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    25                          	C_LINE	25,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    25                          ;extern char __LIB__ *rindex(const char *s,int c) __smallc;
+    25                          	C_LINE	29,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    29                          	C_LINE	29,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    29                          ;extern char __LIB__ *rindex_callee(const char *s,int c) __smallc __z88dk_callee;
+    29                          	C_LINE	30,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    30                          	C_LINE	30,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    30                          ;extern char __LIB__ *strset(char *s,int c) __smallc;
+    30                          	C_LINE	34,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    34                          	C_LINE	34,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    34                          ;extern char __LIB__ *strset_callee(char *s,int c) __smallc __z88dk_callee;
+    34                          	C_LINE	35,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    35                          	C_LINE	35,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    35                          ;extern char __LIB__ *strnset(char *s,int c,size_t n) __smallc;
+    35                          	C_LINE	39,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    39                          	C_LINE	39,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    39                          ;extern char __LIB__ *strnset_callee(char *s,int c,size_t n) __smallc __z88dk_callee;
+    39                          	C_LINE	41,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    41                          	C_LINE	41,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    41                          ;extern void __LIB__ *rawmemchr(const void *mem,int c) __smallc;
+    41                          	C_LINE	46,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    46                          	C_LINE	46,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    46                          ;extern void __LIB__ *rawmemchr_callee(const void *mem,int c) __smallc __z88dk_callee;
+    46                          	C_LINE	47,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    47                          	C_LINE	47,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    47                          ;extern char __LIB__ *_memlwr_(void *p,size_t n) __smallc;
+    47                          	C_LINE	52,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    52                          	C_LINE	52,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    52                          ;extern char __LIB__ *_memlwr__callee(void *p,size_t n) __smallc __z88dk_callee;
+    52                          	C_LINE	53,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    53                          	C_LINE	53,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    53                          ;extern char __LIB__ *_memstrcpy_(void *p,const char *s,size_t n) __smallc;
+    53                          	C_LINE	57,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    57                          	C_LINE	57,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    57                          ;extern char __LIB__ *_memstrcpy__callee(void *p,const char *s,size_t n) __smallc __z88dk_callee;
+    57                          	C_LINE	59,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    59                          	C_LINE	59,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    59                          ;extern char __LIB__ *_memupr_(void *p,size_t n) __smallc;
+    59                          	C_LINE	64,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    64                          	C_LINE	64,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    64                          ;extern char __LIB__ *_memupr__callee(void *p,size_t n) __smallc __z88dk_callee;
+    64                          	C_LINE	65,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    65                          	C_LINE	65,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    65                          ;extern char __LIB__  *_strrstrip_(char *s) __smallc __z88dk_callee __z88dk_fastcall;
+    65                          	C_LINE	69,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    69                          	C_LINE	69,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    69                          ;extern int __LIB__  ffs(int i) __smallc __z88dk_callee __z88dk_fastcall;
+    69                          	C_LINE	72,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    72                          	C_LINE	72,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    72                          ;extern int __LIB__  ffsl(long i) __smallc __z88dk_callee __z88dk_fastcall;
+    72                          	C_LINE	75,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    75                          	C_LINE	75,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    75                          ;extern void __LIB__ *memccpy(void *dst,const void *src,int c,size_t n) __smallc;
+    75                          	C_LINE	78,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    78                          	C_LINE	78,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    78                          ;extern void __LIB__ *memccpy_callee(void *dst,const void *src,int c,size_t n) __smallc __z88dk_callee;
+    78                          	C_LINE	79,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    79                          	C_LINE	79,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    79                          ;extern void __LIB__ *memchr(const void *s,int c,size_t n) __smallc;
+    79                          	C_LINE	83,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    83                          	C_LINE	83,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    83                          ;extern void __LIB__ *memchr_callee(const void *s,int c,size_t n) __smallc __z88dk_callee;
+    83                          	C_LINE	85,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    85                          	C_LINE	85,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    85                          ;extern int __LIB__ memcmp(const void *s1,const void *s2,size_t n) __smallc;
+    85                          	C_LINE	90,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    90                          	C_LINE	90,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    90                          ;extern int __LIB__ memcmp_callee(const void *s1,const void *s2,size_t n) __smallc __z88dk_callee;
+    90                          	C_LINE	92,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    92                          	C_LINE	92,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    92                          ;extern void __LIB__ *memcpy(void *dst,const void *src,size_t n) __smallc;
+    92                          	C_LINE	97,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    97                          	C_LINE	97,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    97                          ;extern void __LIB__ *memcpy_callee(void *dst,const void *src,size_t n) __smallc __z88dk_callee;
+    97                          	C_LINE	99,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    99                          	C_LINE	99,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+    99                          ;extern void __LIB__ *memmem(const void *haystack,size_t haystack_len,const void *needle,size_t needle_len) __smallc;
+    99                          	C_LINE	104,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   104                          	C_LINE	104,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   104                          ;extern void __LIB__ *memmem_callee(const void *haystack,size_t haystack_len,const void *needle,size_t needle_len) __smallc __z88dk_callee;
+   104                          	C_LINE	105,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   105                          	C_LINE	105,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   105                          ;extern void __LIB__ *memmove(void *dst,const void *src,size_t n) __smallc;
+   105                          	C_LINE	109,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   109                          	C_LINE	109,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   109                          ;extern void __LIB__ *memmove_callee(void *dst,const void *src,size_t n) __smallc __z88dk_callee;
+   109                          	C_LINE	111,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   111                          	C_LINE	111,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   111                          ;extern void __LIB__ *memrchr(const void *s,int c,size_t n) __smallc;
+   111                          	C_LINE	116,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   116                          	C_LINE	116,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   116                          ;extern void __LIB__ *memrchr_callee(const void *s,int c,size_t n) __smallc __z88dk_callee;
+   116                          	C_LINE	118,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   118                          	C_LINE	118,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   118                          ;extern void __LIB__ *memset(void *s,int c,size_t n) __smallc;
+   118                          	C_LINE	123,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   123                          	C_LINE	123,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   123                          ;extern void __LIB__ *memset_callee(void *s,int c,size_t n) __smallc __z88dk_callee;
+   123                          	C_LINE	125,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   125                          	C_LINE	125,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   125                          ;
+   125                          ;extern void __LIB__ *memset_wr(volatile void *s,int c,size_t n) __smallc;
+   125                          	C_LINE	133,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   133                          	C_LINE	133,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   133                          ;extern void __LIB__ *memset_wr_callee(volatile void *s,int c,size_t n) __smallc __z88dk_callee;
+   133                          	C_LINE	135,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   135                          	C_LINE	135,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   135                          ;extern void __LIB__ *memswap(void *s1,void *s2,size_t n) __smallc;
+   135                          	C_LINE	139,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   139                          	C_LINE	139,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   139                          ;extern void __LIB__ *memswap_callee(void *s1,void *s2,size_t n) __smallc __z88dk_callee;
+   139                          	C_LINE	141,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   141                          	C_LINE	141,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   141                          ;extern char __LIB__ *stpcpy(char *dst,const char *src) __smallc;
+   141                          	C_LINE	145,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   145                          	C_LINE	145,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   145                          ;extern char __LIB__ *stpcpy_callee(char *dst,const char *src) __smallc __z88dk_callee;
+   145                          	C_LINE	146,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   146                          	C_LINE	146,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   146                          ;extern char __LIB__ *stpncpy(char *dst,const char *src,size_t n) __smallc;
+   146                          	C_LINE	150,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   150                          	C_LINE	150,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   150                          ;extern char __LIB__ *stpncpy_callee(char *dst,const char *src,size_t n) __smallc __z88dk_callee;
+   150                          	C_LINE	152,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   152                          	C_LINE	152,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   152                          ;extern int __LIB__ strcasecmp(const char *s1,const char *s2) __smallc;
+   152                          	C_LINE	157,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   157                          	C_LINE	157,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   157                          ;extern int __LIB__ strcasecmp_callee(const char *s1,const char *s2) __smallc __z88dk_callee;
+   157                          	C_LINE	158,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   158                          	C_LINE	158,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   158                          ;extern char __LIB__ *strcat(char *dst,const char *src) __smallc;
+   158                          	C_LINE	162,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   162                          	C_LINE	162,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   162                          ;extern char __LIB__ *strcat_callee(char *dst,const char *src) __smallc __z88dk_callee;
+   162                          	C_LINE	163,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   163                          	C_LINE	163,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   163                          ;extern char __LIB__ *strchr(const char *s,int c) __smallc;
+   163                          	C_LINE	167,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   167                          	C_LINE	167,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   167                          ;extern char __LIB__ *strchr_callee(const char *s,int c) __smallc __z88dk_callee;
+   167                          	C_LINE	168,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   168                          	C_LINE	168,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   168                          ;extern char __LIB__ *strchrnul(const char *s,int c) __smallc;
+   168                          	C_LINE	172,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   172                          	C_LINE	172,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   172                          ;extern char __LIB__ *strchrnul_callee(const char *s,int c) __smallc __z88dk_callee;
+   172                          	C_LINE	173,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   173                          	C_LINE	173,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   173                          ;extern int __LIB__ strcmp(const char *s1,const char *s2) __smallc;
+   173                          	C_LINE	177,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   177                          	C_LINE	177,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   177                          ;extern int __LIB__ strcmp_callee(const char *s1,const char *s2) __smallc __z88dk_callee;
+   177                          	C_LINE	178,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   178                          	C_LINE	178,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   178                          ;extern int __LIB__ strcoll(const char *s1,const char *s2) __smallc;
+   178                          	C_LINE	182,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   182                          	C_LINE	182,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   182                          ;extern int __LIB__ strcoll_callee(const char *s1,const char *s2) __smallc __z88dk_callee;
+   182                          	C_LINE	183,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   183                          	C_LINE	183,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   183                          ;extern char __LIB__ *strcpy(char *dst,const char *src) __smallc;
+   183                          	C_LINE	187,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   187                          	C_LINE	187,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   187                          ;extern char __LIB__ *strcpy_callee(char *dst,const char *src) __smallc __z88dk_callee;
+   187                          	C_LINE	188,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   188                          	C_LINE	188,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   188                          ;extern size_t __LIB__ strcspn(const char *s,const char *nspn) __smallc;
+   188                          	C_LINE	192,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   192                          	C_LINE	192,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   192                          ;extern size_t __LIB__ strcspn_callee(const char *s,const char *nspn) __smallc __z88dk_callee;
+   192                          	C_LINE	193,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   193                          	C_LINE	193,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   193                          ;extern char __LIB__  *strdup(const char *s) __smallc __z88dk_fastcall;
+   193                          	C_LINE	197,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   197                          	C_LINE	197,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   197                          ;extern char __LIB__  *strerror(int errnum) __smallc __z88dk_fastcall;
+   197                          	C_LINE	200,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   200                          	C_LINE	200,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   200                          ;extern int __LIB__ stricmp(const char *s1,const char *s2) __smallc;
+   200                          	C_LINE	203,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   203                          	C_LINE	203,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   203                          ;extern int __LIB__ stricmp_callee(const char *s1,const char *s2) __smallc __z88dk_callee;
+   203                          	C_LINE	204,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   204                          	C_LINE	204,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   204                          ;extern size_t __LIB__ strlcat(char *dst,const char *src,size_t n) __smallc;
+   204                          	C_LINE	208,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   208                          	C_LINE	208,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   208                          ;extern size_t __LIB__ strlcat_callee(char *dst,const char *src,size_t n) __smallc __z88dk_callee;
+   208                          	C_LINE	210,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   210                          	C_LINE	210,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   210                          ;extern size_t __LIB__ strlcpy(char *dst,const char *src,size_t n) __smallc;
+   210                          	C_LINE	215,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   215                          	C_LINE	215,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   215                          ;extern size_t __LIB__ strlcpy_callee(char *dst,const char *src,size_t n) __smallc __z88dk_callee;
+   215                          	C_LINE	217,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   217                          	C_LINE	217,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   217                          ;extern size_t __LIB__  strlen(const char *s) __smallc __z88dk_fastcall;
+   217                          	C_LINE	222,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   222                          	C_LINE	222,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   222                          ;extern char __LIB__  *strlwr(char *s) __smallc __z88dk_fastcall;
+   222                          	C_LINE	225,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   225                          	C_LINE	225,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   225                          ;extern int __LIB__ strncasecmp(const char *s1,const char *s2,size_t n) __smallc;
+   225                          	C_LINE	228,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   228                          	C_LINE	228,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   228                          ;extern int __LIB__ strncasecmp_callee(const char *s1,const char *s2,size_t n) __smallc __z88dk_callee;
+   228                          	C_LINE	230,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   230                          	C_LINE	230,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   230                          ;extern char __LIB__ *strncat(char *dst,const char *src,size_t n) __smallc;
+   230                          	C_LINE	235,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   235                          	C_LINE	235,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   235                          ;extern char __LIB__ *strncat_callee(char *dst,const char *src,size_t n) __smallc __z88dk_callee;
+   235                          	C_LINE	237,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   237                          	C_LINE	237,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   237                          ;extern char __LIB__ *strnchr(const char *s,size_t n,int c) __smallc;
+   237                          	C_LINE	242,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   242                          	C_LINE	242,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   242                          ;extern char __LIB__ *strnchr_callee(const char *s,size_t n,int c) __smallc __z88dk_callee;
+   242                          	C_LINE	244,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   244                          	C_LINE	244,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   244                          ;extern int __LIB__ strncmp(const char *s1,const char *s2,size_t n) __smallc;
+   244                          	C_LINE	249,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   249                          	C_LINE	249,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   249                          ;extern int __LIB__ strncmp_callee(const char *s1,const char *s2,size_t n) __smallc __z88dk_callee;
+   249                          	C_LINE	251,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   251                          	C_LINE	251,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   251                          ;extern char __LIB__ *strncpy(char *dst,const char *src,size_t n) __smallc;
+   251                          	C_LINE	256,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   256                          	C_LINE	256,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   256                          ;extern char __LIB__ *strncpy_callee(char *dst,const char *src,size_t n) __smallc __z88dk_callee;
+   256                          	C_LINE	258,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   258                          	C_LINE	258,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   258                          ;extern char __LIB__ *strndup(const char *s,size_t n) __smallc;
+   258                          	C_LINE	263,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   263                          	C_LINE	263,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   263                          ;extern char __LIB__ *strndup_callee(const char *s,size_t n) __smallc __z88dk_callee;
+   263                          	C_LINE	264,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   264                          	C_LINE	264,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   264                          ;extern int __LIB__ strnicmp(const char *s1,const char *s2,size_t n) __smallc;
+   264                          	C_LINE	268,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   268                          	C_LINE	268,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   268                          ;extern int __LIB__ strnicmp_callee(const char *s1,const char *s2,size_t n) __smallc __z88dk_callee;
+   268                          	C_LINE	269,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   269                          	C_LINE	269,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   269                          ;extern size_t __LIB__ strnlen(const char *s,size_t max_len) __smallc;
+   269                          	C_LINE	273,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   273                          	C_LINE	273,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   273                          ;extern size_t __LIB__ strnlen_callee(const char *s,size_t max_len) __smallc __z88dk_callee;
+   273                          	C_LINE	274,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   274                          	C_LINE	274,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   274                          ;extern char __LIB__ *strpbrk(const char *s,const char *set) __smallc;
+   274                          	C_LINE	278,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   278                          	C_LINE	278,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   278                          ;extern char __LIB__ *strpbrk_callee(const char *s,const char *set) __smallc __z88dk_callee;
+   278                          	C_LINE	279,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   279                          	C_LINE	279,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   279                          ;extern char __LIB__ *strrchr(const char *s,int c) __smallc;
+   279                          	C_LINE	283,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   283                          	C_LINE	283,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   283                          ;extern char __LIB__ *strrchr_callee(const char *s,int c) __smallc __z88dk_callee;
+   283                          	C_LINE	284,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   284                          	C_LINE	284,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   284                          ;extern size_t __LIB__ strrcspn(const char *s,const char *set) __smallc;
+   284                          	C_LINE	288,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   288                          	C_LINE	288,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   288                          ;extern size_t __LIB__ strrcspn_callee(const char *s,const char *set) __smallc __z88dk_callee;
+   288                          	C_LINE	289,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   289                          	C_LINE	289,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   289                          ;extern char __LIB__  *strrev(char *s) __smallc __z88dk_fastcall;
+   289                          	C_LINE	293,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   293                          	C_LINE	293,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   293                          ;extern size_t __LIB__ strrspn(const char *s,const char *set) __smallc;
+   293                          	C_LINE	296,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   296                          	C_LINE	296,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   296                          ;extern size_t __LIB__ strrspn_callee(const char *s,const char *set) __smallc __z88dk_callee;
+   296                          	C_LINE	297,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   297                          	C_LINE	297,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   297                          ;extern char __LIB__  *strrstrip(char *s) __smallc __z88dk_fastcall;
+   297                          	C_LINE	301,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   301                          	C_LINE	301,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   301                          ;extern char __LIB__ *strsep(char **s,const char *delim) __smallc;
+   301                          	C_LINE	304,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   304                          	C_LINE	304,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   304                          ;extern char __LIB__ *strsep_callee(char **s,const char *delim) __smallc __z88dk_callee;
+   304                          	C_LINE	305,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   305                          	C_LINE	305,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   305                          ;extern size_t __LIB__ strspn(const char *s,const char *pfx) __smallc;
+   305                          	C_LINE	309,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   309                          	C_LINE	309,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   309                          ;extern size_t __LIB__ strspn_callee(const char *s,const char *pfx) __smallc __z88dk_callee;
+   309                          	C_LINE	310,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   310                          	C_LINE	310,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   310                          ;extern char __LIB__ *strstr(const char *s,const char *subs) __smallc;
+   310                          	C_LINE	314,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   314                          	C_LINE	314,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   314                          ;extern char __LIB__ *strstr_callee(const char *s,const char *subs) __smallc __z88dk_callee;
+   314                          	C_LINE	315,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   315                          	C_LINE	315,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   315                          ;extern char __LIB__  *strstrip(char *s) __smallc __z88dk_fastcall;
+   315                          	C_LINE	319,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   319                          	C_LINE	319,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   319                          ;extern char __LIB__ *strtok(char *s,const char *delim) __smallc;
+   319                          	C_LINE	322,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   322                          	C_LINE	322,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   322                          ;extern char __LIB__ *strtok_callee(char *s,const char *delim) __smallc __z88dk_callee;
+   322                          	C_LINE	323,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   323                          	C_LINE	323,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   323                          ;extern char __LIB__ *strtok_r(char *s,const char *delim,char **last_s) __smallc;
+   323                          	C_LINE	327,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   327                          	C_LINE	327,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   327                          ;extern char __LIB__ *strtok_r_callee(char *s,const char *delim,char **last_s) __smallc __z88dk_callee;
+   327                          	C_LINE	329,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   329                          	C_LINE	329,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   329                          ;extern char __LIB__  *strupr(char *s) __smallc __z88dk_fastcall;
+   329                          	C_LINE	334,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   334                          	C_LINE	334,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   334                          ;extern size_t __LIB__ strxfrm(char *dst,const char *src,size_t n) __smallc;
+   334                          	C_LINE	337,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   337                          	C_LINE	337,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   337                          ;extern size_t __LIB__ strxfrm_callee(char *dst,const char *src,size_t n) __smallc __z88dk_callee;
+   337                          	C_LINE	339,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   339                          	C_LINE	339,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   339                          ;extern char __LIB__    *strrstr(const char *haystack, const char *needle) __smallc;
+   339                          	C_LINE	343,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   343                          	C_LINE	343,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   343                          ;extern char __LIB__    *strrstr_callee(const char *haystack, const char *needle) __smallc __z88dk_callee;
+   343                          	C_LINE	344,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   344                          	C_LINE	344,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   344                          ;extern void __LIB__    *memopi(void *, void *, uint, uint) __smallc;
+   344                          	C_LINE	348,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   348                          	C_LINE	348,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   348                          ;extern void __LIB__    *memopi_callee(void *, void *, uint, uint) __smallc __z88dk_callee;
+   348                          	C_LINE	349,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   349                          	C_LINE	349,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   349                          ;extern void __LIB__    *memopd(void *, void *, uint, uint) __smallc;
+   349                          	C_LINE	352,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   352                          	C_LINE	352,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   352                          ;extern void __LIB__    *memopd_callee(void *, void *, uint, uint) __smallc __z88dk_callee;
+   352                          	C_LINE	353,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   353                          	C_LINE	353,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   353                          ;
+   353                          ;
+   353                          	C_LINE	405,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   405                          ;
+   405                          	C_LINE	407,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   407                          ;
+   407                          	C_LINE	408,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   408                          ;
+   408                          	C_LINE	409,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   409                          ;   extern void __LIB__    *__builtin_memset(void *dst, int c, size_t n) __smallc;
+   409                          	C_LINE	410,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   410                          	C_LINE	410,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   410                          ;
+   410                          	C_LINE	411,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   411                          ;
+   411                          	C_LINE	413,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   413                          ;
+   413                          	C_LINE	414,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   414                          ;
+   414                          	C_LINE	415,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   415                          ;   extern void __LIB__    *__builtin_memcpy(void *dst, void *src,size_t n) __smallc;
+   415                          	C_LINE	416,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   416                          	C_LINE	416,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   416                          ;
+   416                          	C_LINE	417,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   417                          ;
+   417                          	C_LINE	418,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   418                          ;
+   418                          	C_LINE	419,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   419                          ;
+   419                          	C_LINE	420,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   420                          ;
+   420                          	C_LINE	421,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   421                          ;   extern char __LIB__    *__builtin_strcpy(char *dst, const char *src) __smallc;
+   421                          	C_LINE	422,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   422                          	C_LINE	422,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   422                          ;
+   422                          	C_LINE	423,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   423                          ;
+   423                          	C_LINE	424,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   424                          ;
+   424                          	C_LINE	425,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   425                          ;
+   425                          	C_LINE	426,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   426                          ;
+   426                          	C_LINE	427,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   427                          ;   extern char __LIB__    *__builtin_strchr(const char *haystack, int needle) __smallc;
+   427                          	C_LINE	428,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   428                          	C_LINE	428,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   428                          ;
+   428                          	C_LINE	429,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   429                          ;
+   429                          	C_LINE	431,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   431                          ;#line 3 "offscreen.c"
+   431                          	C_LINE	474,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/string.h"
+   474                          	C_LINE	2,"offscreen.c"
+offscreen.c:
+     2                          ;#line 1 "/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+     2                          	C_LINE	3,"offscreen.c"
+     3                          	C_LINE	0,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h:
+                                ;
+                                ;#line 1 "/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+                                	C_LINE	12,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+    12                          	C_LINE	0,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h:
+                                ;
+                                ;
+                                ;
+                                ;
+                                ;
+                                ;
+                                ;
+                                ;
+                                ;extern unsigned int  __LIB__ in_JoyFuller();
+                                	C_LINE	64,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    64                          	C_LINE	64,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    64                          ;extern unsigned int  __LIB__ in_JoyKempston();
+    64                          	C_LINE	65,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    65                          	C_LINE	65,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    65                          ;extern unsigned int  __LIB__ in_JoySinclair1();
+    65                          	C_LINE	66,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    66                          	C_LINE	66,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    66                          ;extern unsigned int  __LIB__ in_JoySinclair2();
+    66                          	C_LINE	67,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    67                          	C_LINE	67,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    67                          ;extern unsigned int  __LIB__ in_JoyTimex1();
+    67                          	C_LINE	68,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    68                          	C_LINE	68,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    68                          ;extern unsigned int  __LIB__ in_JoyTimex2();
+    68                          	C_LINE	69,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    69                          	C_LINE	69,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    69                          ;
+    69                          ;
+    69                          ;
+    69                          ;
+    69                          ;extern void __LIB__             in_MouseAMXInit(uchar xvector, uchar yvector) __smallc;
+    69                          	C_LINE	76,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    76                          	C_LINE	76,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    76                          ;extern void __LIB__             in_MouseAMX(uchar *buttons, uint *xcoord, uint *ycoord) __smallc;
+    76                          	C_LINE	77,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    77                          	C_LINE	77,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    77                          ;extern void __LIB__             in_MouseAMXSetPos(uint xcoord, uint ycoord) __smallc;
+    77                          	C_LINE	78,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    78                          	C_LINE	78,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    78                          ;extern void __LIB__   in_MouseAMXInit_callee(uchar xvector, uchar yvector) __smallc __z88dk_callee;
+    78                          	C_LINE	80,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    80                          	C_LINE	80,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    80                          ;extern void __LIB__   in_MouseAMX_callee(uchar *buttons, uint *xcoord, uint *ycoord) __smallc __z88dk_callee;
+    80                          	C_LINE	81,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    81                          	C_LINE	81,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    81                          ;extern void __LIB__   in_MouseAMXSetPos_callee(uint xcoord, uint ycoord) __smallc __z88dk_callee;
+    81                          	C_LINE	82,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    82                          	C_LINE	82,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    82                          ;
+    82                          ;
+    82                          ;
+    82                          ;
+    82                          ;extern void __LIB__             in_MouseKempInit(void);
+    82                          	C_LINE	93,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    93                          	C_LINE	93,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    93                          ;extern void __LIB__             in_MouseKemp(uchar *buttons, uint *xcoord, uint *ycoord) __smallc;
+    93                          	C_LINE	94,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    94                          	C_LINE	94,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    94                          ;extern void __LIB__             in_MouseKempSetPos(uint xcoord, uint ycoord) __smallc;
+    94                          	C_LINE	95,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    95                          	C_LINE	95,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    95                          ;extern void __LIB__   in_MouseKemp_callee(uchar *buttons, uint *xcoord, uint *ycoord) __smallc __z88dk_callee;
+    95                          	C_LINE	97,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    97                          	C_LINE	97,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    97                          ;extern void __LIB__   in_MouseKempSetPos_callee(uint xcoord, uint ycoord) __smallc __z88dk_callee;
+    97                          	C_LINE	98,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    98                          	C_LINE	98,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+    98                          ;#line 13 "/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+    98                          	C_LINE	106,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/zx_input.h"
+   106                          	C_LINE	12,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h:
+    12                          ;
+    12                          ;
+    12                          ;
+    12                          ;
+    12                          ;
+    12                          ;
+    12                          ;
+    12                          ;
+    12                          ;
+    12                          ;extern int  __LIB__ zx_128mode(void);
+    12                          	C_LINE	151,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   151                          	C_LINE	151,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   151                          ;extern int  __LIB__ zx_floatingbus(void);
+   151                          	C_LINE	152,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   152                          	C_LINE	152,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   152                          ;extern int  __LIB__ zx_issue3(void);
+   152                          	C_LINE	153,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   153                          	C_LINE	153,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   153                          ;extern int  __LIB__ zx_type(void);
+   153                          	C_LINE	154,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   154                          	C_LINE	154,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   154                          ;extern int  __LIB__ zx_model(void);
+   154                          	C_LINE	155,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   155                          	C_LINE	155,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   155                          ;extern int  __LIB__ zx_basic_length(void);
+   155                          	C_LINE	156,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   156                          	C_LINE	156,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   156                          ;extern int  __LIB__ zx_var_length(void);
+   156                          	C_LINE	157,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   157                          	C_LINE	157,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   157                          ;extern int  __LIB__ zx_printer(void);
+   157                          	C_LINE	158,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   158                          	C_LINE	158,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   158                          ;extern int  __LIB__ zx_soundchip(void);
+   158                          	C_LINE	159,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   159                          	C_LINE	159,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   159                          ;extern int  __LIB__ zx_timexsound(void);
+   159                          	C_LINE	160,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   160                          	C_LINE	160,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   160                          ;extern int  __LIB__ zx_fullerstick(void);
+   160                          	C_LINE	161,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   161                          	C_LINE	161,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   161                          ;extern int  __LIB__ zx_kempstonmouse(void);
+   161                          	C_LINE	162,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   162                          	C_LINE	162,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   162                          ;extern int  __LIB__ zx_kempston(void);
+   162                          	C_LINE	163,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   163                          	C_LINE	163,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   163                          ;extern int  __LIB__ zx_iss_stick(void);
+   163                          	C_LINE	164,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   164                          	C_LINE	164,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   164                          ;extern int  __LIB__ zx_mb02(void);
+   164                          	C_LINE	165,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   165                          	C_LINE	165,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   165                          ;extern int  __LIB__ zx_multiface(void);
+   165                          	C_LINE	166,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   166                          	C_LINE	166,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   166                          ;extern int  __LIB__ zx_disciple(void);
+   166                          	C_LINE	167,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   167                          	C_LINE	167,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   167                          ;extern int  __LIB__ zx_plus3fdc(void);
+   167                          	C_LINE	168,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   168                          	C_LINE	168,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   168                          ;extern int  __LIB__ zx_zxmmc(void);
+   168                          	C_LINE	169,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   169                          	C_LINE	169,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   169                          ;extern int  __LIB__ zx_extsys(void);
+   169                          	C_LINE	170,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   170                          	C_LINE	170,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   170                          ;extern int  __LIB__ zx_basemem(void);
+   170                          	C_LINE	171,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   171                          	C_LINE	171,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   171                          ;extern int  __LIB__ zx_break(void);
+   171                          	C_LINE	172,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   172                          	C_LINE	172,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   172                          ;extern int  __LIB__ zx_ulaplus(void);
+   172                          	C_LINE	173,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   173                          	C_LINE	173,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   173                          ;
+   173                          ;
+   173                          ;
+   173                          ;extern int  __LIB__ ula_plus_mode(void);
+   173                          	C_LINE	180,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   180                          	C_LINE	180,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   180                          ;extern void __LIB__ ula_normal_mode(void);
+   180                          	C_LINE	181,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   181                          	C_LINE	181,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   181                          ;extern void __LIB__ ula_sync(void);
+   181                          	C_LINE	182,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   182                          	C_LINE	182,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   182                          ;extern int __LIB__ ulaplus_set(unsigned char attribute, unsigned char rgbcolor) __smallc;
+   182                          	C_LINE	183,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   183                          	C_LINE	183,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   183                          ;extern int  __LIB__  ulaplus_get(unsigned char attribute) __z88dk_fastcall;
+   183                          	C_LINE	184,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   184                          	C_LINE	184,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   184                          ;
+   184                          ;
+   184                          ;
+   184                          ;
+   184                          ;extern int  __LIB__  zx_syntax(char *statement) __z88dk_fastcall;
+   184                          	C_LINE	192,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   192                          	C_LINE	192,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   192                          ;
+   192                          ;
+   192                          ;extern int  __LIB__  zx_goto(int line) __z88dk_fastcall;
+   192                          	C_LINE	196,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   196                          	C_LINE	196,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   196                          ;
+   196                          ;extern int  __LIB__  zx_line(int line) __z88dk_fastcall;
+   196                          	C_LINE	199,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   199                          	C_LINE	199,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   199                          ;
+   199                          ;extern int  __LIB__              zx_getstr(char variable, char *value) __smallc;
+   199                          	C_LINE	202,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   202                          	C_LINE	202,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   202                          ;extern void __LIB__              zx_setstr(char variable, char *value) __smallc;
+   202                          	C_LINE	203,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   203                          	C_LINE	203,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   203                          ;
+   203                          ;extern unsigned int  __LIB__  zx_getint(char *variable) __z88dk_fastcall;
+   203                          	C_LINE	206,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   206                          	C_LINE	206,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   206                          ;extern void __LIB__              zx_setint(char *variable, unsigned int value) __smallc;
+   206                          	C_LINE	207,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   207                          	C_LINE	207,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   207                          ;
+   207                          ;extern double_t __LIB__  zx_getfloat(char *variable) __z88dk_fastcall;
+   207                          	C_LINE	210,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   210                          	C_LINE	210,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   210                          ;extern void __LIB__              zx_setfloat(char *variable, double_t value) __smallc;
+   210                          	C_LINE	211,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   211                          	C_LINE	211,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   211                          ;extern int  __LIB__    zx_getstr_callee(char variable, char *value) __smallc __z88dk_callee;
+   211                          	C_LINE	213,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   213                          	C_LINE	213,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   213                          ;extern void __LIB__    zx_setstr_callee(char variable, char *value) __smallc __z88dk_callee;
+   213                          	C_LINE	214,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   214                          	C_LINE	214,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   214                          ;extern void __LIB__    zx_setint_callee(char *variable, unsigned int value) __smallc __z88dk_callee;
+   214                          	C_LINE	215,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   215                          	C_LINE	215,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   215                          ;extern void __LIB__    zx_setfloat_callee(char *variable, double_t value) __smallc __z88dk_callee;
+   215                          	C_LINE	216,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   216                          	C_LINE	216,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;
+   216                          ;extern void __LIB__  zx_lprintc(int chr);
+   216                          	C_LINE	338,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   338                          	C_LINE	338,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   338                          ;extern void __LIB__  zx_hardcopy();
+   338                          	C_LINE	339,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   339                          	C_LINE	339,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   339                          ;
+   339                          ;extern void __LIB__  zx_print_buf(char *buf) __z88dk_fastcall;
+   339                          	C_LINE	341,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   341                          	C_LINE	341,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   341                          ;
+   341                          ;extern void __LIB__  zx_print_row(char *buf) __z88dk_fastcall;
+   341                          	C_LINE	343,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   343                          	C_LINE	343,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   343                          ;
+   343                          ;
+   343                          ;
+   343                          ;struct zxtapehdr {
+   343                          	C_LINE	350,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   350                          	C_LINE	350,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   350                          ;   unsigned char type;
+   350                          	C_LINE	351,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   351                          ;   char          name[10];
+   351                          	C_LINE	352,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   352                          ;   size_t        length;
+   352                          	C_LINE	353,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   353                          ;   size_t        address;
+   353                          	C_LINE	354,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   354                          ;   size_t        offset;
+   354                          	C_LINE	355,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   355                          ;};
+   355                          	C_LINE	356,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   356                          ;extern int  __LIB__            tape_save(char *name, size_t loadstart,void *start, size_t len) __smallc;
+   356                          	C_LINE	358,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   358                          	C_LINE	358,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   358                          ;extern int  __LIB__            tape_save_block(void *addr, size_t len, unsigned char type) __smallc;
+   358                          	C_LINE	359,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   359                          	C_LINE	359,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   359                          ;extern int  __LIB__            tape_load_block(void *addr, size_t len, unsigned char type) __smallc;
+   359                          	C_LINE	360,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   360                          	C_LINE	360,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   360                          ;extern int  __LIB__  tape_save_block_callee(void *addr, size_t len, unsigned char type) __smallc __z88dk_callee;
+   360                          	C_LINE	362,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   362                          	C_LINE	362,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   362                          ;extern int  __LIB__  tape_load_block_callee(void *addr, size_t len, unsigned char type) __smallc __z88dk_callee;
+   362                          	C_LINE	363,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   363                          	C_LINE	363,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;
+   363                          ;extern void  __LIB__  zx_border(uchar colour) __z88dk_fastcall;
+   363                          	C_LINE	403,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   403                          	C_LINE	403,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   403                          ;
+   403                          ;
+   403                          ;
+   403                          ;
+   403                          ;extern void  __LIB__  zx_colour(uchar colour) __z88dk_fastcall;
+   403                          	C_LINE	408,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   408                          	C_LINE	408,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   408                          ;
+   408                          ;
+   408                          ;
+   408                          ;
+   408                          ;
+   408                          ;extern uint  __LIB__              zx_attr(uchar row, uchar col) __smallc;
+   408                          	C_LINE	416,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   416                          	C_LINE	416,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   416                          ;extern uint  __LIB__              zx_screenstr(uchar row, uchar col) __smallc;
+   416                          	C_LINE	417,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   417                          	C_LINE	417,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   417                          ;extern uint  __LIB__    zx_attr_callee(uchar row, uchar col) __smallc __z88dk_callee;
+   417                          	C_LINE	419,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   419                          	C_LINE	419,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   419                          ;extern uint  __LIB__    zx_screenstr_callee(uchar row, uchar col) __smallc __z88dk_callee;
+   419                          	C_LINE	420,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   420                          	C_LINE	420,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   420                          ;
+   420                          ;
+   420                          ;
+   420                          ;
+   420                          ;extern int __LIB__ zx_printf(char *fmt, ...);
+   420                          	C_LINE	435,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   435                          	C_LINE	435,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;
+   435                          ;extern uchar __LIB__              *zx_cxy2saddr(uchar row, uchar col) __smallc;
+   435                          	C_LINE	467,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   467                          	C_LINE	467,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   467                          ;extern uchar __LIB__  *zx_cy2saddr(uchar row) __z88dk_fastcall;
+   467                          	C_LINE	468,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   468                          	C_LINE	468,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   468                          ;extern uchar __LIB__              *zx_pxy2saddr(uchar xcoord, uchar ycoord, uchar *mask) __smallc;
+   468                          	C_LINE	470,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   470                          	C_LINE	470,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   470                          ;extern uchar __LIB__  *zx_py2saddr(uchar ycoord) __z88dk_fastcall;
+   470                          	C_LINE	471,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   471                          	C_LINE	471,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   471                          ;extern uint  __LIB__   zx_saddr2cx(void *pixeladdr) __z88dk_fastcall;
+   471                          	C_LINE	473,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   473                          	C_LINE	473,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   473                          ;extern uint  __LIB__   zx_saddr2cy(void *pixeladdr) __z88dk_fastcall;
+   473                          	C_LINE	474,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   474                          	C_LINE	474,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   474                          ;extern uint  __LIB__               zx_saddr2px(void *pixeladdr, uchar mask) __smallc;
+   474                          	C_LINE	476,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   476                          	C_LINE	476,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   476                          ;extern uint  __LIB__   zx_saddr2py(void *pixeladdr) __z88dk_fastcall;
+   476                          	C_LINE	477,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   477                          	C_LINE	477,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   477                          ;extern uchar __LIB__  *zx_saddr2aaddr(void *pixeladdr) __z88dk_fastcall;
+   477                          	C_LINE	479,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   479                          	C_LINE	479,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   479                          ;extern uchar __LIB__  *zx_saddrcdown(void *pixeladdr) __z88dk_fastcall;
+   479                          	C_LINE	481,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   481                          	C_LINE	481,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   481                          ;extern uchar __LIB__  *zx_saddrcleft(void *pixeladdr) __z88dk_fastcall;
+   481                          	C_LINE	482,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   482                          	C_LINE	482,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   482                          ;extern uchar __LIB__  *zx_saddrcright(void *pixeladdr) __z88dk_fastcall;
+   482                          	C_LINE	483,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   483                          	C_LINE	483,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   483                          ;extern uchar __LIB__  *zx_saddrcup(void *pixeladdr) __z88dk_fastcall;
+   483                          	C_LINE	484,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   484                          	C_LINE	484,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   484                          ;extern uchar __LIB__  *zx_saddrpdown(void *pixeladdr) __z88dk_fastcall;
+   484                          	C_LINE	486,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   486                          	C_LINE	486,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   486                          ;extern uchar __LIB__              *zx_saddrpleft(void *pixeladdr, uchar *mask) __smallc;
+   486                          	C_LINE	487,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   487                          	C_LINE	487,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   487                          ;extern uchar __LIB__              *zx_saddrpright(void *pixeladdr, uchar *mask) __smallc;
+   487                          	C_LINE	488,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   488                          	C_LINE	488,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   488                          ;extern uchar __LIB__  *zx_saddrpup(void *pixeladdr) __z88dk_fastcall;
+   488                          	C_LINE	489,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   489                          	C_LINE	489,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   489                          ;extern uchar __LIB__    *zx_cxy2saddr_callee(uchar row, uchar col) __smallc __z88dk_callee;
+   489                          	C_LINE	491,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   491                          	C_LINE	491,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   491                          ;extern uchar __LIB__    *zx_pxy2saddr_callee(uchar xcoord, uchar ycoord, uchar *mask) __smallc __z88dk_callee;
+   491                          	C_LINE	492,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   492                          	C_LINE	492,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   492                          ;extern uint  __LIB__     zx_saddr2px_callee(void *pixeladdr, uchar mask) __smallc __z88dk_callee;
+   492                          	C_LINE	493,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   493                          	C_LINE	493,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   493                          ;extern uchar __LIB__    *zx_saddrpleft_callee(void *pixeladdr, uchar *mask) __smallc __z88dk_callee;
+   493                          	C_LINE	494,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   494                          	C_LINE	494,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   494                          ;extern uchar __LIB__    *zx_saddrpright_callee(void *pixeladdr, uchar *mask) __smallc __z88dk_callee;
+   494                          	C_LINE	495,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   495                          	C_LINE	495,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   495                          ;
+   495                          ;extern uchar __LIB__              *zx_cxy2aaddr(uchar row, uchar col) __smallc;
+   495                          	C_LINE	507,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   507                          	C_LINE	507,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   507                          ;extern uchar __LIB__  *zx_cy2aaddr(uchar row) __z88dk_fastcall;
+   507                          	C_LINE	508,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   508                          	C_LINE	508,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   508                          ;extern uchar __LIB__              *zx_pxy2aaddr(uchar xcoord, uchar ycoord) __smallc;
+   508                          	C_LINE	510,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   510                          	C_LINE	510,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   510                          ;extern uchar __LIB__  *zx_py2aaddr(uchar ycoord) __z88dk_fastcall;
+   510                          	C_LINE	511,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   511                          	C_LINE	511,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   511                          ;extern uint  __LIB__   zx_aaddr2cx(void *attraddr) __z88dk_fastcall;
+   511                          	C_LINE	513,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   513                          	C_LINE	513,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   513                          ;extern uint  __LIB__   zx_aaddr2cy(void *attraddr) __z88dk_fastcall;
+   513                          	C_LINE	514,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   514                          	C_LINE	514,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   514                          ;
+   514                          ;extern uint  __LIB__   zx_aaddr2px(void *attraddr) __z88dk_fastcall;
+   514                          	C_LINE	516,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   516                          	C_LINE	516,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   516                          ;extern uint  __LIB__   zx_aaddr2py(void *attraddr) __z88dk_fastcall;
+   516                          	C_LINE	517,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   517                          	C_LINE	517,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   517                          ;extern uchar __LIB__  *zx_aaddr2saddr(void *attraddr) __z88dk_fastcall;
+   517                          	C_LINE	519,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   519                          	C_LINE	519,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   519                          ;extern uchar __LIB__  *zx_aaddrcdown(void *attraddr) __z88dk_fastcall;
+   519                          	C_LINE	521,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   521                          	C_LINE	521,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   521                          ;extern uchar __LIB__  *zx_aaddrcleft(void *attraddr) __z88dk_fastcall;
+   521                          	C_LINE	522,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   522                          	C_LINE	522,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   522                          ;extern uchar __LIB__  *zx_aaddrcright(void *attraddr) __z88dk_fastcall;
+   522                          	C_LINE	523,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   523                          	C_LINE	523,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   523                          ;extern uchar __LIB__  *zx_aaddrcup(void *attraddr) __z88dk_fastcall;
+   523                          	C_LINE	524,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   524                          	C_LINE	524,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   524                          ;extern uchar __LIB__    *zx_cxy2aaddr_callee(uchar row, uchar col) __smallc __z88dk_callee;
+   524                          	C_LINE	526,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   526                          	C_LINE	526,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   526                          ;extern uchar __LIB__    *zx_pxy2aaddr_callee(uchar xcoord, uchar ycoord) __smallc __z88dk_callee;
+   526                          	C_LINE	527,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   527                          	C_LINE	527,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   527                          ;
+   527                          ;#line 1 "/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+   527                          	C_LINE	536,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   536                          	C_LINE	0,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h:
+                                ;typedef void (*isr_t)(void);
+                                	C_LINE	6,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+     6                          	C_LINE	6,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+     6                          ;
+     6                          ;
+     6                          ;extern int __LIB__ im1_init(void);
+     6                          	C_LINE	19,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    19                          	C_LINE	19,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    19                          ;
+    19                          ;extern int __LIB__ im1_install_isr(isr_t handler) ;
+    19                          	C_LINE	21,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    21                          	C_LINE	21,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    21                          ;
+    21                          ;extern int __LIB__ im1_uninstall_isr(isr_t handler) ;
+    21                          	C_LINE	23,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    23                          	C_LINE	23,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    23                          ;
+    23                          ;extern int __LIB__ nmi_init(void);
+    23                          	C_LINE	26,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    26                          	C_LINE	26,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    26                          ;
+    26                          ;extern int __LIB__ nmi_install_isr(isr_t handler) ;
+    26                          	C_LINE	28,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    28                          	C_LINE	28,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    28                          ;
+    28                          ;extern int __LIB__ nmi_uninstall_isr(isr_t handler) ;
+    28                          	C_LINE	30,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    30                          	C_LINE	30,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    30                          ;
+    30                          ;extern void __LIB__ tick_count_isr(void);
+    30                          	C_LINE	34,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    34                          	C_LINE	34,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    34                          ;extern long __LIB__ tick_count;
+    34                          	C_LINE	35,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    35                          	C_LINE	35,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    35                          ;#line 537 "/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+    35                          	C_LINE	38,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/interrupt.h"
+    38                          	C_LINE	536,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h:
+   536                          ;
+   536                          ;extern void __LIB__  zx_im2_init(void *address, uchar byte) __smallc;
+   536                          	C_LINE	539,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   539                          	C_LINE	539,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   539                          ;
+   539                          ;extern void __LIB__ add_raster_int(isr_t handler);
+   539                          	C_LINE	542,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   542                          	C_LINE	542,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   542                          ;
+   542                          ;extern int  __LIB__  zxgetfname(char *zxfname);
+   542                          	C_LINE	548,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   548                          	C_LINE	548,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   548                          ;extern int  __LIB__  zxgetfname2(char *zxfname);
+   548                          	C_LINE	549,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   549                          	C_LINE	549,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   549                          ;struct dirent {
+   549                          	C_LINE	551,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   551                          	C_LINE	551,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   551                          ;    ino_t   d_ino;
+   551                          	C_LINE	552,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   552                          ;    char    d_name[12];
+   552                          	C_LINE	553,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   553                          ;};
+   553                          	C_LINE	554,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   554                          ;#line 4 "offscreen.c"
+   554                          	C_LINE	557,"/home/jorgegv/src/spectrum/z88dk/lib/config//../..//include/arch/zx/spectrum.h"
+   557                          	C_LINE	3,"offscreen.c"
+offscreen.c:
+     3                          ;#line 1 "offscreen.h"
+     3                          	C_LINE	5,"offscreen.c"
+     5                          	C_LINE	0,"offscreen.h"
+offscreen.h:
+                                ;
+                                ;
+                                ;
+                                ;
+                                ;void init_offscreen( void );
+                                	C_LINE	20,"offscreen.h"
+    20                          	C_LINE	20,"offscreen.h"
+    20                          ;#line 6 "offscreen.c"
+    20                          	C_LINE	23,"offscreen.h"
+    23                          	C_LINE	5,"offscreen.c"
+offscreen.c:
+     5                          ;
+     5                          ;uint8_t offscreen[  24  * (  (  24  * 8 )  +  (  2  * 8 )  ) ];
+     5                          	C_LINE	8,"offscreen.c"
+     8                          	C_LINE	8,"offscreen.c"
+     8                          ;
+     8                          ;uint8_t *screen_line_address[  (  24  * 8 )  ];
+     8                          	C_LINE	11,"offscreen.c"
+    11                          	C_LINE	11,"offscreen.c"
+    11                          ;
+    11                          ;
+    11                          ;
+    11                          ;
+    11                          ;
+    11                          ;
+    11                          ;
+    11                          ;
+    11                          ;void init_real_screen_address_table( void ) {
+    11                          	C_LINE	21,"offscreen.c"
+    21                          	C_LINE	21,"offscreen.c"
+    21                          	SECTION	code_compiler
+    21                          
+    21                          ; Function init_real_screen_address_table flags 0x00000200 __smallc
+    21                          ; void init_real_screen_address_table()
+    21                          	C_LINE	21,"offscreen.c::init_real_screen_address_table::0::0"
+offscreen.c::init_real_screen_address_table::0::0:
+    21                          ._init_real_screen_address_table
+    21                          	C_LINE	21,"offscreen.c::init_real_screen_address_table::0::0"
+    21                          ;    uint8_t i;
+    21                          	C_LINE	22,"offscreen.c::init_real_screen_address_table::1::1"
+offscreen.c::init_real_screen_address_table::1::1:
+    22                          	C_LINE	22,"offscreen.c::init_real_screen_address_table::1::1"
+    22                          ;    for ( i = 0; i <  (  24  * 8 )  ; i++ ) {
+    22                          	C_LINE	23,"offscreen.c::init_real_screen_address_table::1::1"
+    23                          	C_LINE	23,"offscreen.c::init_real_screen_address_table::1::1"
+    23   000000 3b              	dec	sp
+    23   000001 210000          	ld	hl,0	;const
+    23   000004 39              	add	hl,sp
+    23   000005 3600            	ld	(hl),0
+    23   000007 c30000          	jp	i_4	;EOS
+    23                          .i_2
+    23   00000a 210000          	ld	hl,0	;const
+    23   00000d 39              	add	hl,sp
+    23   00000e 34              	inc	(hl)
+    23                          .i_4
+    23   00000f e1              	pop	hl
+    23   000010 e5              	push	hl
+    23   000011 2600            	ld	h,0
+    23   000013 110000          	ld	de,192
+    23   000016 a7              	and	a
+    23   000017 ed52            	sbc	hl,de
+    23   000019 d20000          	jp	nc,i_3	;
+    23                          ;        screen_line_address[ i ] = zx_py2saddr(  0  * 8 + i ) +  0 ;
+    23                          	C_LINE	24,"offscreen.c::init_real_screen_address_table::3::2"
+offscreen.c::init_real_screen_address_table::3::2:
+    24                          	C_LINE	24,"offscreen.c::init_real_screen_address_table::3::2"
+    24   00001c 210000          	ld	hl,_screen_line_address
+    24   00001f e5              	push	hl
+    24   000020 210000          	ld	hl,2	;const
+    24   000023 39              	add	hl,sp
+    24   000024 6e              	ld	l,(hl)
+    24   000025 2600            	ld	h,0
+    24   000027 29              	add	hl,hl
+    24   000028 d1              	pop	de
+    24   000029 19              	add	hl,de
+    24   00002a e5              	push	hl
+    24                          ;0  *8 +i ;
+    24                          	C_LINE	25,"offscreen.c::init_real_screen_address_table::3::2"
+    25   00002b 210000          	ld	hl,2	;const
+    25   00002e 39              	add	hl,sp
+    25   00002f 6e              	ld	l,(hl)
+    25   000030 2600            	ld	h,0
+    25   000032 cd0000          	call	zx_py2saddr
+    25   000035 d1              	pop	de
+    25   000036 cd0000          	call	l_pint
+    25                          ;    }
+    25                          	C_LINE	25,"offscreen.c::init_real_screen_address_table::3::2"
+    25   000039 c30000          	jp	i_2	;EOS
+    25                          .i_3
+    25                          ;}
+    25   00003c 33              	inc	sp
+    25   00003d c9              	ret
+    25                          
+    25                          
+    25                          ;void init_offscreen( void ) {
+    25                          	C_LINE	28,"offscreen.c::init_real_screen_address_table::0::2"
+offscreen.c::init_real_screen_address_table::0::2:
+    28                          	C_LINE	28,"offscreen.c::init_real_screen_address_table::0::2"
+    28                          
+    28                          ; Function init_offscreen flags 0x00000200 __smallc
+    28                          ; void init_offscreen()
+    28                          	C_LINE	28,"offscreen.c::init_offscreen::0::2"
+offscreen.c::init_offscreen::0::2:
+    28                          ._init_offscreen
+    28                          	C_LINE	28,"offscreen.c::init_offscreen::0::2"
+    28                          ;    init_real_screen_address_table();
+    28                          	C_LINE	29,"offscreen.c::init_offscreen::1::3"
+offscreen.c::init_offscreen::1::3:
+    29                          	C_LINE	29,"offscreen.c::init_offscreen::1::3"
+    29   00003e cd0000          	call	_init_real_screen_address_table
+    29                          ;}
+    29   000041 c9              	ret
+    29                          
+    29                          
+    29                          ;void offscreen_show_frame( void ) {
+    29                          	C_LINE	32,"offscreen.c::init_offscreen::0::3"
+offscreen.c::init_offscreen::0::3:
+    32                          	C_LINE	32,"offscreen.c::init_offscreen::0::3"
+    32                          
+    32                          ; Function offscreen_show_frame flags 0x00000200 __smallc
+    32                          ; void offscreen_show_frame()
+    32                          	C_LINE	32,"offscreen.c::offscreen_show_frame::0::3"
+offscreen.c::offscreen_show_frame::0::3:
+    32                          ._offscreen_show_frame
+    32                          	C_LINE	32,"offscreen.c::offscreen_show_frame::0::3"
+    32                          ;    uint8_t line;
+    32                          	C_LINE	33,"offscreen.c::offscreen_show_frame::1::4"
+offscreen.c::offscreen_show_frame::1::4:
+    33                          	C_LINE	33,"offscreen.c::offscreen_show_frame::1::4"
+    33                          ;    uint16_t offscreen_address;
+    33                          	C_LINE	34,"offscreen.c::offscreen_show_frame::1::4"
+    34                          	C_LINE	34,"offscreen.c::offscreen_show_frame::1::4"
+    34                          ;    offscreen_address = (uint16_t) &offscreen[ 0 ];
+    34                          	C_LINE	35,"offscreen.c::offscreen_show_frame::1::4"
+    35                          	C_LINE	35,"offscreen.c::offscreen_show_frame::1::4"
+    35   000042 c5              	push	bc
+    35   000043 3b              	dec	sp
+    35   000044 210000          	ld	hl,_offscreen
+    35   000047 c1              	pop	bc
+    35   000048 e5              	push	hl
+    35                          ;    for ( line = 0; line <  (  24  * 8 ) ; line++ ) {
+    35                          	C_LINE	36,"offscreen.c::offscreen_show_frame::1::4"
+    36                          	C_LINE	36,"offscreen.c::offscreen_show_frame::1::4"
+    36   000049 210000          	ld	hl,2	;const
+    36   00004c 39              	add	hl,sp
+    36   00004d 3600            	ld	(hl),0
+    36   00004f c30000          	jp	i_7	;EOS
+    36                          .i_5
+    36   000052 210000          	ld	hl,2	;const
+    36   000055 39              	add	hl,sp
+    36   000056 34              	inc	(hl)
+    36                          .i_7
+    36   000057 210000          	ld	hl,2	;const
+    36   00005a 39              	add	hl,sp
+    36   00005b 6e              	ld	l,(hl)
+    36   00005c 2600            	ld	h,0
+    36   00005e 110000          	ld	de,192
+    36   000061 a7              	and	a
+    36   000062 ed52            	sbc	hl,de
+    36   000064 d20000          	jp	nc,i_6	;
+    36                          ;         __builtin_memcpy( screen_line_address[ line ] , (void *) offscreen_address , 24 ) ;
+    36                          	C_LINE	37,"offscreen.c::offscreen_show_frame::3::5"
+offscreen.c::offscreen_show_frame::3::5:
+    37                          	C_LINE	37,"offscreen.c::offscreen_show_frame::3::5"
+    37                          ;screen_line_address[line ] ;
+    37                          	C_LINE	38,"offscreen.c::offscreen_show_frame::3::5"
+    38   000067 210000          	ld	hl,_screen_line_address
+    38   00006a e5              	push	hl
+    38   00006b 210000          	ld	hl,4	;const
+    38   00006e 39              	add	hl,sp
+    38   00006f 6e              	ld	l,(hl)
+    38   000070 2600            	ld	h,0
+    38   000072 29              	add	hl,hl
+    38   000073 d1              	pop	de
+    38   000074 19              	add	hl,de
+    38   000075 cd0000          	call	l_gint	;
+    38   000078 e5              	push	hl
+    38                          ;(void *)offscreen_address ;
+    38                          	C_LINE	38,"offscreen.c::offscreen_show_frame::3::5"
+    38   000079 c1              	pop	bc
+    38   00007a e1              	pop	hl
+    38   00007b e5              	push	hl
+    38   00007c c5              	push	bc
+    38   00007d d1              	pop	de
+    38   00007e d5              	push	de
+    38   00007f 010000          	ld	bc,24
+    38   000082 edb0            	ldir
+    38   000084 e1              	pop	hl
+    38                          ;        offscreen_address +=  24 ;
+    38                          	C_LINE	38,"offscreen.c::offscreen_show_frame::3::5"
+    38                          	C_LINE	38,"offscreen.c::offscreen_show_frame::3::5"
+    38   000085 e1              	pop	hl
+    38   000086 010000          	ld	bc,24
+    38   000089 09              	add	hl,bc
+    38   00008a e5              	push	hl
+    38                          ;    }
+    38                          	C_LINE	39,"offscreen.c::offscreen_show_frame::3::5"
+    39   00008b c30000          	jp	i_5	;EOS
+    39                          .i_6
+    39                          ;}
+    39   00008e 33              	inc	sp
+    39   00008f c1              	pop	bc
+    39   000090 c9              	ret
+    39                          
+    39                          
+    39                          ; --- Start of Optimiser additions ---
+    39                          
+    39                          
+    39                          ; --- Start of Static Variables ---
+    39                          
+    39                          	SECTION	bss_compiler
+    39   000000 0000000000000000._offscreen	defs	4992
+                0f00000000000000
+                00000000c0000000
+                00003c0000801300
+                0002000000000000
+                0000000002000000
+                0000000000000000
+                00000a0000000000
+                0000000000000000
+                0000020000000000
+                5700000200000000
+                02000000000000c0
+                00000000008e0000
+                8013000004000000
+                0000000000000000
+                0000000000000000
+                1800000000000018
+                0000000052000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+    39   001380 0000000000000000._screen_line_address	defs	384
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+                0000000000000000
+    39                          	SECTION	code_compiler
+    39                          
+    39                          
+    39                          ; --- Start of Scope Defns ---
+    39                          
+    39                          	GLOBAL	bcmp
+    39                          	GLOBAL	bcmp_callee
+    39                          	GLOBAL	bcopy
+    39                          	GLOBAL	bcopy_callee
+    39                          	GLOBAL	bzero
+    39                          	GLOBAL	bzero_callee
+    39                          	GLOBAL	index
+    39                          	GLOBAL	index_callee
+    39                          	GLOBAL	rindex
+    39                          	GLOBAL	rindex_callee
+    39                          	GLOBAL	strset
+    39                          	GLOBAL	strset_callee
+    39                          	GLOBAL	strnset
+    39                          	GLOBAL	strnset_callee
+    39                          	GLOBAL	rawmemchr
+    39                          	GLOBAL	rawmemchr_callee
+    39                          	GLOBAL	_memlwr_
+    39                          	GLOBAL	_memlwr__callee
+    39                          	GLOBAL	_memstrcpy_
+    39                          	GLOBAL	_memstrcpy__callee
+    39                          	GLOBAL	_memupr_
+    39                          	GLOBAL	_memupr__callee
+    39                          	GLOBAL	_strrstrip_
+    39                          	GLOBAL	ffs
+    39                          	GLOBAL	ffsl
+    39                          	GLOBAL	memccpy
+    39                          	GLOBAL	memccpy_callee
+    39                          	GLOBAL	memchr
+    39                          	GLOBAL	memchr_callee
+    39                          	GLOBAL	memcmp
+    39                          	GLOBAL	memcmp_callee
+    39                          	GLOBAL	memcpy
+    39                          	GLOBAL	memcpy_callee
+    39                          	GLOBAL	memmem
+    39                          	GLOBAL	memmem_callee
+    39                          	GLOBAL	memmove
+    39                          	GLOBAL	memmove_callee
+    39                          	GLOBAL	memrchr
+    39                          	GLOBAL	memrchr_callee
+    39                          	GLOBAL	memset
+    39                          	GLOBAL	memset_callee
+    39                          	GLOBAL	memset_wr
+    39                          	GLOBAL	memset_wr_callee
+    39                          	GLOBAL	memswap
+    39                          	GLOBAL	memswap_callee
+    39                          	GLOBAL	stpcpy
+    39                          	GLOBAL	stpcpy_callee
+    39                          	GLOBAL	stpncpy
+    39                          	GLOBAL	stpncpy_callee
+    39                          	GLOBAL	strcasecmp
+    39                          	GLOBAL	strcasecmp_callee
+    39                          	GLOBAL	strcat
+    39                          	GLOBAL	strcat_callee
+    39                          	GLOBAL	strchr
+    39                          	GLOBAL	strchr_callee
+    39                          	GLOBAL	strchrnul
+    39                          	GLOBAL	strchrnul_callee
+    39                          	GLOBAL	strcmp
+    39                          	GLOBAL	strcmp_callee
+    39                          	GLOBAL	strcoll
+    39                          	GLOBAL	strcoll_callee
+    39                          	GLOBAL	strcpy
+    39                          	GLOBAL	strcpy_callee
+    39                          	GLOBAL	strcspn
+    39                          	GLOBAL	strcspn_callee
+    39                          	GLOBAL	strdup
+    39                          	GLOBAL	strerror
+    39                          	GLOBAL	stricmp
+    39                          	GLOBAL	stricmp_callee
+    39                          	GLOBAL	strlcat
+    39                          	GLOBAL	strlcat_callee
+    39                          	GLOBAL	strlcpy
+    39                          	GLOBAL	strlcpy_callee
+    39                          	GLOBAL	strlen
+    39                          	GLOBAL	strlwr
+    39                          	GLOBAL	strncasecmp
+    39                          	GLOBAL	strncasecmp_callee
+    39                          	GLOBAL	strncat
+    39                          	GLOBAL	strncat_callee
+    39                          	GLOBAL	strnchr
+    39                          	GLOBAL	strnchr_callee
+    39                          	GLOBAL	strncmp
+    39                          	GLOBAL	strncmp_callee
+    39                          	GLOBAL	strncpy
+    39                          	GLOBAL	strncpy_callee
+    39                          	GLOBAL	strndup
+    39                          	GLOBAL	strndup_callee
+    39                          	GLOBAL	strnicmp
+    39                          	GLOBAL	strnicmp_callee
+    39                          	GLOBAL	strnlen
+    39                          	GLOBAL	strnlen_callee
+    39                          	GLOBAL	strpbrk
+    39                          	GLOBAL	strpbrk_callee
+    39                          	GLOBAL	strrchr
+    39                          	GLOBAL	strrchr_callee
+    39                          	GLOBAL	strrcspn
+    39                          	GLOBAL	strrcspn_callee
+    39                          	GLOBAL	strrev
+    39                          	GLOBAL	strrspn
+    39                          	GLOBAL	strrspn_callee
+    39                          	GLOBAL	strrstrip
+    39                          	GLOBAL	strsep
+    39                          	GLOBAL	strsep_callee
+    39                          	GLOBAL	strspn
+    39                          	GLOBAL	strspn_callee
+    39                          	GLOBAL	strstr
+    39                          	GLOBAL	strstr_callee
+    39                          	GLOBAL	strstrip
+    39                          	GLOBAL	strtok
+    39                          	GLOBAL	strtok_callee
+    39                          	GLOBAL	strtok_r
+    39                          	GLOBAL	strtok_r_callee
+    39                          	GLOBAL	strupr
+    39                          	GLOBAL	strxfrm
+    39                          	GLOBAL	strxfrm_callee
+    39                          	GLOBAL	strrstr
+    39                          	GLOBAL	strrstr_callee
+    39                          	GLOBAL	memopi
+    39                          	GLOBAL	memopi_callee
+    39                          	GLOBAL	memopd
+    39                          	GLOBAL	memopd_callee
+    39                          	GLOBAL	__builtin_memset
+    39                          	GLOBAL	__builtin_memcpy
+    39                          	GLOBAL	__builtin_strcpy
+    39                          	GLOBAL	__builtin_strchr
+    39                          	GLOBAL	in_JoyFuller
+    39                          	GLOBAL	in_JoyKempston
+    39                          	GLOBAL	in_JoySinclair1
+    39                          	GLOBAL	in_JoySinclair2
+    39                          	GLOBAL	in_JoyTimex1
+    39                          	GLOBAL	in_JoyTimex2
+    39                          	GLOBAL	in_MouseAMXInit
+    39                          	GLOBAL	in_MouseAMX
+    39                          	GLOBAL	in_MouseAMXSetPos
+    39                          	GLOBAL	in_MouseAMXInit_callee
+    39                          	GLOBAL	in_MouseAMX_callee
+    39                          	GLOBAL	in_MouseAMXSetPos_callee
+    39                          	GLOBAL	in_MouseKempInit
+    39                          	GLOBAL	in_MouseKemp
+    39                          	GLOBAL	in_MouseKempSetPos
+    39                          	GLOBAL	in_MouseKemp_callee
+    39                          	GLOBAL	in_MouseKempSetPos_callee
+    39                          	GLOBAL	zx_128mode
+    39                          	GLOBAL	zx_floatingbus
+    39                          	GLOBAL	zx_issue3
+    39                          	GLOBAL	zx_type
+    39                          	GLOBAL	zx_model
+    39                          	GLOBAL	zx_basic_length
+    39                          	GLOBAL	zx_var_length
+    39                          	GLOBAL	zx_printer
+    39                          	GLOBAL	zx_soundchip
+    39                          	GLOBAL	zx_timexsound
+    39                          	GLOBAL	zx_fullerstick
+    39                          	GLOBAL	zx_kempstonmouse
+    39                          	GLOBAL	zx_kempston
+    39                          	GLOBAL	zx_iss_stick
+    39                          	GLOBAL	zx_mb02
+    39                          	GLOBAL	zx_multiface
+    39                          	GLOBAL	zx_disciple
+    39                          	GLOBAL	zx_plus3fdc
+    39                          	GLOBAL	zx_zxmmc
+    39                          	GLOBAL	zx_extsys
+    39                          	GLOBAL	zx_basemem
+    39                          	GLOBAL	zx_break
+    39                          	GLOBAL	zx_ulaplus
+    39                          	GLOBAL	ula_plus_mode
+    39                          	GLOBAL	ula_normal_mode
+    39                          	GLOBAL	ula_sync
+    39                          	GLOBAL	ulaplus_set
+    39                          	GLOBAL	ulaplus_get
+    39                          	GLOBAL	zx_syntax
+    39                          	GLOBAL	zx_goto
+    39                          	GLOBAL	zx_line
+    39                          	GLOBAL	zx_getstr
+    39                          	GLOBAL	zx_setstr
+    39                          	GLOBAL	zx_getint
+    39                          	GLOBAL	zx_setint
+    39                          	GLOBAL	zx_getfloat
+    39                          	GLOBAL	zx_setfloat
+    39                          	GLOBAL	zx_getstr_callee
+    39                          	GLOBAL	zx_setstr_callee
+    39                          	GLOBAL	zx_setint_callee
+    39                          	GLOBAL	zx_setfloat_callee
+    39                          	GLOBAL	zx_lprintc
+    39                          	GLOBAL	zx_hardcopy
+    39                          	GLOBAL	zx_print_buf
+    39                          	GLOBAL	zx_print_row
+    39                          	GLOBAL	tape_save
+    39                          	GLOBAL	tape_save_block
+    39                          	GLOBAL	tape_load_block
+    39                          	GLOBAL	tape_save_block_callee
+    39                          	GLOBAL	tape_load_block_callee
+    39                          	GLOBAL	zx_border
+    39                          	GLOBAL	zx_colour
+    39                          	GLOBAL	zx_attr
+    39                          	GLOBAL	zx_screenstr
+    39                          	GLOBAL	zx_attr_callee
+    39                          	GLOBAL	zx_screenstr_callee
+    39                          	GLOBAL	zx_printf
+    39                          	GLOBAL	zx_cxy2saddr
+    39                          	GLOBAL	zx_cy2saddr
+    39                          	GLOBAL	zx_pxy2saddr
+    39                          	GLOBAL	zx_py2saddr
+    39                          	GLOBAL	zx_saddr2cx
+    39                          	GLOBAL	zx_saddr2cy
+    39                          	GLOBAL	zx_saddr2px
+    39                          	GLOBAL	zx_saddr2py
+    39                          	GLOBAL	zx_saddr2aaddr
+    39                          	GLOBAL	zx_saddrcdown
+    39                          	GLOBAL	zx_saddrcleft
+    39                          	GLOBAL	zx_saddrcright
+    39                          	GLOBAL	zx_saddrcup
+    39                          	GLOBAL	zx_saddrpdown
+    39                          	GLOBAL	zx_saddrpleft
+    39                          	GLOBAL	zx_saddrpright
+    39                          	GLOBAL	zx_saddrpup
+    39                          	GLOBAL	zx_cxy2saddr_callee
+    39                          	GLOBAL	zx_pxy2saddr_callee
+    39                          	GLOBAL	zx_saddr2px_callee
+    39                          	GLOBAL	zx_saddrpleft_callee
+    39                          	GLOBAL	zx_saddrpright_callee
+    39                          	GLOBAL	zx_cxy2aaddr
+    39                          	GLOBAL	zx_cy2aaddr
+    39                          	GLOBAL	zx_pxy2aaddr
+    39                          	GLOBAL	zx_py2aaddr
+    39                          	GLOBAL	zx_aaddr2cx
+    39                          	GLOBAL	zx_aaddr2cy
+    39                          	GLOBAL	zx_aaddr2px
+    39                          	GLOBAL	zx_aaddr2py
+    39                          	GLOBAL	zx_aaddr2saddr
+    39                          	GLOBAL	zx_aaddrcdown
+    39                          	GLOBAL	zx_aaddrcleft
+    39                          	GLOBAL	zx_aaddrcright
+    39                          	GLOBAL	zx_aaddrcup
+    39                          	GLOBAL	zx_cxy2aaddr_callee
+    39                          	GLOBAL	zx_pxy2aaddr_callee
+    39                          	GLOBAL	im1_init
+    39                          	GLOBAL	im1_install_isr
+    39                          	GLOBAL	im1_uninstall_isr
+    39                          	GLOBAL	nmi_init
+    39                          	GLOBAL	nmi_install_isr
+    39                          	GLOBAL	nmi_uninstall_isr
+    39                          	GLOBAL	tick_count_isr
+    39                          	GLOBAL	_tick_count
+    39                          	GLOBAL	zx_im2_init
+    39                          	GLOBAL	add_raster_int
+    39                          	GLOBAL	zxgetfname
+    39                          	GLOBAL	zxgetfname2
+    39                          	GLOBAL	_init_offscreen
+    39                          	GLOBAL	_offscreen
+    39                          	GLOBAL	_screen_line_address
+    39                          	GLOBAL	_init_real_screen_address_table
+    39                          	GLOBAL	_offscreen_show_frame
+    39                          
+    39                          
+    39                          ; --- End of Scope Defns ---
+    39                          
+    39                          
+    39                          ; --- End of Compilation ---
+    39                          
