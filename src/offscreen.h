@@ -4,8 +4,8 @@
 #include <stdint.h>
 
 // scroll window dimensions on real screen
-#define SCROLL_COLS	24
-#define SCROLL_ROWS	24
+#define SCROLL_COLS	16
+#define SCROLL_ROWS	8
 #define SCROLL_LINES	( SCROLL_ROWS * 8 )
 
 // scroll window position on real screen
@@ -18,5 +18,7 @@
 
 // utility functions
 void init_offscreen( void );
+void offscreen_show_frame( void );
+void offscreen_draw_tile( uint8_t row, uint8_t col, uint8_t *udg );
 
 #endif // _OFFSCREEN_H

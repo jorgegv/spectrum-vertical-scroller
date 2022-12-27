@@ -3,3 +3,4 @@
 *.map
 *.lis
 *.c.asm
+*.o
