@@ -12,4 +12,4 @@ default:
 	$(ZCC) $(SOURCES) $(LIBS) -o $(BIN) -create-app
 
 clean:
-	-rm -f *.bin *.tap *.o
+	-rm -f *.bin *.tap *.o *.lis *.map
