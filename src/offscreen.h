@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+// UNITS: rows, cols: character cells (8x8)
+// lines: horizontal lines 1 pixel high
+
 // scroll window dimensions on real screen
 #define SCROLL_COLS	16
 #define SCROLL_ROWS	8
