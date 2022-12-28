@@ -16,13 +16,14 @@ _asm_offscreen_show_frame_ldir:
 	add hl,de	;; HL = address of the LUT element
 	ld c,(hl)
 	inc hl
-	ld b,(hl)	;; BC = initial address of first src line
+	ld b,(hl)
+	ld hl,bc	;; HL = initial address of first src line
 
 	ld a,0		;; line loop counter
 
-	push bc		;; save src address
-
 loop1:
+	push hl
+
 	ld l,a
 	ld h,0
 	add hl,hl
@@ -32,25 +33,13 @@ loop1:
 	inc hl
 	ld d,(hl)	;; DE = initial address of dst line
 
-	pop hl		;; HL = initial address of src line
+	pop hl
 
 	ld bc,8		;; transfer line
 	ldir
 
-	push hl		;; HL is ready for next iteration, save it
-
 	inc a
 	cp a,64		;; number of lines to draw
 	jr nz, loop1
-
-	pop hl		;; clean leftovers
-
-	ld a,(_current_scroll_offset_line)
-	dec a
-	cp $ff
-	jr nz,update1
-	ld a,15		;; number of extra lines
-update1:
-	ld (_current_scroll_offset_line),a
 
 	ret

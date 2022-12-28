@@ -18,13 +18,29 @@ void main( void ) {
         offscreen_draw_tile( i, i, ball_tile );
     }
 
+    i = 0;
+
     // do some magic with virtual screen
     while( 1 ) {
+        // sync to retrace
         intrinsic_halt();
         zx_border( INK_RED );
+
+        // draw frame
 //        offscreen_show_frame();
 //        asm_offscreen_show_frame_ldir();
         asm_offscreen_show_frame_ldi();
+
+        // adjust scrolling window
+        if ( ! current_scroll_offset_line-- ) {
+            current_scroll_offset_line = SCROLL_EXTRA_LINES - 1;
+            offscreen_scroll_down();
+            offscreen_draw_tile( 0, i, ball_tile );
+            offscreen_draw_tile( 1, i, ball_tile );
+            if ( ++i == 16 )
+                i = 0;
+        }
+
         zx_border( INK_BLACK );
     }
 
