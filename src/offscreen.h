@@ -7,7 +7,7 @@
 // lines: horizontal lines 1 pixel high
 
 // scroll window dimensions on real screen
-#define SCROLL_COLS	16
+#define SCROLL_COLS	8
 #define SCROLL_ROWS	8
 #define SCROLL_LINES	( SCROLL_ROWS * 8 )
 
@@ -21,7 +21,10 @@
 
 // utility functions
 void init_offscreen( void );
-void offscreen_show_frame( void );
 void offscreen_draw_tile( uint8_t row, uint8_t col, uint8_t *udg );
+
+void offscreen_show_frame( void );
+void asm_offscreen_show_frame_ldi( void );
+void asm_offscreen_show_frame_ldir( void );
 
 #endif // _OFFSCREEN_H

@@ -22,7 +22,9 @@ void main( void ) {
     while( 1 ) {
         intrinsic_halt();
         zx_border( INK_RED );
-        offscreen_show_frame();
+//        offscreen_show_frame();
+//        asm_offscreen_show_frame_ldir();
+        asm_offscreen_show_frame_ldi();
         zx_border( INK_BLACK );
     }
 
