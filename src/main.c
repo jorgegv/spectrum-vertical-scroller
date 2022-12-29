@@ -14,7 +14,7 @@ void main( void ) {
 
     // draw some tiles in virtual screen
     uint8_t i;
-    for ( i = 0; i < 8; i++ ) {
+    for ( i = 0; i < SCROLL_COLS; i++ ) {
         offscreen_draw_tile( i, i, ball_tile );
     }
 
@@ -37,7 +37,7 @@ void main( void ) {
             offscreen_scroll_down();
             offscreen_draw_tile( 0, i, ball_tile );
             offscreen_draw_tile( 1, i, ball_tile );
-            if ( ++i == 16 )
+            if ( ++i == SCROLL_COLS )
                 i = 0;
         }
 

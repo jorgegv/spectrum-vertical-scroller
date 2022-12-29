@@ -43,9 +43,17 @@ loop1:
 	ldi
 	ldi
 	ldi
+	ldi
+	ldi
+	ldi
+	ldi
+	ldi
+	ldi
+	ldi
+	ldi
 
 	inc a
-	cp a,64		;; number of lines to draw
+	cp a,128	;; number of lines to draw
 	jr nz, loop1
 
 	ret

@@ -7,14 +7,14 @@
 // lines: horizontal lines 1 pixel high
 
 // scroll window dimensions on real screen
-#define SCROLL_COLS			8
-#define SCROLL_ROWS			8
+#define SCROLL_COLS			16
+#define SCROLL_ROWS			16
 #define SCROLL_LINES			( SCROLL_ROWS * 8 )
 #define SCROLL_SIZE_BYTES		( SCROLL_LINES * SCROLL_COLS )
 
 // scroll window position on real screen
 #define SCROLL_POS_ROW			0
-#define SCROLL_POS_COL			0
+#define SCROLL_POS_COL			8
 
 // extra rows at the top for drawing new tiles entering screen
 #define SCROLL_EXTRA_ROWS		2

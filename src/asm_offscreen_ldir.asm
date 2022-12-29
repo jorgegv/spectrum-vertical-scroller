@@ -35,11 +35,11 @@ loop1:
 
 	pop hl
 
-	ld bc,8		;; transfer line
+	ld bc,16	;; transfer line
 	ldir
 
 	inc a
-	cp a,64		;; number of lines to draw
+	cp a,128	;; number of lines to draw
 	jr nz, loop1
 
 	ret
