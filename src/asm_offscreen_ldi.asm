@@ -1,5 +1,9 @@
 ;; transfer frame from offscreen buffer to real screen
 
+;; these constants must match those in offscreen.h
+SCROLL_LINES	equ 128
+SCROLL_COLS	equ 16
+
 EXTERN	_offscreen_extra_line_address	;; table of line initial addresses (src)
 EXTERN	_screen_line_address		;; table of line initial addresses (dst)
 EXTERN	_current_scroll_offset_line	;; 0..15
@@ -24,6 +28,7 @@ _asm_offscreen_show_frame_ldi:
 loop1:
 	push hl
 
+	;; get initial address of destination line from LUT
 	ld l,a
 	ld h,0
 	add hl,hl
@@ -36,7 +41,7 @@ loop1:
 	pop hl
 
 	ldi		;; transfer line
-	ldi		;; number of LDIs here must match the scroll window width in cells
+	ldi		;; number of LDIs here must be exactly SCROLL_COLS
 	ldi
 	ldi
 	ldi
@@ -53,7 +58,7 @@ loop1:
 	ldi
 
 	inc a
-	cp a,128	;; number of lines to draw
+	cp a,SCROLL_LINES	;; number of lines to draw
 	jr nz, loop1
 
 	ret
