@@ -9,9 +9,11 @@ uint8_t offscreen[ SCROLL_COLS * ( SCROLL_LINES + SCROLL_EXTRA_LINES ) ];
 
 // initial screen addresses for each line of the scroll window
 uint8_t *screen_line_address[ SCROLL_LINES ];
+uint8_t *screen_line_end_address[ SCROLL_LINES ];
 
 // address of each of the extra lines in the offscreen, plus the first
 uint8_t *offscreen_extra_line_address[ SCROLL_EXTRA_LINES + 1 ];
+uint8_t *offscreen_extra_line_end_address[ SCROLL_EXTRA_LINES + 1 ];
 
 // current line in the offscreen to start drawing the real screen from
 uint8_t current_scroll_offset_line;
@@ -24,17 +26,19 @@ uint8_t current_scroll_offset_line;
 // This is needed just for the real screen, where addresses are weird.  The
 // origin framebuffer is linear and addresses are consecutive, so no LUT
 // needed there.
-void init_real_screen_address_table( void ) {
+void init_real_screen_address_tables( void ) {
     uint8_t i;
     for ( i = 0; i < SCROLL_LINES ; i++ ) {
         screen_line_address[ i ] = zx_py2saddr( SCROLL_POS_ROW * 8 + i ) + SCROLL_POS_COL;
+        screen_line_end_address[ i ] = zx_py2saddr( SCROLL_POS_ROW * 8 + i ) + SCROLL_POS_COL + SCROLL_COLS;
     }
 }
 
-void init_offscreen_extra_lines_offset_table( void ) {
+void init_offscreen_extra_lines_offset_tables( void ) {
     uint8_t i;
     for ( i = 0; i < SCROLL_EXTRA_LINES + 1; i++ ) {
         offscreen_extra_line_address[ i ] = &offscreen[ i * SCROLL_COLS ];
+        offscreen_extra_line_end_address[ i ] = &offscreen[ i * SCROLL_COLS ] + SCROLL_COLS;
     }
 }
 
@@ -64,7 +68,7 @@ void offscreen_scroll_down( void ) {
 }
 
 void init_offscreen( void ) {
-    init_real_screen_address_table();
-    init_offscreen_extra_lines_offset_table();
+    init_real_screen_address_tables();
+    init_offscreen_extra_lines_offset_tables();
     current_scroll_offset_line = 0;
 }

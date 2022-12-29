@@ -29,7 +29,8 @@ void main( void ) {
         // draw frame
 //        offscreen_show_frame();
 //        asm_offscreen_show_frame_ldir();
-        asm_offscreen_show_frame_ldi();
+//        asm_offscreen_show_frame_ldi();
+        asm_offscreen_show_frame_stack();
 
         // adjust scrolling window
         if ( ! current_scroll_offset_line-- ) {

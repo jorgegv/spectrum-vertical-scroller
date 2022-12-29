@@ -5,7 +5,7 @@ LIBS = -lndos
 # files
 C_SRC = main.c offscreen.c
 C_OBJS = $(C_SRC:.c=.o)
-ASM_SRC = asm_offscreen_ldi.asm asm_offscreen_ldir.asm
+ASM_SRC = asm_offscreen_ldi.asm asm_offscreen_ldir.asm asm_offscreen_stack.asm
 ASM_OBJS = $(ASM_SRC:.asm=.o)
 BIN = scroll.bin
 TAP = $(BIN:.bin=.tap)
