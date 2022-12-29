@@ -18,9 +18,14 @@ void main( void ) {
         offscreen_draw_tile( i, i, ball_tile );
     }
 
-    i = 0;
+//    offscreen_show_frame();
+//    asm_offscreen_show_frame_ldir();
+//    asm_offscreen_show_frame_ldi();
+//    asm_offscreen_show_frame_stack();
+//    while (1);
 
     // do some magic with virtual screen
+    i = 0;
     while( 1 ) {
         // sync to retrace
         intrinsic_halt();

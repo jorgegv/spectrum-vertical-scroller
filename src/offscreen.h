@@ -13,7 +13,7 @@
 #define SCROLL_SIZE_BYTES		( SCROLL_LINES * SCROLL_COLS )
 
 // scroll window position on real screen
-#define SCROLL_POS_ROW			0
+#define SCROLL_POS_ROW			4
 #define SCROLL_POS_COL			8
 
 // extra rows at the top for drawing new tiles entering screen

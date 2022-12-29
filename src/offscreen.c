@@ -28,17 +28,21 @@ uint8_t current_scroll_offset_line;
 // needed there.
 void init_real_screen_address_tables( void ) {
     uint8_t i;
+    uint8_t *addr;
     for ( i = 0; i < SCROLL_LINES ; i++ ) {
-        screen_line_address[ i ] = zx_py2saddr( SCROLL_POS_ROW * 8 + i ) + SCROLL_POS_COL;
-        screen_line_end_address[ i ] = zx_py2saddr( SCROLL_POS_ROW * 8 + i ) + SCROLL_POS_COL + SCROLL_COLS;
+        addr = zx_py2saddr( SCROLL_POS_ROW * 8 + i ) + SCROLL_POS_COL;
+        screen_line_address[ i ] = addr;
+        screen_line_end_address[ i ] = addr + SCROLL_COLS;
     }
 }
 
-void init_offscreen_extra_lines_offset_tables( void ) {
+void init_offscreen_address_tables( void ) {
     uint8_t i;
+    uint8_t *addr;
     for ( i = 0; i < SCROLL_EXTRA_LINES + 1; i++ ) {
-        offscreen_extra_line_address[ i ] = &offscreen[ i * SCROLL_COLS ];
-        offscreen_extra_line_end_address[ i ] = &offscreen[ i * SCROLL_COLS ] + SCROLL_COLS;
+        addr = &offscreen[ i * SCROLL_COLS ];
+        offscreen_extra_line_address[ i ] = addr;
+        offscreen_extra_line_end_address[ i ] = addr + SCROLL_COLS;
     }
 }
 
@@ -69,6 +73,6 @@ void offscreen_scroll_down( void ) {
 
 void init_offscreen( void ) {
     init_real_screen_address_tables();
-    init_offscreen_extra_lines_offset_tables();
+    init_offscreen_address_tables();
     current_scroll_offset_line = 0;
 }

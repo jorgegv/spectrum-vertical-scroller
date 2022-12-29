@@ -5,7 +5,7 @@ SCROLL_LINES	equ 128
 SCROLL_COLS	equ 16
 
 EXTERN	_offscreen_extra_line_address	;; table of line initial addresses (src)
-EXTERN	_screen_line_end_address		;; table of line initial addresses (dst)
+EXTERN	_screen_line_end_address	;; table of line initial addresses (dst)
 EXTERN	_current_scroll_offset_line	;; 0..15
 
 ;; temp vars
@@ -65,6 +65,9 @@ loop1:
 	pop de
 	pop hl
 
+	;; save current src for next line
+	ld (src_addr),sp
+
 	;; write 16 bytes to memory
 	ld sp,(dst_addr)
 	push hl
@@ -76,12 +79,6 @@ loop1:
 	push de
 	push bc
 	push af
-
-	;; adjust src address
-	ld hl,(src_addr)
-	ld de,SCROLL_COLS
-	add hl,de
-	ld (src_addr),HL
 
 	;; inc counter and check
 	ld hl,counter
