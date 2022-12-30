@@ -6,14 +6,14 @@
 uint8_t ball_tile[ 8 ] = { 0x38, 0x44, 0x92, 0xba, 0x92, 0x44, 0x38, 0x00 };
 
 void main( void ) {
+    uint8_t i;
 
     // initialize real and virtual screen
-    zx_border( INK_BLACK );
+    zx_border( INK_GREEN );
     zx_colour( INK_WHITE | PAPER_BLACK );
     init_offscreen();
 
     // draw some tiles in virtual screen
-    uint8_t i;
     for ( i = 0; i < SCROLL_COLS; i++ ) {
         offscreen_draw_tile( i, i, ball_tile );
     }

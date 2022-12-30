@@ -7,11 +7,11 @@
 // offscreen linear framebuffer
 uint8_t offscreen[ SCROLL_COLS * ( SCROLL_LINES + SCROLL_EXTRA_LINES ) ];
 
-// initial screen addresses for each line of the scroll window
+// initial and end+1 screen addresses for each line of the scroll window
 uint8_t *screen_line_address[ SCROLL_LINES ];
 uint8_t *screen_line_end_address[ SCROLL_LINES ];
 
-// address of each of the extra lines in the offscreen, plus the first
+// initial and end+1 addresses of each of the extra lines in the offscreen, plus the first
 uint8_t *offscreen_extra_line_address[ SCROLL_EXTRA_LINES + 1 ];
 uint8_t *offscreen_extra_line_end_address[ SCROLL_EXTRA_LINES + 1 ];
 

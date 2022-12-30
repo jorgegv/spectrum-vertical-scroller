@@ -60,6 +60,7 @@ loop1:
 	pop de
 	pop hl
 	exx
+	ex af,af'
 	pop af
 	pop bc
 	pop de
@@ -75,6 +76,7 @@ loop1:
 	push bc
 	push af
 	exx
+	ex af,af'
 	push hl
 	push de
 	push bc
