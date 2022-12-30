@@ -13,8 +13,6 @@ counter:
 	db 0
 src_addr:
 	dw 0
-dst_addr:
-	dw 0
 
 PUBLIC	_asm_offscreen_show_frame_stack
 _asm_offscreen_show_frame_stack:
@@ -37,23 +35,17 @@ _asm_offscreen_show_frame_stack:
 	ld b,(hl)
 	ld (src_addr),bc	;; save initial address of first src line
 
-	xor a		;; set line loop counter to 0
+	;; set line loop counter to 0
+	xor a
+	ld (counter),a
+
+	;; set initial ptr to dst line address
+	ld hl,_screen_line_end_address
+	ld (switch_sp_1 - 2),hl
 
 loop1:
-	;; get initial address of destination line from LUT
-	ld (counter),a
-	ld l,a
-	ld h,0
-	add hl,hl
-	ld de,_screen_line_end_address
-	add hl,de
-	ld e,(hl)
-	inc hl
-	ld d,(hl)	;; DE = initial address of dst line
-	ld (dst_addr),de
-
 	;; src and dst addresses are ready
-	;; read 16 bytes into regs
+	;; read 16 bytes from src into regs
 	ld sp,(src_addr)
 	pop af
 	pop bc
@@ -69,8 +61,10 @@ loop1:
 	;; save current src for next line
 	ld (src_addr),sp
 
-	;; write 16 bytes to memory
-	ld sp,(dst_addr)
+	ld sp,($0)	;; SMC - this value will be the temporary storage
+			;; for ptr to dst address
+switch_sp_1:
+
 	push hl
 	push de
 	push bc
@@ -81,6 +75,12 @@ loop1:
 	push de
 	push bc
 	push af
+
+	;; adjust dst address ptr for next iteration
+	ld hl,(switch_sp_1 - 2)
+	inc hl
+	inc hl
+	ld (switch_sp_1 - 2),hl
 
 	;; inc counter and check
 	ld hl,counter
