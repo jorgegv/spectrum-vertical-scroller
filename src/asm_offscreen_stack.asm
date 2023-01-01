@@ -44,7 +44,7 @@ _asm_offscreen_show_frame_stack:
 loop1:
 	;; src and dst addresses are ready
 	;; read 16 bytes from src into regs
-	ld sp,$ffff		;; SMC: $ffff is used as a variable and modified at the top[6~
+	ld sp,$ffff		;; SMC: $ffff is used as a variable and modified at the top
 switch_sp_2:
 
 	pop af
@@ -76,7 +76,8 @@ switch_sp_1:
 	push bc
 	push af
 
-	;; adjust dst address ptr for next iteration
+	;; adjust dst address ptr for next iteration: load next address from
+	;; LUT
 	ld hl,(switch_sp_1 - 2)
 	inc hl
 	inc hl
