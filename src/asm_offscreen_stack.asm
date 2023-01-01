@@ -11,8 +11,6 @@ EXTERN	_current_scroll_offset_line	;; 0..15
 ;; temp vars
 counter:
 	db 0
-src_addr:
-	dw 0
 
 PUBLIC	_asm_offscreen_show_frame_stack
 _asm_offscreen_show_frame_stack:
@@ -33,7 +31,7 @@ _asm_offscreen_show_frame_stack:
 	ld c,(hl)
 	inc hl
 	ld b,(hl)
-	ld (src_addr),bc	;; save initial address of first src line
+	ld (switch_sp_2 - 2),bc	;; save initial address of first src line
 
 	;; set line loop counter to 0
 	xor a
@@ -46,7 +44,9 @@ _asm_offscreen_show_frame_stack:
 loop1:
 	;; src and dst addresses are ready
 	;; read 16 bytes from src into regs
-	ld sp,(src_addr)
+	ld sp,$ffff		;; SMC: $ffff is used as a variable and modified at the top[6~
+switch_sp_2:
+
 	pop af
 	pop bc
 	pop de
@@ -59,7 +59,7 @@ loop1:
 	pop hl
 
 	;; save current src for next line
-	ld (src_addr),sp
+	ld (switch_sp_2 - 2),sp
 
 	ld sp,($0)	;; SMC - this value will be the temporary storage
 			;; for ptr to dst address
@@ -89,7 +89,8 @@ switch_sp_1:
 	cp a,SCROLL_LINES	;; number of lines to draw
 	jr nz, loop1
 
-	ld sp,0		;; SMC: the 0 is modified when saving SP at the top
+	ld sp,$ffff		;; SMC: $ffff is used as a variable and modified at the top
 restore_sp:
+
 	ei
 	ret
