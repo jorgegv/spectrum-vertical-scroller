@@ -27,8 +27,8 @@ void main( void ) {
         zx_border( INK_RED );
 
         // draw frame
-//        asm_offscreen_show_frame_stack();
-        offscreen_show_frame();
+        asm_offscreen_show_frame_stack();
+//        offscreen_show_frame();
 
         // adjust scrolling window - technique 2
 

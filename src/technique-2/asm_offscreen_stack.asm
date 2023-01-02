@@ -1,12 +1,14 @@
 ;; transfer frame from offscreen buffer to real screen
 
 ;; these constants must match those in offscreen.h
-SCROLL_LINES	equ 128
-SCROLL_COLS	equ 16
+SCROLL_LINES		equ 128
+SCROLL_EXTRA_LINES	equ 16
+SCROLL_COLS		equ 16
 
 EXTERN	_offscreen_line_address		;; table of line initial addresses (src)
 EXTERN	_screen_line_end_address	;; table of line initial addresses (dst)
 EXTERN	_current_scroll_start_line	;; 0..15
+EXTERN	_offscreen			;; virtual screen
 
 ;; temp vars
 counter:
@@ -76,6 +78,22 @@ switch_sp_1:
 	push bc
 	push af
 
+	;; if next line is out of the offscreen, then reset src to the
+	;; beginning of the offscreen:
+	;; DE = addr for next line (we saved it before)
+	ld de,(switch_sp_2 - 2)
+	;; HL = addr of end of offscreen + 1
+	ld hl,_offscreen + ( ( SCROLL_LINES + SCROLL_EXTRA_LINES ) * SCROLL_COLS )
+	;; check if DE >= HL
+	or a		;; reset CF
+	sbc hl,de
+	jr z,reset_1	;; reset if HL equals DE
+	jr nc,skip_1	;; skip if HL is greater than DE
+reset_1:
+	ld hl,_offscreen
+	ld (switch_sp_2 - 2),hl
+
+skip_1:
 	;; adjust dst address ptr for next iteration: load next address from
 	;; LUT
 	ld hl,(switch_sp_1 - 2)
