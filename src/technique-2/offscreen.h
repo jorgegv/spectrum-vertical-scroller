@@ -25,7 +25,7 @@
 extern uint8_t current_scroll_start_line;
 
 // the current row where the new tiles should be drawn when needed
-extern uint8_t current_extra_tile_row;
+extern uint8_t current_extra_tiles_row;
 
 // utility functions
 void init_offscreen( void );
@@ -34,8 +34,10 @@ void init_offscreen( void );
 // absolute row and col from the top of the virtual screen.  The are NOT
 // relative to anything start_line related
 void offscreen_draw_tile( uint8_t row, uint8_t col, uint8_t *udg );
-void offscreen_scroll_down( void );
+void offscreen_clear_extra_tile_row( void );
 
+// frame transfer functions
+void offscreen_show_frame( void );
 void asm_offscreen_show_frame_stack( void );
 
 #endif // _OFFSCREEN_H

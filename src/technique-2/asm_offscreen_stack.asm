@@ -4,7 +4,7 @@
 SCROLL_LINES	equ 128
 SCROLL_COLS	equ 16
 
-EXTERN	_offscreen_extra_line_address	;; table of line initial addresses (src)
+EXTERN	_offscreen_line_address		;; table of line initial addresses (src)
 EXTERN	_screen_line_end_address	;; table of line initial addresses (dst)
 EXTERN	_current_scroll_start_line	;; 0..15
 
@@ -21,12 +21,12 @@ _asm_offscreen_show_frame_stack:
 	;; use SMC to save SP to the position at the end of this routine
 	ld (restore_sp - 2),sp
 
-	;; DE = offscreen_extra_line_address[ current_scroll_start_line ]
+	;; DE = offscreen_line_address[ current_scroll_start_line ]
 	ld a,(_current_scroll_start_line)
 	add a,a
 	ld l,a
 	ld h,0		;; HL = offset into LUT
-	ld de,_offscreen_extra_line_address
+	ld de,_offscreen_line_address
 	add hl,de	;; HL = address of the LUT element
 	ld c,(hl)
 	inc hl

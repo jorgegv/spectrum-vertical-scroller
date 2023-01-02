@@ -11,12 +11,15 @@ uint8_t offscreen[ SCROLL_COLS * ( SCROLL_LINES + SCROLL_EXTRA_LINES ) ];
 uint8_t *screen_line_address[ SCROLL_LINES ];
 uint8_t *screen_line_end_address[ SCROLL_LINES ];
 
-// initial and end+1 addresses of each of the extra lines in the offscreen, plus the first
-uint8_t *offscreen_extra_line_address[ SCROLL_EXTRA_LINES + 1 ];
-uint8_t *offscreen_extra_line_end_address[ SCROLL_EXTRA_LINES + 1 ];
+// initial and end+1 addresses of each of the lines in the offscreen, plus the first
+uint8_t *offscreen_line_address[ SCROLL_LINES + SCROLL_EXTRA_LINES + 1 ];
+uint8_t *offscreen_line_end_address[ SCROLL_LINES + SCROLL_EXTRA_LINES + 1 ];
 
 // current line in the offscreen to start drawing the real screen from
 uint8_t current_scroll_start_line;
+
+// the row where extra tiles are drawn when new graphics are being made visible
+uint8_t current_extra_tiles_row;
 
 // Initializes the LUT for the initial address for each line that will be
 // drawn on the real screen in the scroll window, taking into account the
@@ -39,22 +42,29 @@ void init_real_screen_address_tables( void ) {
 void init_offscreen_address_tables( void ) {
     uint8_t i;
     uint8_t *addr;
-    for ( i = 0; i < SCROLL_EXTRA_LINES + 1; i++ ) {
+    for ( i = 0; i < SCROLL_LINES + SCROLL_EXTRA_LINES + 1; i++ ) {
         addr = &offscreen[ i * SCROLL_COLS ];
-        offscreen_extra_line_address[ i ] = addr;
-        offscreen_extra_line_end_address[ i ] = addr + SCROLL_COLS;
+        offscreen_line_address[ i ] = addr;
+        offscreen_line_end_address[ i ] = addr + SCROLL_COLS;
     }
 }
 
 void offscreen_show_frame( void ) {
-    uint8_t line;
-    uint16_t offscreen_address;
+    uint8_t screen_line;
+    uint8_t offscreen_line;
 
-    offscreen_address = offscreen_extra_line_address[ current_scroll_start_line ];
-    for ( line = 0; line < SCROLL_LINES; line++ ) {
-        memcpy( screen_line_address[ line ], offscreen_address, SCROLL_COLS );
-        offscreen_address += SCROLL_COLS;
+    offscreen_line = current_scroll_start_line;
+    for ( screen_line = 0; screen_line < SCROLL_LINES; screen_line++ ) {
+        memcpy( screen_line_address[ screen_line ], offscreen_line_address[ offscreen_line ], SCROLL_COLS );
+        offscreen_line++;
+        if ( offscreen_line == SCROLL_LINES + SCROLL_EXTRA_LINES ) {
+            offscreen_line = 0;
+        }
     }
+}
+
+void offscreen_clear_extra_tile_row( void ) {
+    memset( &offscreen[ current_extra_tiles_row * 8 * SCROLL_COLS ], 0, SCROLL_EXTRA_LINES * SCROLL_COLS );
 }
 
 void offscreen_draw_tile( uint8_t row, uint8_t col, uint8_t *udg ) {
@@ -66,13 +76,9 @@ void offscreen_draw_tile( uint8_t row, uint8_t col, uint8_t *udg ) {
     }
 }
 
-void offscreen_scroll_down( void ) {
-    memmove( offscreen_extra_line_address[ 16 ], offscreen_extra_line_address[ 0 ], SCROLL_SIZE_BYTES );
-    memset( offscreen_extra_line_address[ 0 ], 0, SCROLL_EXTRA_LINES_BYTES );
-}
-
 void init_offscreen( void ) {
     init_real_screen_address_tables();
     init_offscreen_address_tables();
-    current_scroll_start_line = 0;
+    current_scroll_start_line = SCROLL_EXTRA_LINES;
+    current_extra_tiles_row = 0;
 }
