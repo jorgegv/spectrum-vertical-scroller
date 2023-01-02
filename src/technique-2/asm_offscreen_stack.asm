@@ -6,8 +6,8 @@ SCROLL_EXTRA_LINES	equ 16
 SCROLL_COLS		equ 16
 
 EXTERN	_offscreen_line_address		;; table of line initial addresses (src)
-EXTERN	_screen_line_end_address	;; table of line initial addresses (dst)
-EXTERN	_current_scroll_start_line	;; 0..15
+EXTERN	_screen_line_end_address	;; table of line end addresses (dst)
+EXTERN	_current_scroll_start_line
 EXTERN	_offscreen			;; virtual screen
 
 ;; temp vars
@@ -23,11 +23,11 @@ _asm_offscreen_show_frame_stack:
 	;; use SMC to save SP to the position at the end of this routine
 	ld (restore_sp - 2),sp
 
-	;; DE = offscreen_line_address[ current_scroll_start_line ]
+	;; BC = offscreen_line_address[ current_scroll_start_line ]
 	ld a,(_current_scroll_start_line)
-	add a,a
 	ld l,a
-	ld h,0		;; HL = offset into LUT
+	ld h,0
+	add hl,hl	;; HL = offset into LUT
 	ld de,_offscreen_line_address
 	add hl,de	;; HL = address of the LUT element
 	ld c,(hl)
@@ -39,7 +39,8 @@ _asm_offscreen_show_frame_stack:
 	xor a
 	ld (counter),a
 
-	;; set initial ptr to dst line address
+	;; set initial ptr to first dst line address
+	;; right to left!
 	ld hl,_screen_line_end_address
 	ld (switch_sp_1 - 2),hl
 
@@ -63,7 +64,7 @@ switch_sp_2:
 	;; save current src for next line
 	ld (switch_sp_2 - 2),sp
 
-	ld sp,($0)	;; SMC - this value will be the temporary storage
+	ld sp,($ffff)	;; SMC - $ffff value will be the temporary storage
 			;; for ptr to dst address
 switch_sp_1:
 
@@ -88,7 +89,7 @@ switch_sp_1:
 	or a		;; reset CF
 	sbc hl,de
 	jr z,reset_1	;; reset if HL equals DE
-	jr nc,skip_1	;; skip if HL is greater than DE
+	jr nc,skip_1	;; skip reset if HL is greater than DE
 reset_1:
 	ld hl,_offscreen
 	ld (switch_sp_2 - 2),hl

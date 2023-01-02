@@ -1,6 +1,5 @@
 #include <arch/zx/spectrum.h>
 #include <intrinsic.h>
-#include <string.h>
 
 #include "offscreen.h"
 
@@ -8,6 +7,7 @@ uint8_t ball_tile[ 8 ] = { 0x38, 0x44, 0x92, 0xba, 0x92, 0x44, 0x38, 0x00 };
 
 void main( void ) {
     uint8_t i;
+    uint16_t cnt;
 
     // initialize real and virtual screen
     zx_border( INK_GREEN );
@@ -16,7 +16,7 @@ void main( void ) {
 
     // draw some tiles in virtual screen
     for ( i = 0; i < SCROLL_COLS; i++ ) {
-        offscreen_draw_tile( i, i, ball_tile );
+        offscreen_draw_tile( 2 + i, i, ball_tile );
     }
 
     // do some magic with virtual screen
@@ -29,12 +29,12 @@ void main( void ) {
         // draw frame
         asm_offscreen_show_frame_stack();
 //        offscreen_show_frame();
-
+        
         // adjust scrolling window - technique 2
 
         // check if we need to draw new tiles
         if ( ! ( current_scroll_start_line % SCROLL_EXTRA_LINES ) ) {
-//            // draw additional tiles on the extra row
+            // draw additional tiles on the extra row
             offscreen_clear_extra_tile_row();
             offscreen_draw_tile( current_extra_tiles_row, i, ball_tile );
             offscreen_draw_tile( current_extra_tiles_row + 1, i, ball_tile );
