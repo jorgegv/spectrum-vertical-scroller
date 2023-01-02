@@ -1,5 +1,14 @@
 # Tuning the routines
 
+------------------------------
+**WARNING:** These tuning instructions are only valid for the C and LDI/LDIR
+versions of the scrolling routine.
+
+The stack version is a proof of concept and is specifically designed for a
+16-column wide scrolling area.  It is well commented, though, and should be
+easy to adapt for other widths.
+------------------------------
+
 Changing the dimensions and position of the scrolling area:
 
 - Edit `offscreen.h`, change the `SCROLL_COLS`, `SCROLL_ROWS`, and
@@ -11,7 +20,7 @@ Changing the dimensions and position of the scrolling area:
 - In the `asm_offscreen_ldir.asm` file, make sure the LDIR counter in BC is
   `SCROLL_COLS`, and the line counter is set to `SCROLL_ROWS * 8`
 
-# Tuning results
+## Tuning results
 
 All tests done using a 16x16 cell scrolling area (128 lines, each 16 bytes wide)
 
@@ -25,6 +34,6 @@ All tests done using a 16x16 cell scrolling area (128 lines, each 16 bytes wide)
 - When using `asm_offscreen_show_frame_ldi`, the system can work at 50fps,
   and there is spare CPU time to do other things
 
-- Implementation of `asm_offscreen_show_frame_stack` still pending for
-  better results
-
+- Routine `asm_offscreen_show_frame_stack` gives the better results, but it
+  is currently designed for a (fixed) 16 column scrolling area.  See source
+  code for adapting to other widths.
