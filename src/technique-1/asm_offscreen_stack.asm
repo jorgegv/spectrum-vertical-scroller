@@ -1,5 +1,7 @@
 ;; transfer frame from offscreen buffer to real screen
 
+;; destroys all registers and disables interrupts while working
+
 ;; these constants must match those in offscreen.h
 SCROLL_LINES	equ 128
 SCROLL_COLS	equ 16
@@ -8,15 +10,15 @@ EXTERN	_offscreen_extra_line_address	;; table of line initial addresses (src)
 EXTERN	_screen_line_end_address	;; table of line initial addresses (dst)
 EXTERN	_current_scroll_offset_line	;; 0..15
 
-;; temp vars
-counter:
-	db 0
-
 PUBLIC	_asm_offscreen_show_frame_stack
 _asm_offscreen_show_frame_stack:
 
-	;; interrupts must be disabled during this routine
+	;; interrupts must be disabled during this routine, we are using the
+	;; stack for blazing fast copying
 	di
+
+	;; save IY, we need to keep it when ints are reenabled at the end
+	push iy
 
 	;; use SMC to save SP to the position at the end of this routine
 	ld (restore_sp - 2),sp
@@ -33,9 +35,8 @@ _asm_offscreen_show_frame_stack:
 	ld b,(hl)
 	ld (switch_sp_2 - 2),bc	;; save initial address of first src line
 
-	;; set line loop counter to 0
-	xor a
-	ld (counter),a
+	;; set A (line loop counter) to number of lines to draw
+	ld a,SCROLL_LINES
 
 	;; set initial ptr to dst line address
 	ld hl,_screen_line_end_address
@@ -47,13 +48,12 @@ loop1:
 	ld sp,$ffff		;; SMC: $ffff is used as a variable and modified at the top
 switch_sp_2:
 
-	pop af
+	pop ix
 	pop bc
 	pop de
 	pop hl
 	exx
-	ex af,af'
-	pop af
+	pop iy
 	pop bc
 	pop de
 	pop hl
@@ -68,13 +68,12 @@ switch_sp_1:
 	push hl
 	push de
 	push bc
-	push af
+	push iy
 	exx
-	ex af,af'
 	push hl
 	push de
 	push bc
-	push af
+	push ix
 
 	;; adjust dst address ptr for next iteration: load next address from
 	;; LUT
@@ -83,15 +82,15 @@ switch_sp_1:
 	inc hl
 	ld (switch_sp_1 - 2),hl
 
-	;; inc counter and check
-	ld hl,counter
-	inc (hl)
-	ld a,(counter)
-	cp a,SCROLL_LINES	;; number of lines to draw
+	;; dec counter and check
+	dec a
 	jr nz, loop1
 
+	;; restore SP
 	ld sp,$ffff		;; SMC: $ffff is used as a variable and modified at the top
 restore_sp:
 
+	;; restore IY and reenable ints
+	pop iy
 	ei
 	ret
