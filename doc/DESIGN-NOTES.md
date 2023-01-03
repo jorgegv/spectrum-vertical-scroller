@@ -99,3 +99,10 @@ Doing it this way, there is no need to to the "big scroll down" of the virtual s
 - The source address (offscreen buffer) can be easily adjusted for each line: `src += 24`, since the layout is linear
 - The destination address (on screen) can be precalculated for each line at program startup and stored in an array, and we can get the dst address by indexing at that array when needed
 
+Additional possible optimizations:
+
+- Ensure alignment of offscreen buffer to 256 so that calculations and
+  checks can be done only on high byte 8-bit registers
+
+- Convert `offscreen_scroll_down` function to asm with optimized stack
+  transfer (same as frame transfer function)
