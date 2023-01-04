@@ -81,19 +81,17 @@ switch_sp_1:
 	;; if next line is out of the offscreen, then reset src to the
 	;; beginning of the offscreen:
 	;; DE = addr for next line (we saved it before)
-	ld de,(switch_sp_2 - 2)
 	;; HL = addr of end of offscreen + 1
+	ld de,(switch_sp_2 - 2)
 	ld hl,_offscreen + ( ( SCROLL_LINES + SCROLL_EXTRA_LINES ) * SCROLL_COLS )
-	;; check if DE >= HL
-	or a		;; reset CF (without modifying A!)
-	sbc hl,de
-	jr z,reset_1	;; reset if HL equals DE
-	jr nc,skip_1	;; skip reset if HL is greater than DE
+	sbc hl,de		;; check if DE >= HL
+	jr z,reset_1		;; reset src if equal...
+	jr nc,skip_reset_1	;; skip reset if HL is greater
 reset_1:
-	ld hl,_offscreen
+	ld hl,_offscreen	;; ...or less
 	ld (switch_sp_2 - 2),hl
+skip_reset_1:
 
-skip_1:
 	;; adjust dst address ptr for next iteration: load next address from
 	;; LUT
 	ld hl,(switch_sp_1 - 2)
