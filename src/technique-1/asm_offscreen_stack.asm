@@ -21,7 +21,7 @@ _asm_offscreen_show_frame_stack:
 	push iy
 
 	;; use SMC to save SP to the position at the end of this routine
-	ld (restore_sp - 2),sp
+	ld (restore_sp + 1),sp
 
 	;; DE = offscreen_extra_line_address[ current_scroll_offset_line ]
 	ld a,(_current_scroll_offset_line)
@@ -33,20 +33,20 @@ _asm_offscreen_show_frame_stack:
 	ld c,(hl)
 	inc hl
 	ld b,(hl)
-	ld (switch_sp_2 - 2),bc	;; save initial address of first src line
+	ld (switch_sp_src + 1),bc	;; save initial address of first src line
 
 	;; set A (line loop counter) to number of lines to draw
 	ld a,SCROLL_LINES
 
 	;; set initial ptr to dst line address
 	ld hl,_screen_line_end_address
-	ld (switch_sp_1 - 2),hl
+	ld (switch_sp_dst + 2),hl
 
 loop1:
 	;; src and dst addresses are ready
 	;; read 16 bytes from src into regs
+switch_sp_src:
 	ld sp,$ffff		;; SMC: $ffff is used as a variable and modified at the top
-switch_sp_2:
 
 	pop ix
 	pop bc
@@ -59,11 +59,11 @@ switch_sp_2:
 	pop hl
 
 	;; save current src for next line
-	ld (switch_sp_2 - 2),sp
+	ld (switch_sp_src + 1),sp
 
-	ld sp,($0)	;; SMC - this value will be the temporary storage
+switch_sp_dst:
+	ld sp,($ffff)	;; SMC - this value will be the temporary storage
 			;; for ptr to dst address
-switch_sp_1:
 
 	push hl
 	push de
@@ -77,18 +77,18 @@ switch_sp_1:
 
 	;; adjust dst address ptr for next iteration: load next address from
 	;; LUT
-	ld hl,(switch_sp_1 - 2)
+	ld hl,(switch_sp_dst + 2)
 	inc hl
 	inc hl
-	ld (switch_sp_1 - 2),hl
+	ld (switch_sp_dst + 2),hl
 
 	;; dec counter and check
 	dec a
 	jr nz, loop1
 
 	;; restore SP
-	ld sp,$ffff		;; SMC: $ffff is used as a variable and modified at the top
 restore_sp:
+	ld sp,$ffff		;; SMC: $ffff is used as a variable and modified at the top
 
 	;; restore IY and reenable ints
 	pop iy
