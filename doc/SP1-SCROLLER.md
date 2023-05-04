@@ -25,3 +25,17 @@ I use the second mode in my RAGE1 game library as a way to escape the 255 tile l
 I have made a simple POC (see `src/sp1-baseline`directory) which configures all SP1 tile pointers in the scrolling area to a single tile which I trivially manipulate on each frame to get a feel of the scrolling movement; just to verify if SP1 is quick enough to do this.
 
 I found that of course it can't do 50 fps (I expected that), but so far I have found it quite capable, so I'll do more experiments by tweaking e.g. the scrolling area, the scrolling speed, number of sprites, etc.
+
+## SP1 scrolling test 1
+
+It can be found in the `src/sp1-randomtiles` directory. This is a real scroller, using the real workflow that would be used for a real game: tiles are drawn on some non-visible top rows and are brought into view by the scrolling process. In this example, the logic for printing tiles on the top is trivial, but in a real game those would come from a map.
+
+Keep in mind that the top row of invisible tiles is only drawn once in a while (when a full tile row has been scrolled down) and not on every scroll cycle.
+
+The scrolling routine has been unrolled (multiple LDDs instead of one LDDR) for better speed.
+
+The number of pixels to be scrolled down on each scroll-cycle can be configured at the top of the demo. Less pixels = slower, but smoother. More pixels = faster but clunkier. 1-pixel scrolling is smooth but it could be apropriate (or not) for the game.
+
+The initial numbers for this scroller are around 12.5 FPS, so we are spending 3 frames and some more just for the graphics handling. We could aim for a 10 FPS target, having some 1 frame and something for our game calculations, sprite movements, checks, etc.
+
+Also worth considering: SP1 graphics algorithm is designed so as to not have any flickering, so we can try to run at full tilt avoiding the HALT and waiting for Vsync. This would make the game run slower or faster depending on the number of elements on screen, which may be not desired, but it's worth a try when we have sprites moving on the screen (on next tests).
