@@ -1,5 +1,7 @@
 # ZX Spectrum scroller games using Z88DK SP1 library
 
+## Context
+
 My previous proofs of concept for vertical scrollers on the ZX spectrum (see [DESIGN-NOTES](DESIGN-NOTES.md)) were based on double buffering, and the offscreen buffer had a linear memory layout. This layout very much simplifies the scrolling and screen transfer routines, and also the sprite routines (had they been written!). Linear memory layouts are simple and trivial to work with.
 
 Having done the initial POC for the buffer, scrolling and transfer routines, and having the scroller already working on the screen (see tests in `src/technique-{1,2}` directories), I found myself having to write the sprite routines if I wanted to do any games. Sprite routines would have been simple to write for the linear buffer, but the point was that I already had extensive experience using the SP1 library (a great sprite library for the Spectrum written by Alvin Albrecht), and even fixing and modifying it; SP1 already has the capabilities for handling the most important layers in a game: the background layer and the sprite layer. I felt it could be really good if SP1 could be used for handling those layers in my Speccy scroller games.
