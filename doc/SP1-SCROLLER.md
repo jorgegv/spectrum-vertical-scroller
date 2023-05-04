@@ -1,5 +1,12 @@
 # ZX Spectrum scroller games using Z88DK SP1 library
 
+## Ideas to test
+
+- [x] Reusing SP1 tile pointers to point into offscreen buffer
+- [x] Do a trivial scroller but updating all tiles and with real new tiles coming from the top
+- [ ] Previous test but add sprites moving on top of the scrolling background
+- [ ] Try to _not_ update all tiles, but only the ones that have some content: keep track of the columns that have content (=tiles) and only scroll/update those. Since the BG is scrolling, this will change in time, but we should get a real optimization (much less drawing, if the BG is simple)
+
 ## Context
 
 My previous proofs of concept for vertical scrollers on the ZX spectrum (see [DESIGN-NOTES](DESIGN-NOTES.md)) were based on double buffering, and the offscreen buffer had a linear memory layout. This layout very much simplifies the scrolling and screen transfer routines, and also the sprite routines (had they been written!). Linear memory layouts are simple and trivial to work with.
@@ -41,3 +48,4 @@ The number of pixels to be scrolled down on each scroll-cycle can be configured 
 The initial numbers for this scroller are around 12.5 FPS, so we are spending 3 frames and some more just for the graphics handling. We could aim for a 10 FPS target, having some 1 frame and a bit more for our game calculations, sprite movements, checks, etc.
 
 Also worth considering: SP1 graphics algorithm is designed so as to not have any flickering, so we can try to run at full tilt avoiding the HALT and not waiting for Vsync. This would make the game run slower or faster depending on the number of elements on screen, which may be not desired, but it's worth a try when we have sprites moving on the screen (on next tests).
+
