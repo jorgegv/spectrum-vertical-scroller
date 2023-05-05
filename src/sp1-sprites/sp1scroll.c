@@ -116,10 +116,12 @@ void init_tile_map( void ) {
 void scroll_down_column_loop( uint8_t *data ) __z88dk_fastcall __naked {
 __asm
     ld de,hl
+
+REPT SCROLL_PIXELS
     dec hl
-;;    dec hl
-    ld b,0
-    ld c, SCROLL_AREA_REAL_HEIGHT * 8
+ENDR
+
+    ld bc,SCROLL_AREA_REAL_HEIGHT*8
     lddr
     ret
 __endasm;
@@ -131,152 +133,15 @@ __endasm;
 void scroll_down_column_unrolled( uint8_t *column_end ) __z88dk_fastcall __naked {
 __asm
     ld de,hl
+
+REPT SCROLL_PIXELS
     dec hl
-;;    dec hl
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
+ENDR
+
+REPT SCROLL_AREA_REAL_HEIGHT*8
+    ldd
+ENDR
+
     ret
 __endasm;
 }

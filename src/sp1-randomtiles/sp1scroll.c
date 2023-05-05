@@ -87,167 +87,30 @@ void init_tile_map( void ) {
 void scroll_down_column_loop( uint8_t *data ) __z88dk_fastcall __naked {
 __asm
     ld de,hl
+REPT SCROLL_PIXELS
     dec hl
-;;    dec hl
-    ld b,0
-    ld c, SCROLL_AREA_REAL_HEIGHT * 8
+ENDR
+    ld bc,SCROLL_AREA_REAL_HEIGHT*8
     lddr
     ret
 __endasm;
 }
 
 // function to scroll a column SCROLL_PIXELS pixels down - unrolled version
-// the number of LDDs must be exactly SCROLL_AREA_REAL_HEIGHT * 8
 // the number of DEC HL instructions at the top must be SCROLL_PIXELS
+// the number of LDDs must be exactly SCROLL_AREA_REAL_HEIGHT * 8
 void scroll_down_column_unrolled( uint8_t *data ) __z88dk_fastcall __naked {
 __asm
     ld de,hl
+
+REPT SCROLL_PIXELS
     dec hl
-;;    dec hl
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
-    ldd
+ENDR
+
+REPT SCROLL_AREA_REAL_HEIGHT*8
+    ldd
+ENDR
+
     ret
 __endasm;
 }
