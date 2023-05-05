@@ -11,7 +11,7 @@
 //#include <arch/spectrum.h>
 //#include <games/sp1.h>
 
-#pragma output REGISTER_SP = 49152
+#pragma output STACKPTR=53248                    // place stack at $d000 at startup
 
 #include <intrinsic.h>
 #include <stdint.h>

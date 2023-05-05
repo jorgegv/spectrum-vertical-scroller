@@ -1,6 +1,8 @@
 // Recent Z88DK: zcc +zx -vn -lndos -lsp1-zx -o sp1scroll -create-app sp1scroll.c
 // Last official Z88DK: zcc +zx -vn -lndos -lsp1 -o sp1scroll -create-app sp1scroll.c
 
+#pragma output STACKPTR=53248                    // place stack at $d000 at startup
+
 #include <spectrum.h>
 #include <sprites/sp1.h>
 #include <intrinsic.h>

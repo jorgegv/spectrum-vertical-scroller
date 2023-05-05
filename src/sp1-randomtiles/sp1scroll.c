@@ -2,6 +2,8 @@
 //   Nightly Z88DK:	zcc +zx -vn -m --list --c-code-in-asm -lndos -lsp1-zx -o sp1scroll -create-app sp1scroll.c
 //   Release Z88DK:	zcc +zx -vn -m --list --c-code-in-asm -lndos -lsp1    -o sp1scroll -create-app sp1scroll.c
 
+#pragma output STACKPTR=53248                    // place stack at $d000 at startup
+
 #include <spectrum.h>
 #include <sprites/sp1.h>
 #include <intrinsic.h>
