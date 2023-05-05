@@ -1,7 +1,6 @@
 // Compilation:
-//   Nightly Z88DK:	zcc +zx -vn -m --list --c-code-in-asm -lndos -lsp1-zx -o sp1scroll -create-app sp1scroll.c
-//   Release Z88DK:	zcc +zx -vn -m --list --c-code-in-asm -lndos -lsp1    -o sp1scroll -create-app sp1scroll.c
-
+//   Nightly Z88DK:	zcc +zx -vn -m --list --c-code-in-asm -compiler=sdcc -lndos -lsp1-zx -o sp1scroll -create-app sp1scroll.c
+//   Release Z88DK:	zcc +zx -vn -m --list --c-code-in-asm -compiler=sdcc -lndos -lsp1    -o sp1scroll -create-app sp1scroll.c
 
 // For classic:
 #include <spectrum.h>
@@ -15,6 +14,7 @@
 
 #include <intrinsic.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 ///////////////////////////////////////
 //
@@ -27,6 +27,16 @@
 #define SCROLL_AREA_POS_COL		8
 #define SCROLL_AREA_WIDTH		16
 #define SCROLL_AREA_HEIGHT		16
+
+#define SCROLL_AREA_POS_X		( SCROLL_AREA_POS_COL * 8 )
+#define SCROLL_AREA_POS_Y		( SCROLL_AREA_POS_ROW * 8 )
+#define SCROLL_AREA_WIDTH_PX		( SCROLL_AREA_WIDTH * 8 )
+#define SCROLL_AREA_HEIGHT_PX		( SCROLL_AREA_HEIGHT * 8 )
+
+#define SCROLL_AREA_MIN_X		SCROLL_AREA_POS_X
+#define SCROLL_AREA_MAX_X		( SCROLL_AREA_POS_X + SCROLL_AREA_WIDTH_PX - 1 )
+#define SCROLL_AREA_MIN_Y		SCROLL_AREA_POS_Y
+#define SCROLL_AREA_MAX_Y		( SCROLL_AREA_POS_Y + SCROLL_AREA_HEIGHT_PX - 1 )
 
 // the tiles that are used for drawing the map have this dimensions
 // there is a row of this height at the top of the offscreen to draw the
@@ -57,13 +67,68 @@ uint8_t tile[ 8 * SCROLL_AREA_TOP_TILE_HEIGHT * SCROLL_AREA_TOP_TILE_WIDTH ] = {
 
 ///////////////////////////////////
 //
+// SPRITE DEFINITIONS
+//
+///////////////////////////////////
+
+#define SPRITE_WIDTH		2
+#define SPRITE_HEIGHT		2
+#define SPRITE_WIDTH_PX		( SPRITE_WIDTH * 8 )
+#define SPRITE_HEIGHT_PX	( SPRITE_HEIGHT * 8 )
+uint8_t ball_sprite[] = {
+    0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 
+    0xfc, 0x00, 0xf8, 0x03, 0xe0, 0x0f, 0xc0, 0x19, 0x80, 0x31, 0x80, 0x23, 0x00, 0x67, 0x00, 0x7f, 
+    0x00, 0x7f, 0x00, 0x7f, 0x80, 0x3f, 0x80, 0x3f, 0xc0, 0x1f, 0xe0, 0x0f, 0xf8, 0x03, 0xfc, 0x00, 
+    0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 
+    0x3f, 0x00, 0x1f, 0xc0, 0x07, 0xf0, 0x03, 0xf8, 0x01, 0xfc, 0x01, 0xfc, 0x00, 0xfe, 0x00, 0xfe, 
+    0x00, 0xfe, 0x00, 0xfe, 0x01, 0xfc, 0x01, 0xfc, 0x03, 0xf8, 0x07, 0xf0, 0x1f, 0xc0, 0x3f, 0x00, 
+    0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00
+};
+
+#define SPRITE_START_ADDRESS	( &ball_sprite[ 16 ] )
+
+struct sprite_s {
+    int16_t pos_x, pos_y;
+    int8_t dx, dy;
+    uint8_t z_plane;
+    struct sp1_ss *sprite;
+};
+
+// number of sprites to use in the demo
+// up to 16 can be tested just changing this value (see the array below),
+// but you can add more to the following array if you need more (unlikely!)
+#define NUM_SPRITES	6
+
+// sprite data
+// coordinates are absolute in pixels
+struct sprite_s sprites[] = {
+    { .pos_x = SCROLL_AREA_MIN_X + 10, .pos_y = SCROLL_AREA_MIN_Y + 70, .dx =  1, .dy =  2, .sprite = NULL, .z_plane = 10  },
+    { .pos_x = SCROLL_AREA_MIN_X + 20, .pos_y = SCROLL_AREA_MIN_Y + 40, .dx = -1, .dy =  2, .sprite = NULL, .z_plane = 11  },
+    { .pos_x = SCROLL_AREA_MIN_X + 40, .pos_y = SCROLL_AREA_MIN_Y + 20, .dx =  1, .dy = -2, .sprite = NULL, .z_plane = 12  },
+    { .pos_x = SCROLL_AREA_MIN_X + 70, .pos_y = SCROLL_AREA_MIN_Y + 10, .dx = -1, .dy = -2, .sprite = NULL, .z_plane = 13  },
+    { .pos_x = SCROLL_AREA_MIN_X + 16, .pos_y = SCROLL_AREA_MIN_Y + 82, .dx =  2, .dy =  1, .sprite = NULL, .z_plane = 14  },
+    { .pos_x = SCROLL_AREA_MIN_X + 28, .pos_y = SCROLL_AREA_MIN_Y + 50, .dx = -1, .dy =  2, .sprite = NULL, .z_plane = 15  },
+    { .pos_x = SCROLL_AREA_MIN_X + 50, .pos_y = SCROLL_AREA_MIN_Y + 28, .dx =  1, .dy = -2, .sprite = NULL, .z_plane = 16  },
+    { .pos_x = SCROLL_AREA_MIN_X + 82, .pos_y = SCROLL_AREA_MIN_Y + 16, .dx = -1, .dy = -2, .sprite = NULL, .z_plane = 17  },
+    { .pos_x = SCROLL_AREA_MIN_X +  5, .pos_y = SCROLL_AREA_MIN_Y + 20, .dx =  2, .dy =  1, .sprite = NULL, .z_plane = 18  },
+    { .pos_x = SCROLL_AREA_MIN_X + 10, .pos_y = SCROLL_AREA_MIN_Y + 15, .dx = -1, .dy =  2, .sprite = NULL, .z_plane = 19  },
+    { .pos_x = SCROLL_AREA_MIN_X + 15, .pos_y = SCROLL_AREA_MIN_Y + 10, .dx =  2, .dy = -2, .sprite = NULL, .z_plane = 20  },
+    { .pos_x = SCROLL_AREA_MIN_X + 20, .pos_y = SCROLL_AREA_MIN_Y +  5, .dx = -1, .dy = -2, .sprite = NULL, .z_plane = 21  },
+    { .pos_x = SCROLL_AREA_MIN_X + 25, .pos_y = SCROLL_AREA_MIN_Y + 40, .dx =  2, .dy =  1, .sprite = NULL, .z_plane = 22  },
+    { .pos_x = SCROLL_AREA_MIN_X + 30, .pos_y = SCROLL_AREA_MIN_Y + 35, .dx = -1, .dy =  2, .sprite = NULL, .z_plane = 23  },
+    { .pos_x = SCROLL_AREA_MIN_X + 35, .pos_y = SCROLL_AREA_MIN_Y + 30, .dx =  1, .dy = -1, .sprite = NULL, .z_plane = 24  },
+    { .pos_x = SCROLL_AREA_MIN_X + 40, .pos_y = SCROLL_AREA_MIN_Y + 25, .dx = -1, .dy = -2, .sprite = NULL, .z_plane = 25  },
+};
+
+///////////////////////////////////
+//
 // OFFSCREEN BUFFER DEFINITIONS
 //
 ///////////////////////////////////
 
 // The offscreen buffer. There are SCROLL_PIXELS top pixel lines on each column which are
 // initialized to 0 so that when scrolling down the top non-visible tile row is erased
-#define OFFSCREEN_BUFFER_SIZE			( SCROLL_AREA_WIDTH * SCROLL_PIXELS + SCROLL_AREA_WIDTH * SCROLL_AREA_REAL_HEIGHT * 8 )
+#define OFFSCREEN_BUFFER_SIZE	( SCROLL_AREA_WIDTH * SCROLL_PIXELS + SCROLL_AREA_WIDTH * SCROLL_AREA_REAL_HEIGHT * 8 )
 uint8_t offscreen[ OFFSCREEN_BUFFER_SIZE ];
 
 // Tables of start and end addresses for each column; initialized at start
@@ -72,6 +137,28 @@ uint8_t *offscreen_column_end_address[ SCROLL_AREA_WIDTH ];
 
 uint16_t cell_address_offset( uint8_t row, uint8_t col ) {
   return ( 8 * ( SCROLL_AREA_REAL_HEIGHT * col + row ) + SCROLL_PIXELS * ( col + 1 ) );
+}
+
+/////////////////////////
+//
+// HEAP FUNCTIONS
+//
+/////////////////////////
+
+long heap;
+
+// heap initialization - see SP1 examples
+void init_heap( void ) {
+    heap = 0L;
+    sbrk( ( void * ) 42000, 8000);
+}
+
+void *u_malloc(uint16_t size) {
+    return malloc( size );
+}
+
+void u_free(void *addr) {
+     free( addr );
 }
 
 /////////////////////////
@@ -107,9 +194,79 @@ void init_tile_map( void ) {
     for ( c = 0; c < SCROLL_AREA_WIDTH; c++ )
       for ( r = 0; r < SCROLL_AREA_HEIGHT; r++ )
         sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + c,		// screen position
-          ( ( (r+c) % 2) ? PAPER_BLACK : PAPER_RED ) | INK_WHITE | BRIGHT,	// attr
+          PAPER_YELLOW | INK_BLACK,	// attr
           ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, c ) ] );	// pointer
 }
+
+// initialize SP1 sprites
+void init_sprites( void ) {
+    uint8_t i,c;
+    struct sp1_ss *s;
+    for ( i = 0; i < NUM_SPRITES; i++ ) {
+      // create sprite and first column
+      s = sp1_CreateSpr(SP1_DRAW_MASK2LB, SP1_TYPE_2BYTE,
+        SPRITE_HEIGHT + 1,       // number of rows including the blank bottom one
+        0,              // left column graphic offset
+        0               // z-plane
+        );
+      // add columns
+      for ( c = 1; c <= SPRITE_WIDTH - 1; c++ )
+        sp1_AddColSpr(s,
+            SP1_DRAW_MASK2,             // drawing function
+            0,                          // sprite type
+            ( SPRITE_HEIGHT + 1 ) * 16 * c,      // nth column graphic offset; 16 is because type is 2BYTE (mask+graphic)
+            sprites[ i ].z_plane                           // z-plane
+        );
+      // add final empty column
+      sp1_AddColSpr(s, SP1_DRAW_MASK2RB, 0, 0, 0);
+      // save
+      sprites[ i ].sprite = s;
+    }
+}
+
+// move the sprites with a simple bouncing algorithm
+void move_sprites( void ) {
+  uint8_t i;
+  struct sprite_s *s;
+  for ( i = 0; i < NUM_SPRITES; i++ ) {
+    s = &sprites[ i ];
+
+    // update and check X
+    s->pos_x += s->dx;
+    if ( s->pos_x > SCROLL_AREA_MAX_X - SPRITE_WIDTH_PX + 1 ) {
+      // bounce right
+      s->pos_x = SCROLL_AREA_MAX_X - SPRITE_WIDTH_PX + 1;
+      s->dx = -s->dx;
+    }
+    if ( s->pos_x < SCROLL_AREA_MIN_X ) {
+      // bounce left
+      s->pos_x = SCROLL_AREA_MIN_X;
+      s->dx = -s->dx;
+    }
+
+    // update and check Y
+    s->pos_y += s->dy;
+    if ( s->pos_y > SCROLL_AREA_MAX_Y - SPRITE_HEIGHT_PX + 1 ) {
+      // bounce bottom
+      s->pos_y = SCROLL_AREA_MAX_Y - SPRITE_HEIGHT_PX + 1;
+      s->dy = -s->dy;
+    }
+    if ( s->pos_y < SCROLL_AREA_MIN_Y ) {
+      // bounce up
+      s->pos_y = SCROLL_AREA_MIN_Y;
+      s->dy = -s->dy;
+    }
+
+    // move sprite to new position
+    sp1_MoveSprPix( s->sprite, &scroll_area, SPRITE_START_ADDRESS, s->pos_x, s->pos_y );
+  }
+}
+
+/////////////////////////
+//
+// GRAPHICS FUNCTIONS
+//
+/////////////////////////
 
 // function to scroll a column SCROLL_PIXELS pixels down - loop version
 // the number of DEC HL instructions at the top must be SCROLL_PIXELS
@@ -128,8 +285,8 @@ __endasm;
 }
 
 // function to scroll a column SCROLL_PIXELS pixels down - unrolled version
-// the number of LDDs must be exactly SCROLL_AREA_REAL_HEIGHT * 8
 // the number of DEC HL instructions at the top must be SCROLL_PIXELS
+// the number of LDDs must be exactly SCROLL_AREA_REAL_HEIGHT * 8
 void scroll_down_column_unrolled( uint8_t *column_end ) __z88dk_fastcall __naked {
 __asm
     ld de,hl
@@ -169,19 +326,21 @@ void main( void ) {
     zx_border(INK_BLACK);
 
     // initializations
+    init_heap();
     sp1_Initialize(SP1_IFLAG_MAKE_ROTTBL | SP1_IFLAG_OVERWRITE_TILES | SP1_IFLAG_OVERWRITE_DFILE,
       PAPER_BLACK | INK_GREEN, ' ');
     init_address_tables();
     init_scroll_area();
     init_tile_map();
+    init_sprites();
 
     // main loop
     i = c = 0;
     while (1) {
       // do whatever we want with the background
-      zx_border(INK_BLUE);
+//      zx_border(INK_BLUE);
       scroll_down_area();
-      zx_border(INK_BLACK);
+//      zx_border(INK_BLACK);
 
       // draw tiles
       if ( ! ( i++ % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) ) {
@@ -190,11 +349,14 @@ void main( void ) {
           c = 0;
       }
 
+      // move the sprites
+      move_sprites();
+
       // invalidate the whole scroll area
       sp1_Invalidate( &scroll_area );
 
       // now sync with vert retrace and draw as fast as possible
-      intrinsic_halt();
+//      intrinsic_halt();
       sp1_UpdateNow();
     }
 }

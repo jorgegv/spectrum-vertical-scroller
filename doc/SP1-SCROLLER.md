@@ -4,8 +4,9 @@
 
 - [x] Reusing SP1 tile pointers to point into offscreen buffer
 - [x] Do a trivial scroller but updating all tiles and with real new tiles coming from the top
-- [ ] Previous test but add sprites moving on top of the scrolling background
+- [x] Previous test but add sprites moving on top of the scrolling background
 - [ ] Try to _not_ update all tiles, but only the ones that have some content: keep track of the columns that have content (=tiles) and only scroll/update those. Since the BG is scrolling, this will change in time, but we should get a real optimization (much less drawing, if the BG is simple)
+- [ ] Scroll down with attributes
 
 ## Context
 
@@ -49,3 +50,30 @@ The initial numbers for this scroller are around 12.5 FPS, so we are spending 3 
 
 Also worth considering: SP1 graphics algorithm is designed so as to not have any flickering, so we can try to run at full tilt avoiding the HALT and not waiting for Vsync. This would make the game run slower or faster depending on the number of elements on screen, which may be not desired, but it's worth a try when we have sprites moving on the screen (on next tests).
 
+## SP1 scrolling test 2
+
+It can be found in the `src/sp1-sprites` directory. It's the previous Test 1 real scroller, but this time with sprites running all over the place, while the background is scrolling down.
+
+The source is fully parameterized, so that different configurations can be tested and conclusions drawn.
+
+The following parameters can be modified by just changing the #define's at the top of the C file:
+
+- Size and position of the scrolling area (dimensions in char cells)
+
+- Number of pixels to scroll down on a single scroll cycle (pixels)
+
+- Size of the top non-visible tile row - the one that brings new tiles from the game map (char cells). This is, practically, the size of the biggest tile in the map.
+
+- Number of sprites (a maximum of 16 have been defined, but only the number #define'd will be used for the demo)
+
+My findings so far:
+
+- SP1 seems _very_ capable of running a game with a scrolling background and several sprites moving on the screen
+
+- The number of simultaneous sprites affects speed, but not as much as I expected. A possible explanation may be that since the whole scroll area is invalidated (currently) the drawing of all sprites does not invalidate more cells when more of them are on screen, so just their calculations and positioning matter.
+
+- I have the definive impression that not using the HALT to wait for Vsync makes the demo go smoother (opinions?)
+
+My next optimizations will be oriented to find the way of _not_ invalidating all the screen, but only the affected cells. This will probably force me to keep track of the current tiles on screen and their position.
+
+P.S. Assembler functions and loops have been modified to not require any manual adjustment - just change the #define; and also: I have switched to SDCC compiler for better C syntax support :-)
