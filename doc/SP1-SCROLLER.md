@@ -6,6 +6,10 @@
 - [x] Do a trivial scroller but updating all tiles and with real new tiles coming from the top
 - [x] Previous test but add sprites moving on top of the scrolling background
 - [ ] Try to _not_ update all tiles, but only the ones that have some content: keep track of the columns that have content (=tiles) and only scroll/update those. Since the BG is scrolling, this will change in time, but we should get a real optimization (much less drawing, if the BG is simple)
+- [ ] In line with the previous point, try to _not_ scroll all the vertical column, but just an address range. Since we have the information about which cells have tiles, we can selectively scroll them. We can select the number of LDDs to skip in the scroll routine with some self-modifying code: a calculated `LD HL,xxxx; JP (HL)` where the initial `LD HL` instruction is modified with the initial LDD position.
+- [ ] On the previous optimizations: scrolling al columns takes less than a frame, while updating SP1 background takes 2 frames and some more. So it makes sense to first try to optimize invalidations (biggest gain will be probably here), and then scrolling (this gain will be lower).
+- [ ] Prepare a super-simple IM2 handler which only increments a 32 bit value so that ROM int routine is not run.
+- [ ] Run with INTs disabled and sync with Vsync with floating bus trick
 - [ ] Scroll down with attributes
 
 ## Context
@@ -77,3 +81,55 @@ My findings so far:
 My next optimizations will be oriented to find the way of _not_ invalidating all the screen, but only the affected cells. This will probably force me to keep track of the current tiles on screen and their position.
 
 P.S. Assembler functions and loops have been modified to not require any manual adjustment - just change the #define; and also: I have switched to SDCC compiler for better C syntax support :-)
+
+## SP1 scrolling test 3
+
+It can be found in the `src/sp1-partial-inv-1` directory. Based on Test 2, but this one keeps track of the tiles that are present on each column, and only invalidates the cells that are affected by them. It also keeps track of how the tiles walk down the screen, and propery moves the cells to invalidate.
+
+The information on drawn tiles is known when printing tiles on the top non-visible row.
+
+The basic idea to explore is column cell-range invalidation:
+
+- Instead of invalidating the whole scroll area with a single `sp1_Invalidate()` call, we will run an invalidation per column.
+
+- On each column, only cells that have moving content will be invalidated, taking into account that e.g. a 2-row tile will most of the time invalidate a 3-row area due to vertical pixel offset.
+
+- Initially, only one range per column will be invalidated (for efficiency reasons). That is, if we have tiles in rows 4-5 and 10-11, the whole 4-11 range will be invalidated.
+
+- For each column, there is a (min,max) pair which holds the current range of cell invalidations to be done for that column. This pairs are moved down for all columns every 8 scrolled pixels (cell changes occur every 8 scrolled lines). so if scroll is 1-pixel, it will be done every 8 scroll cycles; if scroll is 2-pixel, every 4 scroll cycles; etc.
+
+- Since these `min` and `max` values will be cell-based, and in ranges 0-31/0-23, they will be of type `int8_t` (signed) and we will use `min` = -128 (`NO_RANGE`) to signal that there is no invalidation to be done on that column.
+
+- Initially, each column starts with a (NO_RANGE,NO_RANGE) pair (no invalidation)
+
+- When printing a tile on the top non-visible row:
+  - Set MIN to -(height of top non-visible row)
+  - If MAX is NO_RANGE, set MAX to 0
+
+- Every 8 scrolled pixels, do the following for each of the columns:
+  - Adjust MIN and MAX (add 1 to each of them)
+  - If MIN is out of the scroll area, set both MIN and MAX to NO_RANGE
+
+- The previous adjustments and movements will have to take into account 1 additional cell due to the pixel offsets mentioned above.
+
+We could keep track of all tiles on each columns and only invalidate the strictly necesary, but this would imply having a changing list for each column, which means more processing on a critical code path. If we have several tiles on the same column, I have assumed that it's probably cheaper to simply invalidate everything in-between than trying to cherry-pick cells to invalidate.
+
+An enhanced version of this schema will be tested in Test 4, though.
+
+## SP1 scrolling test 4
+
+It can be found in the `src/sp1-partial-inv-2` directory. Based on Test 3, but changing the algorithm which keeps track of the cells to invalidate. Conceptually, this method keeps track of the position of each and every tile which is seen on screen, and periodically adjusts the cells that it invalidates in lockstep with the scrolling routine.
+
+Basic ideas:
+
+- We keep a global list of printed tiles. This list can be a ring buffer for efficiency, since all objects in that list will added and removed in FIFO fashion
+
+- When printing a tile on the top row, it is also added to this list, together with its invalidating rectangle
+
+- The list is updated every 8 scrolled pixels to move down the invalidating rectangles of all live tiles
+
+- When tiles reach the bottom row and go out of sight, they are removed from the global list
+
+- The maximum size for the global list is fixed and depends strictly of the scroll area and the tile sizes, so no heap is required. It can be declared statically with maximum size.
+
+- The invalidation routine can run pretty fast: it only has to go over the global list of printed tiles and unconditionally invalidate their rectangles.
