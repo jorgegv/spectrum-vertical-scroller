@@ -102,22 +102,22 @@ struct sprite_s {
 // sprite data
 // coordinates are absolute in pixels
 struct sprite_s sprites[] = {
-    { .pos_x = SCROLL_AREA_MIN_X + 10, .pos_y = SCROLL_AREA_MIN_Y + 70, .dx =  1, .dy =  2, .sprite = NULL, .z_plane = 10  },
-    { .pos_x = SCROLL_AREA_MIN_X + 20, .pos_y = SCROLL_AREA_MIN_Y + 40, .dx = -1, .dy =  2, .sprite = NULL, .z_plane = 11  },
-    { .pos_x = SCROLL_AREA_MIN_X + 40, .pos_y = SCROLL_AREA_MIN_Y + 20, .dx =  1, .dy = -2, .sprite = NULL, .z_plane = 12  },
-    { .pos_x = SCROLL_AREA_MIN_X + 70, .pos_y = SCROLL_AREA_MIN_Y + 10, .dx = -1, .dy = -2, .sprite = NULL, .z_plane = 13  },
-    { .pos_x = SCROLL_AREA_MIN_X + 16, .pos_y = SCROLL_AREA_MIN_Y + 82, .dx =  2, .dy =  1, .sprite = NULL, .z_plane = 14  },
-    { .pos_x = SCROLL_AREA_MIN_X + 28, .pos_y = SCROLL_AREA_MIN_Y + 50, .dx = -1, .dy =  2, .sprite = NULL, .z_plane = 15  },
-    { .pos_x = SCROLL_AREA_MIN_X + 50, .pos_y = SCROLL_AREA_MIN_Y + 28, .dx =  1, .dy = -2, .sprite = NULL, .z_plane = 16  },
-    { .pos_x = SCROLL_AREA_MIN_X + 82, .pos_y = SCROLL_AREA_MIN_Y + 16, .dx = -1, .dy = -2, .sprite = NULL, .z_plane = 17  },
-    { .pos_x = SCROLL_AREA_MIN_X +  5, .pos_y = SCROLL_AREA_MIN_Y + 20, .dx =  2, .dy =  1, .sprite = NULL, .z_plane = 18  },
-    { .pos_x = SCROLL_AREA_MIN_X + 10, .pos_y = SCROLL_AREA_MIN_Y + 15, .dx = -1, .dy =  2, .sprite = NULL, .z_plane = 19  },
-    { .pos_x = SCROLL_AREA_MIN_X + 15, .pos_y = SCROLL_AREA_MIN_Y + 10, .dx =  2, .dy = -2, .sprite = NULL, .z_plane = 20  },
-    { .pos_x = SCROLL_AREA_MIN_X + 20, .pos_y = SCROLL_AREA_MIN_Y +  5, .dx = -1, .dy = -2, .sprite = NULL, .z_plane = 21  },
-    { .pos_x = SCROLL_AREA_MIN_X + 25, .pos_y = SCROLL_AREA_MIN_Y + 40, .dx =  2, .dy =  1, .sprite = NULL, .z_plane = 22  },
-    { .pos_x = SCROLL_AREA_MIN_X + 30, .pos_y = SCROLL_AREA_MIN_Y + 35, .dx = -1, .dy =  2, .sprite = NULL, .z_plane = 23  },
-    { .pos_x = SCROLL_AREA_MIN_X + 35, .pos_y = SCROLL_AREA_MIN_Y + 30, .dx =  1, .dy = -1, .sprite = NULL, .z_plane = 24  },
-    { .pos_x = SCROLL_AREA_MIN_X + 40, .pos_y = SCROLL_AREA_MIN_Y + 25, .dx = -1, .dy = -2, .sprite = NULL, .z_plane = 25  },
+    { .pos_x = SCROLL_AREA_MIN_X + 10, .pos_y = SCROLL_AREA_MIN_Y + 70, .dx =  1, .dy =  2, .z_plane = 10, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 20, .pos_y = SCROLL_AREA_MIN_Y + 40, .dx = -1, .dy =  2, .z_plane = 11, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 40, .pos_y = SCROLL_AREA_MIN_Y + 20, .dx =  1, .dy = -2, .z_plane = 12, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 70, .pos_y = SCROLL_AREA_MIN_Y + 10, .dx = -1, .dy = -2, .z_plane = 13, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 16, .pos_y = SCROLL_AREA_MIN_Y + 82, .dx =  2, .dy =  1, .z_plane = 14, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 28, .pos_y = SCROLL_AREA_MIN_Y + 50, .dx = -1, .dy =  2, .z_plane = 15, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 50, .pos_y = SCROLL_AREA_MIN_Y + 28, .dx =  1, .dy = -2, .z_plane = 16, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 82, .pos_y = SCROLL_AREA_MIN_Y + 16, .dx = -1, .dy = -2, .z_plane = 17, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X +  5, .pos_y = SCROLL_AREA_MIN_Y + 20, .dx =  2, .dy =  1, .z_plane = 18, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 10, .pos_y = SCROLL_AREA_MIN_Y + 15, .dx = -1, .dy =  2, .z_plane = 19, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 15, .pos_y = SCROLL_AREA_MIN_Y + 10, .dx =  2, .dy = -2, .z_plane = 20, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 20, .pos_y = SCROLL_AREA_MIN_Y +  5, .dx = -1, .dy = -2, .z_plane = 21, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 25, .pos_y = SCROLL_AREA_MIN_Y + 40, .dx =  2, .dy =  1, .z_plane = 22, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 30, .pos_y = SCROLL_AREA_MIN_Y + 35, .dx = -1, .dy =  2, .z_plane = 23, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 35, .pos_y = SCROLL_AREA_MIN_Y + 30, .dx =  1, .dy = -1, .z_plane = 24, .sprite = NULL  },
+    { .pos_x = SCROLL_AREA_MIN_X + 40, .pos_y = SCROLL_AREA_MIN_Y + 25, .dx = -1, .dy = -2, .z_plane = 25, .sprite = NULL  },
 };
 
 ///////////////////////////////////
