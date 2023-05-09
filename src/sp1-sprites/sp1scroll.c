@@ -65,6 +65,11 @@ uint8_t tile[ 8 * SCROLL_AREA_TOP_TILE_HEIGHT * SCROLL_AREA_TOP_TILE_WIDTH ] = {
   1,2,4,8,16,32,64,128
 };
 
+uint8_t diamond_tile[] = {
+    0x01, 0x02, 0x05, 0x0b, 0x16, 0x2d, 0x58, 0xb1, 0xb5, 0x58, 0x2c, 0x16, 0x0b, 0x05, 0x02, 0x01, 
+    0x80, 0x40, 0xa0, 0xd0, 0x68, 0x34, 0x1a, 0xad, 0x8d, 0x1a, 0xb4, 0x68, 0xd0, 0xa0, 0x40, 0x80
+};
+
 ///////////////////////////////////
 //
 // SPRITE DEFINITIONS
@@ -387,13 +392,13 @@ void main( void ) {
     i = c = 0;
     while (1) {
       // do whatever we want with the background
-      zx_border(INK_BLUE);
+//      zx_border(INK_BLUE);
       scroll_down_area();
-      zx_border(INK_BLACK);
+//      zx_border(INK_BLACK);
 
       // draw tiles
       if ( ! ( i++ % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) ) {
-        draw_tile_on_top_row( tile, c * 2 );
+        draw_tile_on_top_row( diamond_tile, c * 2 );
         if ( ++c == 8 )
           c = 0;
       }
