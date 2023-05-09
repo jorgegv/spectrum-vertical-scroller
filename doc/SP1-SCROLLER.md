@@ -5,12 +5,18 @@
 - [x] Reusing SP1 tile pointers to point into offscreen buffer
 - [x] Do a trivial scroller but updating all tiles and with real new tiles coming from the top
 - [x] Previous test but add sprites moving on top of the scrolling background
-- [ ] Try to _not_ update all tiles, but only the ones that have some content: keep track of the columns that have content (=tiles) and only scroll/update those. Since the BG is scrolling, this will change in time, but we should get a real optimization (much less drawing, if the BG is simple)
-- [ ] In line with the previous point, try to _not_ scroll all the vertical column, but just an address range. Since we have the information about which cells have tiles, we can selectively scroll them. We can select the number of LDDs to skip in the scroll routine with some self-modifying code: a calculated `LD HL,xxxx; JP (HL)` where the initial `LD HL` instruction is modified with the initial LDD position.
-- [ ] On the previous optimizations: scrolling al columns takes less than a frame, while updating SP1 background takes 2 frames and some more. So it makes sense to first try to optimize invalidations (biggest gain will be probably here), and then scrolling (this gain will be lower).
-- [ ] Prepare a super-simple IM2 handler which only increments a 32 bit value so that ROM int routine is not run.
+- [x] Try to create a stack-based scrolling routine
+- [ ] Prepare a super-simple IM2 handler which only increments a 32 bit value so that ROM int routine is not run. We can use this counter to better measure the execution time.
 - [ ] Run with INTs disabled and sync with Vsync with floating bus trick
 - [ ] Scroll down with attributes
+
+- With the previous ideas, we are using two exhaustive loops: a) when scrolling a column, we do it for all lines; and b) when invalidating, we do it for the whole scroll area. We can try to optimize each of them (or both) to not do them exhaustively, but selectively.
+- Scrolling all columns takes less than a frame, while updating SP1 background takes 2 frames and some more. So it makes sense to first try to optimize invalidations (biggest gain will be probably here), and then scrolling (this gain will be lower).
+
+Optimizations:
+
+- [ ] Try to _not_ update all tiles, but only the ones that have some content: keep track of the columns that have content (=tiles) and only scroll/update those. Since the BG is scrolling, this will change in time, but we should get a real optimization (much less drawing, if the BG is simple)
+- [ ] In line with the previous point, try to _not_ scroll all the vertical column, but just an address range. Since we have the information about which cells have tiles, we can selectively scroll them. We can select the number of LDDs to skip in the scroll routine with some self-modifying code: a calculated `LD HL,xxxx; JP (HL)` where the value of the initial `LD HL` instruction is modified with the initial LDD position to jump to.
 
 ## Context
 

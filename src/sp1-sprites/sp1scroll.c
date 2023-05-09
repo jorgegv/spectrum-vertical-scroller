@@ -303,12 +303,61 @@ ENDR
 __endasm;
 }
 
+// function to scroll a column SCROLL_PIXELS pixels down - stack version
+// the number of transfer loops must be exactly SCROLL_AREA_REAL_HEIGHT
+// must be called with INTs disabled!
+uint16_t saved_sp;
+void scroll_down_column_stack( uint8_t *column_end ) __z88dk_fastcall __naked {
+__asm
+
+    ;; we will be using HL as the dst ptr and HL' as the src ptr
+    inc hl	;; stack is predec/postinc
+    push hl	;; HL already contains the final column address (dst address)
+    exx
+    pop	hl
+    ld de,- ( 8 + SCROLL_PIXELS	)
+    add hl,de
+
+    ld (_saved_sp),sp	;; save stack pointer
+
+    ;; we enter the loop with alt regs
+REPT SCROLL_AREA_REAL_HEIGHT
+    ld sp,hl	;; load src address in SP (from HL')
+    pop de	;; load 8 bytes from source
+    pop bc
+    exx
+    pop de
+    pop bc
+
+    ld sp, hl	;; load dst address in SP (from HL)
+    push bc	;; store 8 bytes ro dest
+    push de
+
+    ld de,-8	;; update dst for next iter
+    add hl,de
+
+    exx		;; back to alt regs
+    push bc
+    push de
+
+    ld de,-8	;; update src for next iter
+    add hl,de
+ENDR
+    exx		;; back to normal regs
+    ld sp, (_saved_sp)	;; restore stack pointer
+    ret
+__endasm;
+}
+
 // scroll the whole scroll area one pixel down
 void scroll_down_area( void ) {
   uint8_t i;
+  intrinsic_di();
   for ( i = 0; i < SCROLL_AREA_WIDTH; i++ )
-//    scroll_down_column_loop( offscreen_column_end_address[ i ] );
-    scroll_down_column_unrolled( offscreen_column_end_address[ i ] );
+//    scroll_down_column_loop( offscreen_column_end_address[ i ] );	// ~2697 T-states
+    scroll_down_column_unrolled( offscreen_column_end_address[ i ] );	// ~2062 T-states
+//    scroll_down_column_stack( offscreen_column_end_address[ i ] );	// ~2336 T-states
+  intrinsic_ei();
 }
 
 // draw a tile on the top non-visible row, at the given column
@@ -338,9 +387,9 @@ void main( void ) {
     i = c = 0;
     while (1) {
       // do whatever we want with the background
-//      zx_border(INK_BLUE);
+      zx_border(INK_BLUE);
       scroll_down_area();
-//      zx_border(INK_BLACK);
+      zx_border(INK_BLACK);
 
       // draw tiles
       if ( ! ( i++ % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) ) {
