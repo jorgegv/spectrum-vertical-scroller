@@ -4,3 +4,4 @@
 *.lis
 *.c.asm
 *.o
+src/**/sp1scroll
