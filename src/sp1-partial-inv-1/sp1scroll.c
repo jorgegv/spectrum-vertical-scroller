@@ -178,62 +178,6 @@ void u_free(void *addr) {
      free( addr );
 }
 
-/////////////////////////////
-//
-// INVALIDATION FUNCTIONS
-//
-/////////////////////////////
-
-#define NO_RANGE (-128)
-
-struct column_invalidation_range_s {
-  // offset from the scroll area top
-  // values can be negative, -SCROLL_AREA_TOP_TILE_HEIGHT-1 to (SCROLL_AREA_HEIGHT-1)
-  // NO_RANGE is -128 (0x80)
-  int8_t start_row;
-  int8_t end_row;
-};
-
-struct column_invalidation_range_s column_invalidations[ SCROLL_AREA_WIDTH ];
-
-void init_column_invalidation_ranges( void ) {
-  uint8_t i;
-  for ( i = 0; i < SCROLL_AREA_WIDTH; i++ ) {
-    column_invalidations[ i ].start_row = NO_RANGE;
-    column_invalidations[ i ].end_row = NO_RANGE;
-  }
-}
-
-struct sp1_Rect dirty;
-void invalidate_dirty_scrollarea( void ) {
-//  sp1_Invalidate( &scroll_area );
-  uint8_t i, real_start_row;
-  for ( i = 0; i < SCROLL_AREA_WIDTH; i++ )
-    // if the invalidation area is inside the scroll area...
-    if ( column_invalidations[ i ].end_row >= 0 ) {
-      real_start_row = ( column_invalidations[ i ].start_row >= 0 ? column_invalidations[ i ].start_row : 0 );
-      dirty.row = real_start_row;
-      dirty.col = SCROLL_AREA_POS_COL + i;
-      dirty.width = 1;	// width: 1 cell
-      dirty.height = column_invalidations[ i ].end_row - real_start_row + 1;
-      sp1_Invalidate( &dirty );
-    }
-}
-
-void move_down_column_invalidation_ranges( void ) {
-  uint8_t i;
-  for ( i = 0; i < SCROLL_AREA_WIDTH; i++ ) {
-    // If end_row is not the bottom row, increment it, else leave it alone
-    if ( ( column_invalidations[ i ].end_row >= 0 ) && ( column_invalidations[ i ].end_row < ( SCROLL_AREA_HEIGHT - 1 ) ) )
-      column_invalidations[ i ].end_row++;
-    // if start_row is out of scroll area, reset both start_row and end_row
-    if ( ++(column_invalidations[ i ].start_row) >= SCROLL_AREA_HEIGHT ) {
-      column_invalidations[ i ].start_row = NO_RANGE;
-      column_invalidations[ i ].end_row = NO_RANGE;
-    }
-  }
-}
-
 /////////////////////////
 //
 // SCROLLING FUNCTIONS
@@ -337,6 +281,64 @@ void scroll_down_area( void ) {
   scroll_counter++;
 }
 
+/////////////////////////////
+//
+// INVALIDATION FUNCTIONS
+//
+/////////////////////////////
+
+#define NO_RANGE (-128)
+
+struct column_invalidation_range_s {
+  // offset from the scroll area top
+  // values can be negative, -SCROLL_AREA_TOP_TILE_HEIGHT-1 to (SCROLL_AREA_HEIGHT-1)
+  // NO_RANGE is -128 (0x80)
+  int8_t start_row;
+  int8_t end_row;
+};
+
+struct column_invalidation_range_s column_invalidations[ SCROLL_AREA_WIDTH ];
+
+void init_column_invalidation_ranges( void ) {
+  uint8_t i;
+  for ( i = 0; i < SCROLL_AREA_WIDTH; i++ ) {
+    column_invalidations[ i ].start_row = NO_RANGE;
+    column_invalidations[ i ].end_row = NO_RANGE;
+  }
+}
+
+struct sp1_Rect dirty;
+void invalidate_dirty_scrollarea( void ) {
+  uint8_t i, real_start_row;
+  for ( i = 0; i < SCROLL_AREA_WIDTH; i++ )
+    // if the invalidation area is inside the scroll area...
+    if ( column_invalidations[ i ].end_row >= 0 ) {
+      real_start_row = ( column_invalidations[ i ].start_row >= 0 ? column_invalidations[ i ].start_row : 0 );
+      dirty.row = real_start_row;
+      dirty.col = SCROLL_AREA_POS_COL + i;
+      dirty.width = 1;	// width: 1 cell
+      dirty.height = column_invalidations[ i ].end_row - real_start_row + 1;
+      sp1_Invalidate( &dirty );
+    }
+}
+
+void move_down_column_invalidation_ranges( void ) {
+  uint8_t i;
+  for ( i = 0; i < SCROLL_AREA_WIDTH; i++ ) {
+
+    // If end_row is not the bottom row, increment it, else leave it alone
+    if ( ( column_invalidations[ i ].end_row >= 0 ) && ( column_invalidations[ i ].end_row < ( SCROLL_AREA_HEIGHT - 1 ) ) )
+      column_invalidations[ i ].end_row++;
+
+    // if start_row is out of scroll area, reset both start_row and end_row
+    if ( ++(column_invalidations[ i ].start_row) >= SCROLL_AREA_HEIGHT ) {
+      column_invalidations[ i ].start_row = NO_RANGE;
+      column_invalidations[ i ].end_row = NO_RANGE;
+    }
+
+  }
+}
+
 //////////////////
 //
 // TILE DRAWING
@@ -354,7 +356,10 @@ void draw_tile_on_top_row( uint8_t *tile, uint8_t col ) {
       offscreen_column_start_address[ col + j ][ i ] = tile[ j * SCROLL_AREA_TOP_TILE_HEIGHT * 8 + i ];
 
     // modify invalidation ranges for the column
-    column_invalidations[ col + j ].start_row = -SCROLL_AREA_TOP_TILE_HEIGHT -1;
+    column_invalidations[ col + j ].start_row = -SCROLL_AREA_TOP_TILE_HEIGHT;
+
+    // if the bottom row is NO_RANGE, set it to the top row
+    // if the bottom is something else, keep it
     if ( column_invalidations[ col + j ].end_row == NO_RANGE )
       column_invalidations[ col + j ].end_row = 0;
   }
@@ -512,10 +517,6 @@ void main( void ) {
       if ( ! ( scroll_counter % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) )
         draw_top_row_of_tiles();
 
-      // move down the column invalidation ranges if needed
-      if ( ( scroll_counter % 8 ) == 7 )
-        move_down_column_invalidation_ranges();
-
       // do whatever we want with the background
       // this increments scroll_counter!
       scroll_down_area();
@@ -525,6 +526,10 @@ void main( void ) {
 
       // move the sprites
       move_sprites();
+
+      // move down the column invalidation ranges if needed
+      if ( ! ( scroll_counter % 8 ) )
+        move_down_column_invalidation_ranges();
 
       // now sync with vert retrace and redraw
       intrinsic_halt();
