@@ -9,6 +9,7 @@
 - [ ] Prepare a super-simple IM2 handler which only increments a 32 bit value so that ROM int routine is not run. We can use this counter to better measure the execution time.
 - [ ] Run with INTs disabled and sync with Vsync with floating bus trick
 - [ ] Scroll down with attributes
+- [ ] Parallax scrolling by scrolling the leftmost and rightmost columns at a different higher speed than the center ones. Allow for a different scroll speed per column. Modify scroll routine to receive 3 params: address, num of scroll pixels, height of the scroll window. Computed jump for the correct number od LDDs.
 
 - With the previous ideas, we are using two exhaustive loops: a) when scrolling a column, we do it for all lines; and b) when invalidating, we do it for the whole scroll area. We can try to optimize each of them (or both) to not do them exhaustively, but selectively.
 - Scrolling all columns takes less than a frame, while updating SP1 background takes 2 frames and some more. So it makes sense to first try to optimize invalidations (biggest gain will be probably here), and then scrolling (this gain will be lower).
@@ -16,7 +17,7 @@
 Optimizations:
 
 - [ ] Try to _not_ update all tiles, but only the ones that have some content: keep track of the columns that have content (=tiles) and only scroll/update those. Since the BG is scrolling, this will change in time, but we should get a real optimization (much less drawing, if the BG is simple)
-- [ ] In line with the previous point, try to _not_ scroll all the vertical column, but just an address range. Since we have the information about which cells have tiles, we can selectively scroll them. We can select the number of LDDs to skip in the scroll routine with some self-modifying code: a calculated `LD HL,xxxx; JP (HL)` where the value of the initial `LD HL` instruction is modified with the initial LDD position to jump to.
+- [ ] In line with the previous point, try to _not_ scroll all the vertical column, but just an address range. Since we have the information about which cells have tiles, we can selectively scroll them. We can select the number of LDDs to skip in the scroll routine with some self-modifying code: a computed jump `JP xxxx` where the value of `xxxx` is modified with the initial LDD position to jump to.
 
 ## Context
 
@@ -102,7 +103,7 @@ The basic idea to explore is column cell-range invalidation:
 
 - Initially, only one range per column will be invalidated (for efficiency reasons). That is, if we have tiles in rows 4-5 and 10-11, the whole 4-11 range will be invalidated.
 
-- For each column, there is a (min,max) pair which holds the current range of cell invalidations to be done for that column. This pairs are moved down for all columns every 8 scrolled pixels (cell changes occur every 8 scrolled lines). so if scroll is 1-pixel, it will be done every 8 scroll cycles; if scroll is 2-pixel, every 4 scroll cycles; etc.
+- For each column, there is a (min,max) pair which holds the current range of cell invalidations to be done for that column. This pairs are moved down for all columns every 8 scrolled pixels (cell changes occur every 8 scrolled lines). So if scroll is 1-pixel, it will be done every 8 scroll cycles; if scroll is 2-pixel, every 4 scroll cycles; etc.
 
 - Since these `min` and `max` values will be cell-based, and in ranges 0-31/0-23, they will be of type `int8_t` (signed) and we will use `min` = -128 (`NO_RANGE`) to signal that there is no invalidation to be done on that column.
 
@@ -113,7 +114,7 @@ The basic idea to explore is column cell-range invalidation:
   - If MAX is NO_RANGE, set MAX to 0
 
 - Every 8 scrolled pixels, do the following for each of the columns:
-  - Adjust MIN and MAX (add 1 to each of them)
+  - Adjust MIN and MAX (add 1 to each of them, saturating at the maximum row value)
   - If MIN is out of the scroll area, set both MIN and MAX to NO_RANGE
 
 - The previous adjustments and movements will have to take into account 1 additional cell due to the pixel offsets mentioned above.
@@ -122,7 +123,23 @@ We could keep track of all tiles on each columns and only invalidate the strictl
 
 An enhanced version of this schema will be tested in Test 4, though.
 
-## SP1 scrolling test 4
+My findings with this test:
+
+- The idea of only invalidating the needed areas is good and adds speed to the test
+
+- The current algorithm is not so good: given that on any given column, only a single range of rows can be tracked and invalidated, it quickly degenerates into the full-column invalidation case. E.g.: when the map has few and vertically sparse tiles, the algorithm works well (it can be appreciated at the beginning of the demo, when only a few background tiles can be seen on the screen); but when more tiles start to appear, suddenly all the columns have several tiles and almost the full column is invalidated, defeating the optimization.
+
+- A better algorithm which really keeps track of all the on-screen tiles and their invalidating rectangles will be explored in Test 4.
+
+## New stack-based scrolling routine
+
+Also in Test 3, a new stack-based scrolling function has been developed and tested.
+
+I have found that the regular unrolled LDD version is hard to beat, mainly due to the fact that when moving the bytes, the source and destination ranges mostly overlap, and this makes it more difficult to optimize the stack transfer.
+
+The approximate T-state count for each of the versions is commented in the code.
+
+## SP1 scrolling test 4 (WIP)
 
 It can be found in the `src/sp1-partial-inv-2` directory. Based on Test 3, but changing the algorithm which keeps track of the cells to invalidate. Conceptually, this method keeps track of the position of each and every tile which is seen on screen, and periodically adjusts the cells that it invalidates in lockstep with the scrolling routine.
 
