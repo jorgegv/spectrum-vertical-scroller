@@ -39,15 +39,15 @@ uint8_t diamond_tile[] = {
 
 // initialize SP1 tile map
 void init_tile_map( void ) {
-    uint8_t r,c;
-    // setup the SP1 tile map to point to the cells in the offscreen buffer
-    // the top 2 rows are reserved for drawing and not visible
-    // the tile array is configured in columns!
-    for ( c = 0; c < SCROLL_AREA_WIDTH; c++ )
-      for ( r = 0; r < SCROLL_AREA_HEIGHT; r++ )
-        sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + c,		// screen position
-          PAPER_YELLOW | INK_BLACK,	// attr
-          ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, c ) ] );	// pointer
+  uint8_t r,c;
+  // setup the SP1 tile map to point to the cells in the offscreen buffer
+  // the top 2 rows are reserved for drawing and not visible
+  // the tile array is configured in columns!
+  for ( c = 0; c < SCROLL_AREA_WIDTH; c++ )
+    for ( r = 0; r < SCROLL_AREA_HEIGHT; r++ )
+      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + c,		// screen position
+        PAPER_YELLOW | INK_BLACK,	// attr
+        ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, c ) ] );	// pointer
 }
 
 // draw a tile on the top non-visible row, at the given column
@@ -73,13 +73,10 @@ void draw_tile_on_top_row( uint8_t *tile, uint8_t col ) {
 // draws the top row of tiles.  This is the function where the map can be
 // explored and be brought into view
 void draw_top_row_of_tiles( void ) {
-
-//  static uint8_t tile_counter = 0;
-
+  // uncomment more calls for higher tile density
   draw_tile_on_top_row( diamond_tile, rand() % (SCROLL_AREA_WIDTH-1) );
-//  draw_tile_on_top_row( diamond_tile, tile_counter * 2 );
-//  if ( ++tile_counter == 8 )
-//    tile_counter = 0;
+//  draw_tile_on_top_row( diamond_tile, rand() % (SCROLL_AREA_WIDTH-1) );
+//  draw_tile_on_top_row( diamond_tile, rand() % (SCROLL_AREA_WIDTH-1) );
 }
 
 /////////////////////////////
@@ -134,4 +131,3 @@ void dump_invalidations( void ) {
   for ( i = 0; i < SCROLL_AREA_HEIGHT; i++ )
     printf( "%02d:S:%d E:%d      \n", i,column_invalidations[i].start_row,column_invalidations[i].end_row);
 }
-
