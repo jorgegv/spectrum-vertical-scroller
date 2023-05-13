@@ -5,3 +5,4 @@
 *.c.asm
 *.o
 src/**/sp1scroll
+src/**/main
