@@ -375,11 +375,17 @@ void draw_tile_on_top_row( uint8_t *tile, uint8_t col ) {
 // explored and be brought into view
 void draw_top_row_of_tiles( void ) {
 
-  static uint8_t tile_counter = 0;
+// The following lines generate a diagonal tile layout which forces the
+// invalidation algorithm into a pathological unoptimized state
+//
+//  static uint8_t tile_counter = 0;
+//  draw_tile_on_top_row( diamond_tile, tile_counter * 2 );
+//  if ( ++tile_counter == 8 )
+//    tile_counter = 0;
 
-  draw_tile_on_top_row( diamond_tile, tile_counter * 2 );
-  if ( ++tile_counter == 8 )
-    tile_counter = 0;
+// The following uses random tile placement, algorithm works fine this way
+//
+  draw_tile_on_top_row( diamond_tile, rand() % (SCROLL_AREA_WIDTH-1) );
 }
 
 /////////////////////////
