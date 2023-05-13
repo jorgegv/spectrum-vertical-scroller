@@ -76,13 +76,6 @@ struct sp1_Rect scroll_area = { SCROLL_AREA_POS_ROW, SCROLL_AREA_POS_COL, SCROLL
 ///////////////////////////////////
 
 // a test diamond tile - must have the dimensions mentioned above for the top tile row
-uint8_t tile[ 8 * SCROLL_AREA_TOP_TILE_HEIGHT * SCROLL_AREA_TOP_TILE_WIDTH ] = {
-  1,2,4,8,16,32,64,128,
-  128,64,32,16,8,4,2,1,
-  128,64,32,16,8,4,2,1,
-  1,2,4,8,16,32,64,128
-};
-
 uint8_t diamond_tile[] = {
     0x01, 0x02, 0x05, 0x0b, 0x16, 0x2d, 0x58, 0xb1, 0xb5, 0x58, 0x2c, 0x16, 0x0b, 0x05, 0x02, 0x01, 
     0x80, 0x40, 0xa0, 0xd0, 0x68, 0x34, 0x1a, 0xad, 0x8d, 0x1a, 0xb4, 0x68, 0xd0, 0xa0, 0x40, 0x80
