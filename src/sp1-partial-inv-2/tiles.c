@@ -1,35 +1,76 @@
 #include "build.h"
 
-///////////////////////////////////////
-//
-// TILE AND INVALIDATION DEFINITIONS
-//
-///////////////////////////////////////
-
-#define INVAL_NO_RANGE (-128)
-
-struct column_invalidation_range_s {
-  // offset from the scroll area top
-  // values can be negative, -SCROLL_AREA_TOP_TILE_HEIGHT-1 to (SCROLL_AREA_HEIGHT-1)
-  // INVAL_NO_RANGE is -128 (0x80)
-  int8_t start_row;
-  int8_t end_row;
-};
-
-struct column_invalidation_range_s column_invalidations[ SCROLL_AREA_WIDTH ];
-
 // a test diamond tile - must have the dimensions mentioned above for the top tile row
-uint8_t tile[ 8 * SCROLL_AREA_TOP_TILE_HEIGHT * SCROLL_AREA_TOP_TILE_WIDTH ] = {
-  1,2,4,8,16,32,64,128,
-  128,64,32,16,8,4,2,1,
-  128,64,32,16,8,4,2,1,
-  1,2,4,8,16,32,64,128
-};
-
 uint8_t diamond_tile[] = {
     0x01, 0x02, 0x05, 0x0b, 0x16, 0x2d, 0x58, 0xb1, 0xb5, 0x58, 0x2c, 0x16, 0x0b, 0x05, 0x02, 0x01, 
     0x80, 0x40, 0xa0, 0xd0, 0x68, 0x34, 0x1a, 0xad, 0x8d, 0x1a, 0xb4, 0x68, 0xd0, 0xa0, 0x40, 0x80
 };
+
+////////////////////////////////////////////
+//
+// INVALIDATION DEFINITIONS AND FUNCTIONS
+//
+////////////////////////////////////////////
+
+// a struct for tile positions.  row,col can be negative for tiles that
+// are out of view
+struct tile_position_s {
+  int8_t row,col;
+  uint8_t width,height;
+};
+
+// Maximum number of tiles on screen.  This depends on the map and/or the
+// function that draw new tiles on top.  If a tool for compiling maps is
+// ever created, this number can be calculated from the map layout.
+//
+// For the current map generation function, 1-2-3 tiles are generated per
+// row, and there are 8 2-cell rows, so we would be safe with about 24 max
+// tiles on screen.  Let's define some more to be able to experiment safely.
+//
+// This number must be 1-byte for the moment, so maximum of 255 visible
+// tiles at any instant
+#define MAX_NUM_TILES_ON_SCREEN		10
+#define TILE_POSITION_QUEUE_SIZE	MAX_NUM_TILES_ON_SCREEN
+
+// the invalidation queue struct, implemented as a ring buffer for efficiency
+// head holds the position of the first used slot
+// num_tiles holds the number of currently visible tiles
+// the indexing on "positions" using "size" is always done modulo
+// TILE_POSITION_QUEUE_SIZE, so it it autmoatically handled as a ring buffer
+struct tile_position_queue_s {
+  uint8_t head,num_tiles;
+  struct tile_position_s positions[ TILE_POSITION_QUEUE_SIZE ];
+};
+
+// the single instance of the position queue
+struct tile_position_queue_s position_queue;
+
+void init_tile_position_queue( void ) {
+  position_queue.head = 0;
+  position_queue.num_tiles = 0;
+}
+
+void add_tile_position_to_queue( int8_t row, int8_t col, uint8_t width, uint8_t height ) {
+  uint8_t new_pos = ( position_queue.head + position_queue.num_tiles ) % TILE_POSITION_QUEUE_SIZE;
+  position_queue.positions[ new_pos ].row = row;
+  position_queue.positions[ new_pos ].col = col;
+  position_queue.positions[ new_pos ].width = width;
+  position_queue.positions[ new_pos ].height = height;
+  position_queue.num_tiles++;
+}
+
+void move_down_tile_positions( void ) {
+  uint8_t i,real_index;
+  if ( position_queue.num_tiles ) {
+    for ( i = 0; i < position_queue.num_tiles; i++ ) {
+      real_index = ( position_queue.head + i ) % TILE_POSITION_QUEUE_SIZE;
+      if ( ++position_queue.positions[ real_index ].row == SCROLL_AREA_HEIGHT ) {
+        position_queue.head = ( real_index + 1 ) % TILE_POSITION_QUEUE_SIZE;
+        position_queue.num_tiles--;
+      }
+    }
+  }
+}
 
 /////////////////////////////////////
 //
@@ -52,22 +93,16 @@ void init_tile_map( void ) {
 
 // draw a tile on the top non-visible row, at the given column
 void draw_tile_on_top_row( uint8_t *tile, uint8_t col ) {
+
+  // transfer the tile pixels
   uint8_t i,j;
-
-  for ( j = 0; j < SCROLL_AREA_TOP_TILE_WIDTH; j++ ) {
-
-    // transfer the column pixels
+  for ( j = 0; j < SCROLL_AREA_TOP_TILE_WIDTH; j++ )
+    // transfer bytes column-wise
     for ( i = 0; i < SCROLL_AREA_TOP_TILE_HEIGHT * 8; i++ )
       offscreen_column_start_address[ col + j ][ i ] = tile[ j * SCROLL_AREA_TOP_TILE_HEIGHT * 8 + i ];
 
-    // modify invalidation ranges for the column
-    column_invalidations[ col + j ].start_row = -SCROLL_AREA_TOP_TILE_HEIGHT;
-
-    // if the bottom row is INVAL_NO_RANGE, set it to the top row
-    // if the bottom is something else, keep it
-    if ( column_invalidations[ col + j ].end_row == INVAL_NO_RANGE )
-      column_invalidations[ col + j ].end_row = 0;
-  }
+  // add a tile position record to the queue
+  add_tile_position_to_queue( -SCROLL_AREA_TOP_TILE_HEIGHT, col, SCROLL_AREA_TOP_TILE_WIDTH, SCROLL_AREA_TOP_TILE_HEIGHT+1 );
 }
 
 // draws the top row of tiles.  This is the function where the map can be
@@ -85,49 +120,33 @@ void draw_top_row_of_tiles( void ) {
 //
 /////////////////////////////
 
-void init_column_invalidation_ranges( void ) {
-  uint8_t i;
-  for ( i = 0; i < SCROLL_AREA_WIDTH; i++ ) {
-    column_invalidations[ i ].start_row = INVAL_NO_RANGE;
-    column_invalidations[ i ].end_row = INVAL_NO_RANGE;
-  }
-}
-
-struct sp1_Rect dirty;
 void invalidate_dirty_scrollarea( void ) {
-  uint8_t i, real_start_row;
-  for ( i = 0; i < SCROLL_AREA_WIDTH; i++ )
-    // if the invalidation area is inside the scroll area...
-    if ( column_invalidations[ i ].end_row >= 0 ) {
-      real_start_row = ( column_invalidations[ i ].start_row >= 0 ? column_invalidations[ i ].start_row : 0 );
-      dirty.row = real_start_row;
-      dirty.col = SCROLL_AREA_POS_COL + i;
-      dirty.width = 1;	// width: 1 cell
-      dirty.height = column_invalidations[ i ].end_row - real_start_row + 1;
+  uint8_t i,real_index;
+  static struct sp1_Rect dirty;
+  if ( position_queue.num_tiles ) {
+    for ( i = 0; i < position_queue.num_tiles; i++ ) {
+      real_index = ( position_queue.head + i ) % TILE_POSITION_QUEUE_SIZE;
+      dirty.row = SCROLL_AREA_POS_ROW + ( position_queue.positions[ real_index ].row >= 0 ? position_queue.positions[ real_index ].row : 0 );
+      dirty.col = SCROLL_AREA_POS_COL + position_queue.positions[ real_index ].col;
+      dirty.width = position_queue.positions[ real_index ].width;
+      dirty.height = position_queue.positions[ real_index ].height;
+      if ( dirty.row + dirty.height > SCROLL_AREA_POS_ROW + SCROLL_AREA_HEIGHT )
+        dirty.height = SCROLL_AREA_POS_ROW + SCROLL_AREA_HEIGHT - dirty.row;
       sp1_Invalidate( &dirty );
     }
-}
-
-void move_down_column_invalidation_ranges( void ) {
-  uint8_t i;
-  for ( i = 0; i < SCROLL_AREA_WIDTH; i++ ) {
-
-    // If end_row is not the bottom row, increment it, else leave it alone
-    if ( ( column_invalidations[ i ].end_row >= 0 ) && ( column_invalidations[ i ].end_row < ( SCROLL_AREA_HEIGHT - 1 ) ) )
-      column_invalidations[ i ].end_row++;
-
-    // if start_row is out of scroll area, reset both start_row and end_row
-    if ( ++(column_invalidations[ i ].start_row) >= SCROLL_AREA_HEIGHT ) {
-      column_invalidations[ i ].start_row = INVAL_NO_RANGE;
-      column_invalidations[ i ].end_row = INVAL_NO_RANGE;
-    }
-
   }
 }
 
-void dump_invalidations( void ) {
+void dump_tile_positions( void ) {
   uint8_t i;
   gotoxy(0,0);
-  for ( i = 0; i < SCROLL_AREA_HEIGHT; i++ )
-    printf( "%02d:S:%d E:%d      \n", i,column_invalidations[i].start_row,column_invalidations[i].end_row);
+  printf( "head:%d, n:%d\n",position_queue.head,position_queue.num_tiles );
+  for ( i=0; i < TILE_POSITION_QUEUE_SIZE; i++ )
+    printf( " %02d: r:%d c:%d    \n   w:%d h:%d   \n",
+      i,
+      position_queue.positions[ i ].row,
+      position_queue.positions[ i ].col,
+      position_queue.positions[ i ].width,
+      position_queue.positions[ i ].height
+    );
 }

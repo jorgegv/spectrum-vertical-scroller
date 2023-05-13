@@ -16,15 +16,13 @@ void main( void ) {
     init_scroll_area();
     init_tile_map();
     init_sprites();
-    init_column_invalidation_ranges();
+    init_tile_position_queue();
 
     // make sure the scroll area is cleared at start
     sp1_Invalidate( &scroll_area );
 
     // main loop
     while (1) {
-
-//      dump_invalidations();
 
       // draw tiles if top row has been completely scrolled down
       // this updates the invalidation ranges for all affected columns
@@ -41,9 +39,11 @@ void main( void ) {
       // move the sprites
       move_sprites();
 
-      // move down the column invalidation ranges if needed
-      if ( ! ( scroll_counter % 8 ) )
-        move_down_column_invalidation_ranges();
+      // move down the tile positions if needed
+      if ( ! ( scroll_counter % 8 ) ) {
+//        dump_tile_positions();
+        move_down_tile_positions();
+      }
 
       // now sync with vert retrace and redraw
       intrinsic_halt();

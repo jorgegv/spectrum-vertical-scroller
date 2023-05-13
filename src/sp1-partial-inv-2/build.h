@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <conio.h>
+#include <arch/z80.h>
 
 #include "config.h"
 
@@ -45,12 +46,13 @@ void init_address_tables( void );
 void init_scroll_area( void );
 void init_tile_map( void );
 void init_sprites( void );
-void init_column_invalidation_ranges( void );
+void init_tile_position_queue( void );
 
 // utility functions
+uint16_t cell_address_offset( uint8_t row, uint8_t col );
 void draw_top_row_of_tiles( void );
 void scroll_down_area( void );
 void invalidate_dirty_scrollarea( void );
 void move_sprites( void );
-void move_down_column_invalidation_ranges( void );
-uint16_t cell_address_offset( uint8_t row, uint8_t col );
+void move_down_tile_positions( void );
+void dump_tile_positions( void );
