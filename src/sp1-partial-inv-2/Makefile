@@ -22,7 +22,7 @@ main.tap: $(OBJS)
 	$(ZCC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o main -create-app
 
 clean:
-	-rm -f *.tap *.o *.bin *.map *.lis sp1scroll
+	-rm -f *.tap *.o *.bin *.map *.lis main
 	$(MAKE) -s -C graphics clean
 
 run:
