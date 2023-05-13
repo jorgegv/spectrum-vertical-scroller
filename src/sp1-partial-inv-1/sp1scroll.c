@@ -10,7 +10,6 @@
 //#include <arch/spectrum.h>
 //#include <games/sp1.h>
 
-//#pragma output STACKPTR=53248                    // place stack at $d000 at startup
 #pragma output CRT_ORG_CODE           = 0x5f00  // org of compile
 #pragma output REGISTER_SP            = 0xd1d1  // just below ISR
 #pragma output CRT_STACK_SIZE         = 208     // just enough
@@ -22,11 +21,18 @@
 #pragma output CLIB_MALLOC_HEAP_SIZE  = 0       // // heap: initialized manually
 #pragma output CLIB_STDIO_HEAP_SIZE   = 0       // no stdio heap (no files)
 
+// Memory map:
+// $5F00 - $BFFF: code/data/bss
+// $C000 - $CFFF: heap (manualy assigned)
+// $D100 - $D1D1: stack
+// $D1D2 - $FFFF: SP1 data
+
 #include <intrinsic.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <conio.h>
+#include <string.h>
 
 ///////////////////////////////////////
 //
@@ -167,7 +173,7 @@ long heap;
 // heap initialization - see SP1 examples
 void init_heap( void ) {
     heap = 0L;
-    sbrk( ( void * ) 42000, 8000);
+    sbrk( ( void * ) 0xC000, 0x1000 );	  // 4096 bytes of heap at 0xC000
 }
 
 void *u_malloc(uint16_t size) {
@@ -393,12 +399,7 @@ void init_address_tables( void ) {
 
 // initialize scroll area
 void init_scroll_area( void ) {
-  uint8_t c,i;
-  // set the top pixel line to 0
-  for ( c = 0; c < SCROLL_AREA_WIDTH; c++ )
-    for ( i = 0; i < SCROLL_PIXELS; i++ )
-      offscreen[ c * ( SCROLL_AREA_REAL_HEIGHT * 8 + SCROLL_PIXELS ) + i ] = 0;
-  // initialize scroll counter
+  memset( offscreen, 0, OFFSCREEN_BUFFER_SIZE );
   scroll_counter = 0;
 }
 
