@@ -1,37 +1,45 @@
-// zcc +zx hscroll.c -o hscroll -create-app
+// zcc +zx -lndos -o hscroll -create-app hscroll.c
 
-void scroll_right( void ) __naked {
+#include <stdio.h>
+#include <conio.h>
+#include <intrinsic.h>
+
+void scroll_right_1pixel( void ) __naked {
 __asm
-	ld hl,16384
-	ld a,1
-	ld b,32
-loop1:
-	ld (hl),a
-	inc a
-	inc hl
-	djnz loop1
 
-;; rotamos
-inicio:
-	ld b,32
-	ld hl,16384+31
-loop2:
-	ld a,(hl)
-	dec hl
-	ld c,(hl)
-	rrc c
-	rra
-	inc hl
-	ld (hl),a
-	dec hl
-	djnz loop2
+start:
+	ld hl,16384	;; first screen line
+	ld de,32	;; increment for next line
 
-	halt
-	jp inicio
+	ld a,192	;; number of lines
+
+line:
+	ld b,32
+	or a
+loop_line:
+	rr (hl)
+	inc hl
+	djnz loop_line
+
+	dec a
+	jp nz, line
+	ret
+
 __endasm;
 }
 
 void main( void ) {
-    scroll_right();
+    int i,j;
+    for ( i=0; i < 24; i++ ) {
+    	gotoxy( i, i );
+    	for ( j=0; j < i/2; j++ )
+            printf( "AA" );
+    }
+    	
+    while (1) {
+//    	intrinsic_halt();
+    	zx_border( INK_RED );
+        scroll_right_1pixel();
+    	zx_border( INK_WHITE );
+    }
 }
-
