@@ -10,6 +10,8 @@
 - [ ] Run with INTs disabled and sync with Vsync with floating bus trick
 - [ ] Scroll down with attributes
 - [ ] Parallax scrolling by scrolling the leftmost and rightmost columns at a different higher speed than the center ones. Allow for a different scroll speed per column. Modify scroll routine to receive 3 params: address, num of scroll pixels, height of the scroll window. Computed jump for the correct number od LDDs.
+- [ ] Speed optimizations
+- [ ] Explore similar ideas as the above, but with _horizontal_ scrolling (see minimal POC in dir `src/hscroll`)
 
 - With the previous ideas, we are using two exhaustive loops: a) when scrolling a column, we do it for all lines; and b) when invalidating, we do it for the whole scroll area. We can try to optimize each of them (or both) to not do them exhaustively, but selectively.
 
