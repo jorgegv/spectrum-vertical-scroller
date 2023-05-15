@@ -41,7 +41,7 @@ void main( void ) {
 
       // move down the tile positions if needed
       if ( ! ( scroll_counter % 8 ) ) {
-        dump_tile_positions();
+//        dump_tile_positions();
         move_down_tile_positions();
       }
 
