@@ -19,7 +19,7 @@
 
 Optimizations:
 
-- [ ] Try to _not_ update all tiles, but only the ones that have some content: keep track of the columns that have content (=tiles) and only scroll/update those. Since the BG is scrolling, this will change in time, but we should get a real optimization (much less drawing, if the BG is simple)
+- [x] Try to _not_ update all tiles, but only the ones that have some content: keep track of the columns that have content (=tiles) and only scroll/update those. Since the BG is scrolling, this will change in time, but we should get a real optimization (much less drawing, if the BG is simple - BUT: background normally is _not_ simple :-/ )
 
 - [ ] In line with the previous point, try to _not_ scroll all the vertical column, but just an address range. Since we have the information about which cells have tiles, we can selectively scroll them. We can select the number of LDDs to skip in the scroll routine with some self-modifying code: a computed jump `JP xxxx` where the value of `xxxx` is modified with the initial LDD position to jump to.
 
@@ -143,20 +143,30 @@ I have found that the regular unrolled LDD version is hard to beat, mainly due t
 
 The approximate T-state count for each of the versions is commented in the code.
 
-## SP1 scrolling test 4 (WIP)
+## SP1 scrolling test 4
 
 It can be found in the `src/sp1-partial-inv-2` directory. Based on Test 3, but changing the algorithm which keeps track of the cells to invalidate. Conceptually, this method keeps track of the position of each and every tile which is seen on screen, and periodically adjusts the cells that it invalidates in lockstep with the scrolling routine.
 
 Basic ideas:
 
-- We keep a global list of printed tiles. This list can be a ring buffer for efficiency, since all objects in that list will added and removed in FIFO fashion
+- We keep a global list of printed tiles and their invalidation rectangles. This list is a ring buffer for efficiency, since all tiles in that list will added and removed in FIFO fashion
 
-- When printing a tile on the top row, it is also added to this list, together with its invalidating rectangle
+- When printing a tile on the top row, it is also added to this list, together with its position and rectangle definition
 
-- The list is updated every 8 scrolled pixels to move down the invalidating rectangles of all live tiles
+- The list is updated every 8 scrolled pixels and all the positions of all visible tiles and their rectangles are moved down one row
 
-- When tiles reach the bottom row and go out of sight, they are removed from the global list
+- When tiles reach the bottom row and go out of sight, they are removed from the global list. So at any moment, the list only contains the visible tiles.
 
-- The maximum size for the global list is fixed and depends strictly of the scroll area and the tile sizes, so no heap is required. It can be declared statically with maximum size.
+- The maximum size for the global list is fixed and depends strictly of the scroll area and the tile sizes, so no heap is required. It can be declared statically with a maximum size, and have the map function ensure that there are never more than that number of visible tiles on screen (including the top non-visible row)
 
-- The invalidation routine can run pretty fast: it only has to go over the global list of printed tiles and unconditionally invalidate their rectangles.
+- The invalidation routine walks the global list going over each of the visible tile positions records, and invalidating its rectangle. It is run every frame, so every optimization here has a big impact on performance. The initial version created a sp1_Rect for every visible tile based on its coordinates, but this was quickly moved into the tile printing and moving functions, since these two are not run every frame, but every 8 scrolled pixels.
+
+This version is faster when there are fewer background tiles on the screen, so its real utility will depend on the complexity of our map. For a map with lots of visibnle tiles, it will probably be more efficient to use the previous versions which simply invalidate the whole scroll area.
+
+I'm thinking also on designing a visual way of measuring performance that I can include in all the tests; some counter that is incremented on each interrupt and measured and reset on every scroll cycle, and periodically output to screen in some way that does not interfere much with the graphics update.
+
+So far the experiments indicate that if you have a complex map, then it's better to have a simple routine that invalidates all the area, and spend the (less) remaining CPU time in having a good simple gameplay. Or hoy can have a simple background and go with a more complex gameplay, faster, with more sprites, etc.
+
+Next test: Test 5, partial scroll. I'll try not to scroll the whole column, but only the address ranges affected by the visible tiles. We already have this info in the invalidation ranges used in Test 3, so Test 3 will be easily adapted for this case.
+
+It will be very difficult to do it by reusing the tile list used in Test 4 because tiles in that list are stored _horizontally_ (i.e. tiles on top row, then tiles below, etc.), but we need the vertical ranges to make the scroll. It will be very timeconsuming to scroll every tile rectangle separately.
