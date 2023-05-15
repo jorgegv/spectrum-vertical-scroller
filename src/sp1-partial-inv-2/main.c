@@ -46,7 +46,7 @@ void main( void ) {
       }
 
       // now sync with vert retrace and redraw
-      intrinsic_halt();
+//      intrinsic_halt();
       sp1_UpdateNow();
     }
 }

@@ -13,10 +13,10 @@ uint8_t diamond_tile[] = {
 ////////////////////////////////////////////
 
 // a struct for tile positions.  row,col can be negative for tiles that
-// are out of view
+// are out of view. rect is updated every time the tile is moved down
 struct tile_position_s {
   int8_t row,col;
-  uint8_t width,height;
+  struct sp1_Rect rect;
 };
 
 // Maximum number of tiles on screen.  This depends on the map and/or the
@@ -54,13 +54,16 @@ void add_tile_position_to_queue( int8_t row, int8_t col, uint8_t width, uint8_t 
   uint8_t new_pos = ( position_queue.head + position_queue.num_tiles ) % TILE_POSITION_QUEUE_SIZE;
   position_queue.positions[ new_pos ].row = row;
   position_queue.positions[ new_pos ].col = col;
-  position_queue.positions[ new_pos ].width = width;
-  position_queue.positions[ new_pos ].height = height;
+  position_queue.positions[ new_pos ].rect.row = SCROLL_AREA_POS_ROW + ( row >= 0 ? row : 0 );
+  position_queue.positions[ new_pos ].rect.col = SCROLL_AREA_POS_COL + col;
+  position_queue.positions[ new_pos ].rect.width = width;
+  position_queue.positions[ new_pos ].rect.height = height;
   position_queue.num_tiles++;
 }
 
 void move_down_tile_positions( void ) {
   uint8_t i, real_index, num_tiles, head;
+  struct tile_position_s *tile_pos;
   if ( position_queue.num_tiles ) {
 
     // Values of head and num_tiles need to be saved at the start of the
@@ -72,10 +75,11 @@ void move_down_tile_positions( void ) {
     // Sweep the position records of currently visible tiles
     for ( i = 0; i < num_tiles; i++ ) {
       real_index = ( head + i ) % TILE_POSITION_QUEUE_SIZE;
+      tile_pos = &position_queue.positions[ real_index ];
 
       // Move the position down one row.  If the new position is outside the
       // scrolling window visible any more, drop it from the queue
-      if ( ++position_queue.positions[ real_index ].row == SCROLL_AREA_HEIGHT ) {
+      if ( ++(tile_pos->row) == SCROLL_AREA_HEIGHT ) {
 
         // drop current record from queue: decrement the number of elements
         // and increment the head pointer in circular way
@@ -83,6 +87,12 @@ void move_down_tile_positions( void ) {
         if ( ++position_queue.head == TILE_POSITION_QUEUE_SIZE ) {
           position_queue.head = 0;
         }
+      } else {
+
+        // if it is not outside of the scrolling, update its invalidation rect too
+        tile_pos->rect.row = SCROLL_AREA_POS_ROW + ( tile_pos->row >= 0 ? tile_pos->row : 0 );
+        if ( tile_pos->rect.row + tile_pos->rect.height > SCROLL_AREA_POS_ROW + SCROLL_AREA_HEIGHT )
+          tile_pos->rect.height = SCROLL_AREA_POS_ROW + SCROLL_AREA_HEIGHT - tile_pos->rect.row;
       }
     }
   }
@@ -102,8 +112,8 @@ void init_tile_map( void ) {
   // the tile array is configured in columns!
   for ( c = 0; c < SCROLL_AREA_WIDTH; c++ )
     for ( r = 0; r < SCROLL_AREA_HEIGHT; r++ )
-      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + c,		// screen position
-        PAPER_YELLOW | INK_BLACK,	// attr
+      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + c,	// screen position
+        PAPER_YELLOW | INK_BLACK,					// attr
         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, c ) ] );	// pointer
 }
 
@@ -126,8 +136,8 @@ void draw_tile_on_top_row( uint8_t *tile, uint8_t col ) {
 void draw_top_row_of_tiles( void ) {
   // uncomment more calls for higher tile density
   draw_tile_on_top_row( diamond_tile, 2 * ( rand() % (SCROLL_AREA_WIDTH / 2) ) );
-  draw_tile_on_top_row( diamond_tile, 2 * ( rand() % (SCROLL_AREA_WIDTH /2 ) ) );
-  draw_tile_on_top_row( diamond_tile, rand() % (SCROLL_AREA_WIDTH-1) );
+  draw_tile_on_top_row( diamond_tile, 2 * ( rand() % (SCROLL_AREA_WIDTH / 2 ) ) );
+  draw_tile_on_top_row( diamond_tile, 2 * ( rand() % (SCROLL_AREA_WIDTH / 2 ) ) );
 }
 
 /////////////////////////////
@@ -137,18 +147,10 @@ void draw_top_row_of_tiles( void ) {
 /////////////////////////////
 
 void invalidate_dirty_scrollarea( void ) {
-  uint8_t i,real_index;
-  static struct sp1_Rect dirty;
+  uint8_t i;
   if ( position_queue.num_tiles ) {
     for ( i = 0; i < position_queue.num_tiles; i++ ) {
-      real_index = ( position_queue.head + i ) % TILE_POSITION_QUEUE_SIZE;
-      dirty.row = SCROLL_AREA_POS_ROW + ( position_queue.positions[ real_index ].row >= 0 ? position_queue.positions[ real_index ].row : 0 );
-      dirty.col = SCROLL_AREA_POS_COL + position_queue.positions[ real_index ].col;
-      dirty.width = position_queue.positions[ real_index ].width;
-      dirty.height = position_queue.positions[ real_index ].height;
-      if ( dirty.row + dirty.height > SCROLL_AREA_POS_ROW + SCROLL_AREA_HEIGHT )
-        dirty.height = SCROLL_AREA_POS_ROW + SCROLL_AREA_HEIGHT - dirty.row;
-      sp1_Invalidate( &dirty );
+      sp1_Invalidate( &position_queue.positions[ ( position_queue.head + i ) % TILE_POSITION_QUEUE_SIZE ].rect );
     }
   }
 }
@@ -157,14 +159,14 @@ void dump_tile_positions( void ) {
   uint8_t i;
   gotoxy(0,0);
   printf( "head:%d, n:%d     \n",position_queue.head,position_queue.num_tiles );
-/*
+///*
   for ( i=0; i < TILE_POSITION_QUEUE_SIZE; i++ )
     printf( " %02d: r:%d c:%d    \n   w:%d h:%d   \n",
       i,
-      position_queue.positions[ i ].row,
-      position_queue.positions[ i ].col,
-      position_queue.positions[ i ].width,
-      position_queue.positions[ i ].height
+      position_queue.positions[ i ].rect.row,
+      position_queue.positions[ i ].rect.col,
+      position_queue.positions[ i ].rect.width,
+      position_queue.positions[ i ].rect.height
     );
-*/
+//*/
 }
