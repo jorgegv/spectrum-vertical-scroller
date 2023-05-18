@@ -2,6 +2,7 @@
 #include <intrinsic.h>
 
 #include "offscreen.h"
+#include "sprite.h"
 
 uint8_t ball_tile[ 8 ] = { 0x38, 0x44, 0x92, 0xba, 0x92, 0x44, 0x38, 0x00 };
 
@@ -43,6 +44,10 @@ void main( void ) {
             offscreen_scroll_down();
             offscreen_draw_tile( 0, i, ball_tile );
             offscreen_draw_tile( 1, i, ball_tile );
+            // draw the sprite
+//            draw_sprite_column( &ball_sprite[0], &ball_sprite_buffer[0], &offscreen[0] );
+//            draw_sprite_column( &ball_sprite[32], &ball_sprite_buffer[16], &offscreen[1] );
+
             if ( ++i == SCROLL_COLS )
                 i = 0;
         }

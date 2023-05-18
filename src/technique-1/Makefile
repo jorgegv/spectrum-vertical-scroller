@@ -3,7 +3,7 @@ ZCC = zcc +zx -vn -m --c-code-in-asm --list
 LIBS = -lndos
 
 # files
-C_SRC = main.c offscreen.c
+C_SRC = main.c offscreen.c sprite.c
 C_OBJS = $(C_SRC:.c=.o)
 ASM_SRC = asm_offscreen_ldi.asm asm_offscreen_ldir.asm asm_offscreen_stack.asm
 ASM_OBJS = $(ASM_SRC:.asm=.o)

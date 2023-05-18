@@ -22,6 +22,7 @@
 #define SCROLL_EXTRA_LINES_BYTES	( SCROLL_EXTRA_LINES * SCROLL_COLS )
 
 extern uint8_t current_scroll_offset_line;
+extern uint8_t offscreen[];
 
 // utility functions
 void init_offscreen( void );
