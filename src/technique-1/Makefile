@@ -1,5 +1,5 @@
 # compilation
-ZCC = zcc +zx -vn -m --c-code-in-asm --list
+ZCC = zcc +zx -vn -m --c-code-in-asm --list -compiler=sdcc -SO3 --max-allocs-per-node200000
 LIBS = -lndos
 
 # files

@@ -48,7 +48,7 @@ void init_offscreen_address_tables( void ) {
 
 void offscreen_show_frame( void ) {
     uint8_t line;
-    uint16_t offscreen_address;
+    uint8_t *offscreen_address;
 
     offscreen_address = offscreen_extra_line_address[ current_scroll_offset_line ];
     for ( line = 0; line < SCROLL_LINES; line++ ) {

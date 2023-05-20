@@ -25,6 +25,10 @@ void main( void ) {
 //    asm_offscreen_show_frame_stack();
 //    while (1);
 
+    for ( i = 1; i < 4; i++ ) {
+        generate_shifted_sprite( &ball_sprite, i * 2 );
+    }
+
     // do some magic with virtual screen
     i = 0;
     while( 1 ) {
@@ -45,8 +49,9 @@ void main( void ) {
             offscreen_draw_tile( 0, i, ball_tile );
             offscreen_draw_tile( 1, i, ball_tile );
             // draw the sprite
-//            draw_sprite_column( &ball_sprite[0], &ball_sprite_buffer[0], &offscreen[0] );
-//            draw_sprite_column( &ball_sprite[32], &ball_sprite_buffer[16], &offscreen[1] );
+            draw_sprite_column( (uint8_t *)( ball_sprite.cells[0] ), &ball_sprite.save_buffer[0], &offscreen[0] );
+            draw_sprite_column( (uint8_t *)( ball_sprite.cells[0] + 2 ), &ball_sprite.save_buffer[16], &offscreen[1] );
+            draw_sprite_column( (uint8_t *)( ball_sprite.cells[0] + 4 ), &ball_sprite.save_buffer[32], &offscreen[2] );
 
             if ( ++i == SCROLL_COLS )
                 i = 0;
