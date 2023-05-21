@@ -15,6 +15,9 @@ uint8_t *screen_line_end_address[ SCROLL_LINES ];
 uint8_t *offscreen_extra_line_address[ SCROLL_EXTRA_LINES + 1 ];
 uint8_t *offscreen_extra_line_end_address[ SCROLL_EXTRA_LINES + 1 ];
 
+// initial address for offscreen lines
+uint8_t *offscreen_line_address[ SCROLL_LINES ];
+
 // current line in the offscreen to start drawing the real screen from
 uint8_t current_scroll_offset_line;
 
@@ -43,6 +46,10 @@ void init_offscreen_address_tables( void ) {
         addr = &offscreen[ i * SCROLL_COLS ];
         offscreen_extra_line_address[ i ] = addr;
         offscreen_extra_line_end_address[ i ] = addr + SCROLL_COLS;
+    }
+    for ( i = 0; i < SCROLL_LINES; i++ ) {
+        addr = &offscreen[ i * SCROLL_COLS ];
+        offscreen_line_address[ i ] = addr;
     }
 }
 

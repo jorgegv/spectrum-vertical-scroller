@@ -23,6 +23,7 @@
 
 extern uint8_t current_scroll_offset_line;
 extern uint8_t offscreen[];
+extern uint8_t *offscreen_line_address[];
 
 // utility functions
 void init_offscreen( void );
