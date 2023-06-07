@@ -22,7 +22,7 @@ Optimizations:
 
 - [x] Try to _not_ update all tiles, but only the ones that have some content: keep track of the columns that have content (=tiles) and only scroll/update those. Since the BG is scrolling, this will change in time, but we should get a real optimization (much less drawing, if the BG is simple - BUT: background normally is _not_ simple :-/ )
 
-- [ ] In line with the previous point, try to _not_ scroll all the vertical column, but just an address range. Since we have the information about which cells have tiles, we can selectively scroll them. We can select the number of LDDs to skip in the scroll routine with some self-modifying code: a computed jump `JP xxxx` where the value of `xxxx` is modified with the initial LDD position to jump to.
+- [-] In line with the previous point, try to _not_ scroll all the vertical column, but just an address range. Since we have the information about which cells have tiles, we can selectively scroll them. We can select the number of LDDs to skip in the scroll routine with some self-modifying code: a computed jump `JP xxxx` where the value of `xxxx` is modified with the initial LDD position to jump to.
 
 ## Context
 
@@ -171,3 +171,13 @@ So far the experiments indicate that if you have a complex map, then it's better
 Next test: Test 5, partial scroll. I'll try not to scroll the whole column, but only the address ranges affected by the visible tiles. We already have this info in the invalidation ranges used in Test 3, so Test 3 will be easily adapted for this case.
 
 It will be very difficult to do it by reusing the tile list used in Test 4 because tiles in that list are stored _horizontally_ (i.e. tiles on top row, then tiles below, etc.), but we need the vertical ranges to make the scroll. It will be very timeconsuming to scroll every tile rectangle separately.
+
+## SP1 scrolling test 5
+
+I have decided not to explore the mentioned Test 5 case (paertial column scroll), since again we will have the degenerated case of having to scroll most of the column most of the time, and also the scrolling is not the most time-consuming operation which is being executed.
+
+## SP1 scrolling test 6
+
+It can be found in the `src/sp1-parallax` directory. Based on Test 3, the scrolling routine is modified to accept a parameter which is the number of pixels to scroll. Since the scroll routine is LDD based, the number of pixels scrolled does not affect the speed of the routine, it's just a matter of adjusting the offset from the source to the destination address.
+
+Two new zones have been defined at each of the sides of the main scrolling area, which are scrolled at different speeds. These areas have to be taken into account when doing the whole scroll effect. This effect is achieved with 3 main functions: `draw_top_row_of_tiles()`, `scroll_down_area()`, `move_down_tile_positions()`. These functions have to be modified so that they take into account the 3 different areas and their scrolling speeds.
