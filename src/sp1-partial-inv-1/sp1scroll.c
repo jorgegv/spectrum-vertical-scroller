@@ -330,11 +330,12 @@ void move_down_column_invalidation_ranges( void ) {
       column_invalidations[ i ].end_row++;
 
     // if start_row is out of scroll area, reset both start_row and end_row
-    if ( ++(column_invalidations[ i ].start_row) >= SCROLL_AREA_HEIGHT ) {
-      column_invalidations[ i ].start_row = NO_RANGE;
-      column_invalidations[ i ].end_row = NO_RANGE;
+    if ( column_invalidations[ i ].start_row != NO_RANGE ) {
+      if ( ++column_invalidations[ i ].start_row >= SCROLL_AREA_HEIGHT ) {
+        column_invalidations[ i ].start_row = NO_RANGE;
+        column_invalidations[ i ].end_row = NO_RANGE;
+      }
     }
-
   }
 }
 
