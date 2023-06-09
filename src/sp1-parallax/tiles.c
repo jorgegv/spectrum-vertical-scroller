@@ -60,20 +60,20 @@ void init_tile_map( void ) {
           ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, c ) ] );	// pointer
 
       // scroll zone 2 (AREA_2)
-      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + 1,		// screen position
+      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + SCROLL_AREA2_LEFT_COL,		// screen position
         PAPER_CYAN | INK_BLUE | BRIGHT,	// attr
-         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, 1 ) ] );	// pointer
-      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + SCROLL_AREA_WIDTH - 2,		// screen position
+         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, SCROLL_AREA2_LEFT_COL ) ] );	// pointer
+      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + SCROLL_AREA2_RIGHT_COL,		// screen position
         PAPER_CYAN | INK_BLUE | BRIGHT,	// attr
-         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, SCROLL_AREA_WIDTH - 2 ) ] );	// pointer
+         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, SCROLL_AREA2_RIGHT_COL ) ] );	// pointer
 
       // scroll zone 3 (AREA_3)
-      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + 0,		// screen position
+      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + SCROLL_AREA3_LEFT_COL,		// screen position
         PAPER_BLUE | INK_YELLOW | BRIGHT,	// attr
-         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, 0 ) ] );	// pointer
-      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + SCROLL_AREA_WIDTH - 1,		// screen position
+         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, SCROLL_AREA3_LEFT_COL ) ] );	// pointer
+      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + SCROLL_AREA3_RIGHT_COL,		// screen position
         PAPER_BLUE | INK_YELLOW | BRIGHT,	// attr
-         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, SCROLL_AREA_WIDTH - 1 ) ] );	// pointer
+         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, SCROLL_AREA3_RIGHT_COL ) ] );	// pointer
     }
 }
 
@@ -128,14 +128,14 @@ void draw_top_row_of_tiles( void ) {
 
   // scroll zone 2 (AREA_2)
   if ( ! ( scroll_counter_2 % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) ) {
-    draw_half_tile_on_top_row( area2_tile, 1 );
-    draw_half_tile_on_top_row( area2_tile, SCROLL_AREA_WIDTH - 2 );
+    draw_half_tile_on_top_row( area2_tile, SCROLL_AREA2_LEFT_COL );
+    draw_half_tile_on_top_row( area2_tile, SCROLL_AREA2_RIGHT_COL );
   }
 
   // scroll zone 3 (AREA_3)
   if ( ! ( scroll_counter_3 % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) ) {
-    draw_half_tile_on_top_row( area3_tile, 0 );
-    draw_half_tile_on_top_row( area3_tile, SCROLL_AREA_WIDTH - 1 );
+    draw_half_tile_on_top_row( area3_tile, SCROLL_AREA3_LEFT_COL );
+    draw_half_tile_on_top_row( area3_tile, SCROLL_AREA3_RIGHT_COL );
   }
 
 }

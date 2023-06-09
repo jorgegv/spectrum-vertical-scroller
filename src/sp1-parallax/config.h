@@ -38,8 +38,13 @@
 #define SCROLL_AREA_REAL_HEIGHT		( SCROLL_AREA_HEIGHT + SCROLL_AREA_TOP_TILE_HEIGHT )
 
 // the scroll speed, i.e. the number of pixels scrolled down on each round
-#define SCROLL_PIXELS_AREA_1		1
-#define SCROLL_PIXELS_AREA_2		2
-#define SCROLL_PIXELS_AREA_3		4
+#define SCROLL_AREA1_PIXELS		1
+#define SCROLL_AREA2_PIXELS		2
+#define SCROLL_AREA3_PIXELS		4
 #define SCROLL_PIXELS_MAX		4
 
+// columns for scroll areas 2 and 3
+#define SCROLL_AREA2_LEFT_COL		1
+#define SCROLL_AREA2_RIGHT_COL		( SCROLL_AREA_WIDTH - 2 )
+#define SCROLL_AREA3_LEFT_COL		0
+#define SCROLL_AREA3_RIGHT_COL		( SCROLL_AREA_WIDTH - 1 )
