@@ -43,11 +43,30 @@ void init_tile_map( void ) {
     // setup the SP1 tile map to point to the cells in the offscreen buffer
     // the top 2 rows are reserved for drawing and not visible
     // the tile array is configured in columns!
-    for ( c = 0; c < SCROLL_AREA_WIDTH; c++ )
-      for ( r = 0; r < SCROLL_AREA_HEIGHT; r++ )
+    for ( r = 0; r < SCROLL_AREA_HEIGHT; r++ ) {
+
+      // Scroll zone 1 (AREA_1)
+      for ( c = 2; c < SCROLL_AREA_WIDTH - 2; c++ )
         sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + c,		// screen position
-          PAPER_YELLOW | INK_BLACK,	// attr
+          PAPER_BLACK | INK_WHITE,	// attr
           ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, c ) ] );	// pointer
+
+      // scroll zone 2 (AREA_2)
+      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + 1,		// screen position
+        PAPER_BLACK | INK_WHITE | BRIGHT,	// attr
+         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, 1 ) ] );	// pointer
+      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + SCROLL_AREA_WIDTH - 2,		// screen position
+        PAPER_BLACK | INK_WHITE | BRIGHT,	// attr
+         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, SCROLL_AREA_WIDTH - 2 ) ] );	// pointer
+
+      // scroll zone 3 (AREA_3)
+      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + 0,		// screen position
+        PAPER_BLUE | INK_YELLOW | BRIGHT,	// attr
+         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, 0 ) ] );	// pointer
+      sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + SCROLL_AREA_WIDTH - 1,		// screen position
+        PAPER_BLUE | INK_YELLOW | BRIGHT,	// attr
+         ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, SCROLL_AREA_WIDTH - 1 ) ] );	// pointer
+    }
 }
 
 // draw a tile on the top non-visible row, at the given column
