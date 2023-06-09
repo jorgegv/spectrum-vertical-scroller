@@ -31,6 +31,14 @@ uint8_t diamond_tile[] = {
     0x80, 0x40, 0xa0, 0xd0, 0x68, 0x34, 0x1a, 0xad, 0x8d, 0x1a, 0xb4, 0x68, 0xd0, 0xa0, 0x40, 0x80
 };
 
+uint8_t area2_tile[] = {
+    0x18, 0x24, 0x42, 0x81, 0x81, 0x42, 0x24, 0x18, 0x18, 0x24, 0x42, 0x81, 0x81, 0x42, 0x24, 0x18, 
+};
+
+uint8_t area3_tile[] = {
+    0x18, 0x24, 0x24, 0x42, 0x42, 0x99, 0xa5, 0xa5, 0xa5, 0xa5, 0x99, 0x42, 0x42, 0x24, 0x24, 0x18, 
+};
+
 /////////////////////////////////////
 //
 // TILE FUNCTIONS
@@ -53,10 +61,10 @@ void init_tile_map( void ) {
 
       // scroll zone 2 (AREA_2)
       sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + 1,		// screen position
-        PAPER_BLACK | INK_WHITE | BRIGHT,	// attr
+        PAPER_CYAN | INK_BLUE | BRIGHT,	// attr
          ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, 1 ) ] );	// pointer
       sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + SCROLL_AREA_WIDTH - 2,		// screen position
-        PAPER_BLACK | INK_WHITE | BRIGHT,	// attr
+        PAPER_CYAN | INK_BLUE | BRIGHT,	// attr
          ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, SCROLL_AREA_WIDTH - 2 ) ] );	// pointer
 
       // scroll zone 3 (AREA_3)
@@ -89,6 +97,22 @@ void draw_tile_on_top_row( uint8_t *tile, uint8_t col ) {
   }
 }
 
+void draw_half_tile_on_top_row( uint8_t *tile, uint8_t col ) {
+  uint8_t i;
+
+  // transfer the column pixels
+  for ( i = 0; i < SCROLL_AREA_TOP_TILE_HEIGHT * 8; i++ )
+    offscreen_column_start_address[ col ][ i ] = tile[ i ];
+
+  // modify invalidation ranges for the column
+  column_invalidations[ col ].start_row = -SCROLL_AREA_TOP_TILE_HEIGHT;
+
+  // if the bottom row is INVAL_NO_RANGE, set it to the top row
+  // if the bottom is something else, keep it
+  if ( column_invalidations[ col ].end_row == INVAL_NO_RANGE )
+    column_invalidations[ col ].end_row = 0;
+}
+
 // draws the top row of tiles.  This is the function where the map can be
 // explored and be brought into view
 void draw_top_row_of_tiles( void ) {
@@ -103,9 +127,17 @@ void draw_top_row_of_tiles( void ) {
   }
 
   // scroll zone 2 (AREA_2)
+  if ( ! ( scroll_counter_2 % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) ) {
+    draw_half_tile_on_top_row( area2_tile, 1 );
+    draw_half_tile_on_top_row( area2_tile, SCROLL_AREA_WIDTH - 2 );
+  }
 
   // scroll zone 3 (AREA_3)
-  
+  if ( ! ( scroll_counter_3 % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) ) {
+    draw_half_tile_on_top_row( area3_tile, 0 );
+    draw_half_tile_on_top_row( area3_tile, SCROLL_AREA_WIDTH - 1 );
+  }
+
 }
 
 /////////////////////////////
@@ -160,7 +192,7 @@ void move_down_column_invalidation_ranges( void ) {
     for ( i = 2; i < SCROLL_AREA_WIDTH-2; i++ )
       move_down_single_column_invalidation( i );
 
-/*
+
   // scroll zone 2 (AREA_2)
   if ( ! ( scroll_counter_2 % 8 ) ) {
     move_down_single_column_invalidation( 1 );
@@ -172,7 +204,7 @@ void move_down_column_invalidation_ranges( void ) {
     move_down_single_column_invalidation( 0 );
     move_down_single_column_invalidation( SCROLL_AREA_WIDTH-1 );
   }
-*/
+
 
 }
 

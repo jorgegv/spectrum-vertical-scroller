@@ -90,27 +90,27 @@ void move_sprites( void ) {
 
     // update and check X
     s->pos_x += s->dx;
-    if ( s->pos_x > SCROLL_AREA_MAX_X - SPRITE_WIDTH_PX + 1 ) {
+    if ( s->pos_x > SCROLL_AREA1_MAX_X - SPRITE_WIDTH_PX + 1 ) {
       // bounce right
-      s->pos_x = SCROLL_AREA_MAX_X - SPRITE_WIDTH_PX + 1;
+      s->pos_x = SCROLL_AREA1_MAX_X - SPRITE_WIDTH_PX + 1;
       s->dx = -s->dx;
     }
-    if ( s->pos_x < SCROLL_AREA_MIN_X ) {
+    if ( s->pos_x < SCROLL_AREA1_MIN_X ) {
       // bounce left
-      s->pos_x = SCROLL_AREA_MIN_X;
+      s->pos_x = SCROLL_AREA1_MIN_X;
       s->dx = -s->dx;
     }
 
     // update and check Y
     s->pos_y += s->dy;
-    if ( s->pos_y > SCROLL_AREA_MAX_Y - SPRITE_HEIGHT_PX + 1 ) {
+    if ( s->pos_y > SCROLL_AREA1_MAX_Y - SPRITE_HEIGHT_PX + 1 ) {
       // bounce bottom
-      s->pos_y = SCROLL_AREA_MAX_Y - SPRITE_HEIGHT_PX + 1;
+      s->pos_y = SCROLL_AREA1_MAX_Y - SPRITE_HEIGHT_PX + 1;
       s->dy = -s->dy;
     }
-    if ( s->pos_y < SCROLL_AREA_MIN_Y ) {
+    if ( s->pos_y < SCROLL_AREA1_MIN_Y ) {
       // bounce up
-      s->pos_y = SCROLL_AREA_MIN_Y;
+      s->pos_y = SCROLL_AREA1_MIN_Y;
       s->dy = -s->dy;
     }
 
