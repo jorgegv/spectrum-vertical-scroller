@@ -174,15 +174,15 @@ It will be very difficult to do it by reusing the tile list used in Test 4 becau
 
 ## SP1 scrolling test 5
 
-I have decided not to explore the mentioned Test 5 case (paertial column scroll), since again we will have the degenerated case of having to scroll most of the column most of the time, and also the scrolling is not the most time-consuming operation which is being executed.
+I have decided not to explore the mentioned Test 5 case (partial column scroll), since again we will have the degenerated case of having to scroll most of the column most of the time, and also the scrolling is not the most time-consuming operation which is being executed.
 
 ## SP1 scrolling test 6
 
 It can be found in the `src/sp1-parallax` directory. Based on Test 3, the assembler scrolling routine is modified to accept a parameter which is the number of pixels to scroll. Since the scroll routine is LDD based, the number of pixels scrolled does not affect the speed of the routine, it's just a matter of adjusting the offset from the source to the destination address.
 
-The scrolling area is now divided in 3 areas: AREA 1 is the center zone, where the action happens (columns 2 to 13); AREA 2 (columns 1 and 14) and AREA 3 (columns 0 and 15) are the parallax effect zones that scroll at different speed tham the main one. AREA 1 scrolls at 1 pixel per cycle, AREA 2 at 2 pixels per cycle and AREA 3 at 4 pixels per cycle.
+The scrolling area is now divided in 3 areas: AREA 1 is the center zone, where the action happens (columns 2 to 13); AREA 2 (columns 1 and 14) and AREA 3 (columns 0 and 15) are the parallax effect zones that scroll at different speed than the main one. AREA 1 scrolls at 1 pixel per cycle, AREA 2 at 2 pixels per cycle and AREA 3 at 4 pixels per cycle.
 
-These new areas have to be managed when doing the whole scroll effect. This effect is achieved with 3 main functions: `draw_top_row_of_tiles()`, `scroll_down_area()`, and `move_down_tile_positions()`. All 3 functions have been modified so that they take into account the 3 different areas and their scrolling speeds.
+These new areas have to be explicitly managed when doing the whole scroll effect. This effect is achieved with 3 main functions: `draw_top_row_of_tiles()`, `scroll_down_area()`, and `move_down_tile_positions()`. All 3 functions have been modified so that they take into account the 3 different areas and their scrolling speeds.
 
 Attributes have been changed on all areas for better observation of the effect,  and also sprite movement has been constrained to AREA 1, so they don't move over the parallax zones.
 
