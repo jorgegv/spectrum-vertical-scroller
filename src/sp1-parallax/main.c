@@ -24,7 +24,8 @@ void main( void ) {
     // main loop
     while (1) {
 
-      dump_invalidations();
+//      if ( ! ( scroll_counter_1 % 8 ) )
+//        dump_invalidations();
 
       // draw tiles if top row has been completely scrolled down
       // this updates the invalidation ranges for all affected columns

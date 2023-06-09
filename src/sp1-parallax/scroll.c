@@ -137,10 +137,11 @@ void scroll_down_area( void ) {
   uint8_t i;
 
   // scroll zone 1 (AREA_1)
-  for ( i = 2; i < SCROLL_AREA_WIDTH-4; i++ )
+  for ( i = 2; i < SCROLL_AREA_WIDTH-2; i++ )
     scroll_down_column_unrolled( offscreen_column_end_address[ i ], SCROLL_PIXELS_AREA_1 );
   scroll_counter_1 += SCROLL_PIXELS_AREA_1;
 
+/*
   // scroll zone 2 (AREA_2)
   scroll_down_column_unrolled( offscreen_column_end_address[ 1 ], SCROLL_PIXELS_AREA_2 );
   scroll_down_column_unrolled( offscreen_column_end_address[ SCROLL_AREA_WIDTH-2 ], SCROLL_PIXELS_AREA_2 );
@@ -150,6 +151,7 @@ void scroll_down_area( void ) {
   scroll_down_column_unrolled( offscreen_column_end_address[ 0 ], SCROLL_PIXELS_AREA_3 );
   scroll_down_column_unrolled( offscreen_column_end_address[ SCROLL_AREA_WIDTH-1 ], SCROLL_PIXELS_AREA_3 );
   scroll_counter_3 += SCROLL_PIXELS_AREA_3;
+*/
 }
 
 // initialize scroll areas

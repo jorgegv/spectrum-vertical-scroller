@@ -118,7 +118,6 @@ void invalidate_dirty_scrollarea( void ) {
     }
 }
 
-
 // refactored code from function below
 void move_down_single_column_invalidation( uint8_t col ) {
       // If end_row is not the bottom row, increment it, else leave it alone
@@ -126,9 +125,11 @@ void move_down_single_column_invalidation( uint8_t col ) {
       column_invalidations[ col ].end_row++;
 
     // if start_row is out of scroll area, reset both start_row and end_row
-    if ( ++(column_invalidations[ col ].start_row) >= SCROLL_AREA_HEIGHT ) {
-      column_invalidations[ col ].start_row = INVAL_NO_RANGE;
-      column_invalidations[ col ].end_row = INVAL_NO_RANGE;
+    if ( column_invalidations[ col ].start_row != INVAL_NO_RANGE ) {
+      if ( ++column_invalidations[ col ].start_row >= SCROLL_AREA_HEIGHT ) {
+        column_invalidations[ col ].start_row = INVAL_NO_RANGE;
+        column_invalidations[ col ].end_row = INVAL_NO_RANGE;
+      }
     }
 }
 
@@ -137,9 +138,10 @@ void move_down_column_invalidation_ranges( void ) {
 
   // main scroll zone (AREA_1)
   if ( ! ( scroll_counter_1 % 8 ) )
-    for ( i = 2; i < SCROLL_AREA_WIDTH-4; i++ )
+    for ( i = 2; i < SCROLL_AREA_WIDTH-2; i++ )
       move_down_single_column_invalidation( i );
 
+/*
   // scroll zone 2 (AREA_2)
   if ( ! ( scroll_counter_2 % 8 ) ) {
     move_down_single_column_invalidation( 1 );
@@ -151,6 +153,7 @@ void move_down_column_invalidation_ranges( void ) {
     move_down_single_column_invalidation( 0 );
     move_down_single_column_invalidation( SCROLL_AREA_WIDTH-1 );
   }
+*/
 
 }
 
