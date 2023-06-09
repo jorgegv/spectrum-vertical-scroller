@@ -9,7 +9,7 @@
 - [ ] Prepare a super-simple IM2 handler which only increments a 32 bit value so that ROM int routine is not run. We can use this counter to better measure the execution time.
 - [ ] Run with INTs disabled and sync with Vsync with floating bus trick
 - [ ] Scroll down with attributes
-- [ ] Parallax scrolling by scrolling the leftmost and rightmost columns at a different higher speed than the center ones. Allow for a different scroll speed per column. Modify scroll routine to receive 3 params: address, num of scroll pixels, height of the scroll window. Computed jump for the correct number od LDDs.
+- [x] Parallax scrolling by scrolling the leftmost and rightmost columns at a different higher speed than the center ones. Allow for a different scroll speed per column. Modify scroll routine to receive 3 params: address, num of scroll pixels, height of the scroll window. Computed jump for the correct number od LDDs.
 - [ ] Speed optimizations
 - [ ] Explore similar ideas as the above, but with _horizontal_ scrolling (see minimal POC in dir `src/hscroll`)
 - [ ] Character sized scrolling (suggested by @clebin on SpectrumComputing)
@@ -178,6 +178,19 @@ I have decided not to explore the mentioned Test 5 case (paertial column scroll)
 
 ## SP1 scrolling test 6
 
-It can be found in the `src/sp1-parallax` directory. Based on Test 3, the scrolling routine is modified to accept a parameter which is the number of pixels to scroll. Since the scroll routine is LDD based, the number of pixels scrolled does not affect the speed of the routine, it's just a matter of adjusting the offset from the source to the destination address.
+It can be found in the `src/sp1-parallax` directory. Based on Test 3, the assembler scrolling routine is modified to accept a parameter which is the number of pixels to scroll. Since the scroll routine is LDD based, the number of pixels scrolled does not affect the speed of the routine, it's just a matter of adjusting the offset from the source to the destination address.
 
-Two new zones have been defined at each of the sides of the main scrolling area, which are scrolled at different speeds. These areas have to be taken into account when doing the whole scroll effect. This effect is achieved with 3 main functions: `draw_top_row_of_tiles()`, `scroll_down_area()`, `move_down_tile_positions()`. These functions have to be modified so that they take into account the 3 different areas and their scrolling speeds.
+The scrolling area is now divided in 3 areas: AREA 1 is the center zone, where the action happens (columns 2 to 13); AREA 2 (columns 1 and 14) and AREA 3 (columns 0 and 15) are the parallax effect zones that scroll at different speed tham the main one. AREA 1 scrolls at 1 pixel per cycle, AREA 2 at 2 pixels per cycle and AREA 3 at 4 pixels per cycle.
+
+These new areas have to be managed when doing the whole scroll effect. This effect is achieved with 3 main functions: `draw_top_row_of_tiles()`, `scroll_down_area()`, and `move_down_tile_positions()`. All 3 functions have been modified so that they take into account the 3 different areas and their scrolling speeds.
+
+Attributes have been changed on all areas for better observation of the effect,  and also sprite movement has been constrained to AREA 1, so they don't move over the parallax zones.
+
+Admittedly I'm not a great artist and the tiles are not of great quality.
+
+I was expecting that parallax would make the general scrolling substantially slower, but surprisingly it didn't. I blame it to the `draw_top_row_of_tiles()` and `scroll_down_area()` functions not doing that much additional work (with respect to Test 3), because the parallax tiles are half the size of the regular ones and also they are printed ocassionally (as the others). The `move_down_tile_positions()` function has not changed at all, since the work to do is the same for all the columns, no matter in which parallax zone they are.
+
+My next steps will be to optimize the code, add a trivial IM2 routine and deploy the "performance" monitor in all the previous tests, so that the perceived performance can be justified.
+
+I'll continue exploring other scrolling techniques with code in this repo, although it will probably not be SP1 based.
+
