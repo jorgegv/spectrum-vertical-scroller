@@ -6,7 +6,7 @@
 - [x] Do a trivial scroller but updating all tiles and with real new tiles coming from the top
 - [x] Previous test but add sprites moving on top of the scrolling background
 - [x] Try to create a stack-based scrolling routine
-- [ ] Prepare a super-simple IM2 handler which only increments a 32 bit value so that ROM int routine is not run. We can use this counter to better measure the execution time.
+- [x] Prepare a super-simple IM2 handler which only increments a 32 bit value so that ROM int routine is not run. We can use this counter to better measure the execution time.
 - [ ] Run with INTs disabled and sync with Vsync with floating bus trick
 - [ ] Scroll down with attributes
 - [x] Parallax scrolling by scrolling the leftmost and rightmost columns at a different higher speed than the center ones. Allow for a different scroll speed per column. Modify scroll routine to receive 3 params: address, num of scroll pixels, height of the scroll window. Computed jump for the correct number od LDDs.
@@ -54,7 +54,7 @@ I found that of course it can't do 50 fps (I expected that), but so far I have f
 
 ## SP1 scrolling test 1
 
-It can be found in the `src/sp1-randomtiles` directory. This is a real scroller, using the workflow that would be used for a real game: tiles are drawn on some non-visible top rows and are brought into view by the scrolling process. In this example, the logic for printing tiles on the top is trivial, but in a real game those would come from a map.
+It can be found in the `src/sp1-randomtiles` directory. This is a real scrol|ler, using the workflow that would be used for a real game: tiles are drawn on some non-visible top rows and are brought into view by the scrolling process. In this example, the logic for printing tiles on the top is trivial, but in a real game those would come from a map.
 
 Keep in mind that the top row of invisible tiles is only drawn once in a while (when a full tile row has been scrolled down) and not on every scroll cycle.
 
@@ -194,3 +194,33 @@ My next steps will be to optimize the code, add a trivial IM2 routine and deploy
 
 I'll continue exploring other scrolling techniques with code in this repo, although it will probably not be SP1 based.
 
+## Performance review of all SP1 scrolling tests
+
+In this section I have compiled the performance characteristics for all the previous tests. For this, I have needed to normalize the code so that comparison between measurements are meaninful.
+
+I have disabled the regular ROM interrupt processing and activated a minimal IM2 interrupt routine and performance counter in all the previous SP1 examples, so that we have a consistent way of measuring the performance of all of them.
+
+Performance is then measured as a Frames Per Second counter which is shown every second at the bottom left corner. It is interesting to see how it changes depending on the number of tiles on screen and the different algorithms used for updating the scrolling zones.
+
+Synchronizing to screen retrace via HALT instruction has also been removed in all tests, since it is not needed in SP1 games, and also allows us to measure the raw speed with no artifacts.
+
+Finally, all scroll areas have been normalized to a 16x16-cell zone, and the number of sprites has been set to 6 in all tests that have them.
+
+The following table resumes the measured performance on each of the tests:
+
+| Test #  | Directory         | FPS   | Description                                                                                               | Remarks                                                                                                               |
+| ------ | ----------------- | ----- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Test 0 | sp1-baseline      | 22    | A simple Proof of Concept to test the raw performance of SP1 updating the whole scroll area               |                                                                                                                       |
+| Test 1 | sp1-randomtiles   | 17-18 | Basic implementation of the whole scroll/top-tile-row-update loop, full column scrolling and invalidation |                                                                                                                       |
+| Test 2 | sp1-sprites       | 13    | Test 1, with added moving sprites                                                                         |                                                                                                                       |
+| Test 3 | sp1-partial-inv-1 | 17-25 | Test 2, but with partial column invalidation, method #1                                                   | Results depend highly on the number of visible tiles on the scrolling background                                      |
+| Test 4 | sp1-partial-inv-2 | 13-25 | Test 2, but with partial column invalidation, method #2                                                   | Results dependent on the number of visible tiles on the scrolling background, but can have denser backgrounds than Test 3 |
+| Test 5 | -                 | -     | Not implemented                                                                                           | Discarded due to degenerated case of having to scroll most of the column most of the time                             |
+| Test 6 | sp1-parallax      | 11-17 | Test 3, with 2 additional parallax zones scrolling at different speed than the main zone                  |                                                                                                                       |
+
+Conclusions:
+
+- For a 16x16 scrolling area, a baseline framerate of 22 FPS shows that scrolling games with SP1 are quite a possibility, given that SP1 conveniently integrates background _and_ sprite management in a single library.
+- The scrolling routine is not the critical part, but the SP1 update is. Initial baseline measurements indicated that the scrolling code spends only around half a frame for scrolling an area of this size, and the rest of the time being used by SP1.
+- The optimizations done in Test 3 and Test 4 (partial invalidation instead of fully invalidating the whole scroll area) are indeed valuable and make the FPS ocassionally reach the baseline measurement, and even a bit higher. This is quite remarkable, given than on these tests we have sprites moving all around.
+- The parallax effect, contrary to what was indicated in the previous statements, generates a measurable additional load with respect to code with a single scrolling zone.
