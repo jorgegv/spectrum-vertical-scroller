@@ -1,7 +1,7 @@
 # compiler configuration
 ZCC		= zcc +zx
 CFLAGS		= -vn -m --list --c-code-in-asm -compiler=sdcc
-LDFLAGS		= -lndos -lsp1-zx
+LDFLAGS		= -lndos -lsp1-zx -lmath32
 
 # sources
 SRCS_C		= $(wildcard *.c)
@@ -23,7 +23,7 @@ main.tap: $(OBJS)
 
 clean:
 	-rm -f *.tap *.o *.bin *.map *.lis main
-	$(MAKE) -s -C graphics clean
+	if [ -d graphics ]; then $(MAKE) -s -C graphics clean ; fi
 
 run:
 	fuse main.tap

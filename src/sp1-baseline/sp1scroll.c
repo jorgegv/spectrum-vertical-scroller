@@ -42,7 +42,7 @@ void main( void ) {
       PAPER_BLACK | INK_GREEN, ' ');
     for ( r = SCROLL_AREA_POS_ROW; r < SCROLL_AREA_POS_ROW + SCROLL_AREA_HEIGHT; r++ )
       for ( c= SCROLL_AREA_POS_COL; c < SCROLL_AREA_POS_COL + SCROLL_AREA_WIDTH; c++ )
-        sp1_PrintAt( r, c, PAPER_BLACK | INK_YELLOW, ( void * ) &tile );
+        sp1_PrintAt( r, c, PAPER_BLACK | INK_YELLOW, (uint16_t) &tile );
 
     while (1) {
       // do whatever we want with the background

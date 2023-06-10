@@ -61,10 +61,10 @@ void init_tile_map( void ) {
 
       // scroll zone 2 (AREA_2)
       sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + SCROLL_AREA2_LEFT_COL,		// screen position
-        PAPER_CYAN | INK_BLUE | BRIGHT,	// attr
+        PAPER_BLUE | INK_CYAN | BRIGHT,	// attr
          ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, SCROLL_AREA2_LEFT_COL ) ] );	// pointer
       sp1_PrintAt( SCROLL_AREA_POS_ROW + r, SCROLL_AREA_POS_COL + SCROLL_AREA2_RIGHT_COL,		// screen position
-        PAPER_CYAN | INK_BLUE | BRIGHT,	// attr
+        PAPER_BLUE | INK_CYAN | BRIGHT,	// attr
          ( uint16_t ) &offscreen[ cell_address_offset( r + SCROLL_AREA_TOP_TILE_HEIGHT, SCROLL_AREA2_RIGHT_COL ) ] );	// pointer
 
       // scroll zone 3 (AREA_3)

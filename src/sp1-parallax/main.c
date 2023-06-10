@@ -4,6 +4,8 @@
 // main function
 ///////////////////
 
+struct sp1_Rect full_screen = { 0,0,32,24 };
+
 void main( void ) {
 
     zx_border(INK_BLACK);
@@ -18,6 +20,10 @@ void main( void ) {
     init_tile_map();
     init_sprites();
     init_column_invalidation_ranges();
+
+    // clear the screen
+    sp1_Invalidate( &full_screen );
+    sp1_UpdateNow();
 
     // make sure the scroll area is cleared at start
     sp1_Invalidate( &scroll_area );
