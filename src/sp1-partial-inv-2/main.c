@@ -45,8 +45,7 @@ void main( void ) {
         move_down_tile_positions();
       }
 
-      // now sync with vert retrace and redraw
-//      intrinsic_halt();
+      // redraw
       sp1_UpdateNow();
     }
 }

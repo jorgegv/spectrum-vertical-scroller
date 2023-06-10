@@ -532,8 +532,7 @@ void main( void ) {
       if ( ! ( scroll_counter % 8 ) )
         move_down_column_invalidation_ranges();
 
-      // now sync with vert retrace and redraw
-//      intrinsic_halt();
+      // redraw
       sp1_UpdateNow();
     }
 }

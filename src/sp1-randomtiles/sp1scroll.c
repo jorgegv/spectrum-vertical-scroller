@@ -160,8 +160,7 @@ void main( void ) {
       // invalidate the whole scroll area
       sp1_Invalidate( &scroll_area );
 
-      // now sync with vert retrace and draw as fast as possible
-      intrinsic_halt();
+      // redraw
       sp1_UpdateNow();
     }
 }
