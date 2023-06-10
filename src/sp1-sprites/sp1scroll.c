@@ -16,6 +16,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "perf.h"
+
 ///////////////////////////////////////
 //
 // SCROLL AREA DEFINITIONS
@@ -377,6 +379,7 @@ void draw_tile_on_top_row( uint8_t *tile, uint8_t col ) {
 void main( void ) {
     uint8_t i,c;
 
+    init_interrupts();
     zx_border(INK_BLACK);
 
     // initializations
@@ -390,6 +393,7 @@ void main( void ) {
 
     // main loop
     i = c = 0;
+    reset_perfmeter();
     while (1) {
       // do whatever we want with the background
 //      zx_border(INK_BLUE);
@@ -411,5 +415,6 @@ void main( void ) {
 
       // redraw
       sp1_UpdateNow();
+      do_perf_accounting();
     }
 }

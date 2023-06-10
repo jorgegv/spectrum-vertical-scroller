@@ -8,6 +8,8 @@
 #include <intrinsic.h>
 #include <stdint.h>
 
+#include "perf.h"
+
 //char tile[8] = { 1,2,4,8,16,32,64,128 };
 char tile[8] = { 255,0,0,0,0,0,0,0 };
 
@@ -36,6 +38,8 @@ void scroll_tile( void ) {
 void main( void ) {
     uint8_t r,c;
 
+    init_interrupts();
+
     // initialization
     zx_border(INK_BLACK);
     sp1_Initialize(SP1_IFLAG_MAKE_ROTTBL | SP1_IFLAG_OVERWRITE_TILES | SP1_IFLAG_OVERWRITE_DFILE,
@@ -44,6 +48,7 @@ void main( void ) {
       for ( c= SCROLL_AREA_POS_COL; c < SCROLL_AREA_POS_COL + SCROLL_AREA_WIDTH; c++ )
         sp1_PrintAt( r, c, PAPER_BLACK | INK_YELLOW, (uint16_t) &tile );
 
+    reset_perfmeter();
     while (1) {
       // do whatever we want with the background
       scroll_tile();
@@ -54,5 +59,6 @@ void main( void ) {
 //      zx_border( INK_CYAN );
       sp1_UpdateNow();
 //      zx_border( INK_BLACK );
+      do_perf_accounting();
     }
 }

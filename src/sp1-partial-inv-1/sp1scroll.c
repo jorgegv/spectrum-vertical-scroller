@@ -34,6 +34,8 @@
 #include <conio.h>
 #include <string.h>
 
+#include "perf.h"
+
 ///////////////////////////////////////
 //
 // SCROLL AREA DEFINITIONS
@@ -495,6 +497,8 @@ void main( void ) {
 
     zx_border(INK_BLACK);
 
+    init_interrupts();
+
     // initializations
     init_heap();
     sp1_Initialize(SP1_IFLAG_MAKE_ROTTBL | SP1_IFLAG_OVERWRITE_TILES | SP1_IFLAG_OVERWRITE_DFILE,
@@ -509,6 +513,7 @@ void main( void ) {
     sp1_Invalidate( &scroll_area );
 
     // main loop
+    reset_perfmeter();
     while (1) {
 
 //      dump_invalidations();
@@ -534,5 +539,6 @@ void main( void ) {
 
       // redraw
       sp1_UpdateNow();
+      do_perf_accounting();
     }
 }

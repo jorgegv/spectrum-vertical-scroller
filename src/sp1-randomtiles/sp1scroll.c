@@ -11,6 +11,8 @@
 
 #include <stdio.h>
 
+#include "perf.h"
+
 // scroll area constants
 #define SCROLL_AREA_POS_ROW		0
 #define SCROLL_AREA_POS_COL		8
@@ -133,6 +135,8 @@ void draw_tile_on_top( uint8_t *tile, uint8_t col ) {
 void main( void ) {
     uint8_t i,c;
 
+    init_interrupts();
+
     zx_border(INK_BLACK);
 
     // initializations
@@ -144,11 +148,12 @@ void main( void ) {
 
     // main loop
     i = c = 0;
+    reset_perfmeter();
     while (1) {
       // do whatever we want with the background
-      zx_border(INK_BLUE);
+//      zx_border(INK_BLUE);
       scroll_down_area();
-      zx_border(INK_BLACK);
+//      zx_border(INK_BLACK);
 
       // draw tiles
       if ( ! ( i++ % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) ) {
@@ -162,5 +167,6 @@ void main( void ) {
 
       // redraw
       sp1_UpdateNow();
+      do_perf_accounting();
     }
 }

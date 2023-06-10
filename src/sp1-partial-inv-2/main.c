@@ -1,5 +1,7 @@
 #include "build.h"
 
+#include "perf.h"
+
 ///////////////////
 // main function
 ///////////////////
@@ -9,6 +11,7 @@ void main( void ) {
     zx_border(INK_BLACK);
 
     // initializations
+    init_interrupts();
     init_heap();
     sp1_Initialize(SP1_IFLAG_MAKE_ROTTBL | SP1_IFLAG_OVERWRITE_TILES | SP1_IFLAG_OVERWRITE_DFILE,
       PAPER_BLACK | INK_GREEN, ' ');
@@ -22,6 +25,7 @@ void main( void ) {
     sp1_Invalidate( &scroll_area );
 
     // main loop
+    reset_perfmeter();
     while (1) {
 
       // draw tiles if top row has been completely scrolled down
@@ -47,5 +51,6 @@ void main( void ) {
 
       // redraw
       sp1_UpdateNow();
+      do_perf_accounting();
     }
 }
