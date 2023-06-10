@@ -1,7 +1,7 @@
 # compiler configuration
 ZCC		= zcc +zx
 CFLAGS		= -vn -m --list --c-code-in-asm -compiler=sdcc
-LDFLAGS		= -lndos -lsp1-zx
+LDFLAGS		= -lndos -lsp1-zx -lmath32
 
 # sources
 SRCS_C		= $(wildcard *.c)

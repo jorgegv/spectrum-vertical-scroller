@@ -7,7 +7,7 @@
 #pragma output CRT_ENABLE_RESTART     = 1       // do not return to basic
 
 #pragma output CLIB_MALLOC_HEAP_SIZE  = 0       // // heap: initialized manually
-#pragma output CLIB_STDIO_HEAP_SIZE   = 0       // no stdio heap (no files)
+//#pragma output CLIB_STDIO_HEAP_SIZE   = 0       // no stdio heap (no files)
 
 // Memory map:
 // $5F00 - $BFFF: code/data/bss
@@ -40,6 +40,8 @@ extern uint8_t scroll_counter_2;
 extern uint8_t scroll_counter_3;
 extern uint8_t offscreen[];
 extern uint8_t *offscreen_column_start_address[];
+extern uint32_t global_frame_counter;
+extern uint8_t main_loop_counter;
 
 // initialization functions
 void init_heap( void );
@@ -48,6 +50,8 @@ void init_scroll_area( void );
 void init_tile_map( void );
 void init_sprites( void );
 void init_column_invalidation_ranges( void );
+void init_interrupts( void );
+void reset_perfmeter( void );
 
 // utility functions
 void draw_top_row_of_tiles( void );
@@ -57,3 +61,4 @@ void move_sprites( void );
 void move_down_column_invalidation_ranges( void );
 uint16_t cell_address_offset( uint8_t row, uint8_t col );
 void dump_invalidations( void );
+void do_perf_accounting( void );

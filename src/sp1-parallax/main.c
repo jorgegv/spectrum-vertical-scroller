@@ -9,6 +9,7 @@ void main( void ) {
     zx_border(INK_BLACK);
 
     // initializations
+    init_interrupts();
     init_heap();
     sp1_Initialize(SP1_IFLAG_MAKE_ROTTBL | SP1_IFLAG_OVERWRITE_TILES | SP1_IFLAG_OVERWRITE_DFILE,
       PAPER_BLACK | INK_GREEN, ' ');
@@ -22,6 +23,7 @@ void main( void ) {
     sp1_Invalidate( &scroll_area );
 
     // main loop
+    reset_perfmeter();
     while (1) {
 
 //      if ( ! ( scroll_counter_1 % 8 ) )
@@ -44,8 +46,8 @@ void main( void ) {
       // move down the column invalidation ranges if needed
       move_down_column_invalidation_ranges();
 
-      // now sync with vert retrace and redraw
-//      intrinsic_halt();
+      // redraw
       sp1_UpdateNow();
+      do_perf_accounting();
     }
 }
