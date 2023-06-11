@@ -208,19 +208,21 @@ Finally, all scroll areas have been normalized to a 16x16-cell zone, and the num
 
 The following table resumes the measured performance on each of the tests:
 
-| Test #  | Directory         | FPS   | Description                                                                                               | Remarks                                                                                                               |
-| ------ | ----------------- | ----- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Test 0 | sp1-baseline      | 22    | A simple Proof of Concept to test the raw performance of SP1 updating the whole scroll area               |                                                                                                                       |
-| Test 1 | sp1-randomtiles   | 17-18 | Basic implementation of the whole scroll/top-tile-row-update loop, full column scrolling and invalidation |                                                                                                                       |
-| Test 2 | sp1-sprites       | 13    | Test 1, with added moving sprites                                                                         |                                                                                                                       |
-| Test 3 | sp1-partial-inv-1 | 17-25 | Test 2, but with partial column invalidation, method #1                                                   | Results depend highly on the number of visible tiles on the scrolling background                                      |
-| Test 4 | sp1-partial-inv-2 | 13-25 | Test 2, but with partial column invalidation, method #2                                                   | Results dependent on the number of visible tiles on the scrolling background, but can have denser backgrounds than Test 3 |
-| Test 5 | -                 | -     | Not implemented                                                                                           | Discarded due to degenerated case of having to scroll most of the column most of the time                             |
-| Test 6 | sp1-parallax      | 11-17 | Test 3, with 2 additional parallax zones scrolling at different speed than the main zone                  |                                                                                                                       |
+| Test # | Directory         | Description                                                           | FPS   |
+| ------ | ----------------- | --------------------------------------------------------------------- | ----- |
+| Test 0 | sp1-baseline      | PoC to test raw performance of SP1 updating whole scroll area         | 22    |
+| Test 1 | sp1-randomtiles   | Whole scroll/top-row-update loop, full column scroll and invalidation | 17-18 |
+| Test 2 | sp1-sprites       | Test 1, with added moving sprites                                     | 13    |
+| Test 3 | sp1-partial-inv-1 | Test 2, with added partial column invalidation, method #1             | 17-25 |
+| Test 4 | sp1-partial-inv-2 | Test 2, with added partial column invalidation, method #2             | 20-25 |
+| Test 5 | -                 | Not implemented                                                       | -     |
+| Test 6 | sp1-parallax      | Test 3, with 2 added parallax zones scrolling at different speeds     | 11-17 |
 
 Conclusions:
 
 - For a 16x16 scrolling area, a baseline framerate of 22 FPS shows that scrolling games with SP1 are quite a possibility, given that SP1 conveniently integrates background _and_ sprite management in a single library.
 - The scrolling routine is not the critical part, but the SP1 update is. Initial baseline measurements indicated that the scrolling code spends only around half a frame for scrolling an area of this size, and the rest of the time being used by SP1.
-- The optimizations done in Test 3 and Test 4 (partial invalidation instead of fully invalidating the whole scroll area) are indeed valuable and make the FPS ocassionally reach the baseline measurement, and even a bit higher. This is quite remarkable, given than on these tests we have sprites moving all around.
+- The optimizations done in Test 3 and Test 4 (partial invalidation instead of fully invalidating the whole scroll area) are indeed valuable and make the FPS ocassionally reach the baseline measurement, and even a bit higher. This is quite remarkable, given than on these tests we have sprites moving all around. Optimization in Test 4 show slightly better performance than Test 3.
+- In both Test 3 and Test 4, results depend highly on the number of visible background tiles, which is to be expected.
 - The parallax effect, contrary to what was indicated in the previous statements, generates a measurable additional load with respect to code with a single scrolling zone.
+- For a scroller game with a single zone (no parallax), the better algorithm seems to be the one in Test 4

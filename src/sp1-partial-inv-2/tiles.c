@@ -136,8 +136,8 @@ void draw_tile_on_top_row( uint8_t *tile, uint8_t col ) {
 void draw_top_row_of_tiles( void ) {
   // uncomment more calls for higher tile density
   draw_tile_on_top_row( diamond_tile, 2 * ( rand() % (SCROLL_AREA_WIDTH / 2) ) );
-  draw_tile_on_top_row( diamond_tile, 2 * ( rand() % (SCROLL_AREA_WIDTH / 2 ) ) );
-  draw_tile_on_top_row( diamond_tile, 2 * ( rand() % (SCROLL_AREA_WIDTH / 2 ) ) );
+//  draw_tile_on_top_row( diamond_tile, 2 * ( rand() % (SCROLL_AREA_WIDTH / 2 ) ) );
+//  draw_tile_on_top_row( diamond_tile, 2 * ( rand() % (SCROLL_AREA_WIDTH / 2 ) ) );
 }
 
 /////////////////////////////
