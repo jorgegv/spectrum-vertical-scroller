@@ -226,3 +226,21 @@ Conclusions:
 - In both Test 3 and Test 4, results depend highly on the number of visible background tiles, which is to be expected.
 - The parallax effect, contrary to what was indicated in the previous statements, generates a measurable additional load with respect to code with a single scrolling zone.
 - For a scroller game with a single zone (no parallax), the better algorithm seems to be the one in Test 4
+
+## Updated performance review for a 16x24-cell scrolling zone
+
+I have reconfigured all tests to use a 16x24-cell scrolling zone, which is a more realistic size for a scrolling game on the ZX. The results are proportionally similar to the previous ones, but with bigger differences between the baseline measurements and the optimized ones in Test 3 and Test 4.
+
+Here is the table with the old and new results in an additional column for comparison:
+
+| Test # | Directory         | Description                                                           | FPS-16x16 | FPS-16x24 |
+| ------ | ----------------- | --------------------------------------------------------------------- | --------- | --------- |
+| Test 0 | sp1-baseline      | PoC to test raw performance of SP1 updating whole scroll area         | 22        | 15        |
+| Test 1 | sp1-randomtiles   | Whole scroll/top-row-update loop, full column scroll and invalidation | 17-18     | 12        |
+| Test 2 | sp1-sprites       | Test 1, with added moving sprites                                     | 13        | 10        |
+| Test 3 | sp1-partial-inv-1 | Test 2, with added partial column invalidation, method #1             | 17-25     | 13-22     |
+| Test 4 | sp1-partial-inv-2 | Test 2, with added partial column invalidation, method #2             | 20-25     | 17-23     |
+| Test 5 | -                 | Not implemented                                                       | -         | -         |
+| Test 6 | sp1-parallax      | Test 3, with 2 added parallax zones scrolling at different speeds     | 11-17     | 9-16      |
+
+In this new test it can clearly be seen that the baselines (the ones that manage and invalidate the full area) suffer a big performance penalty when enlarging the scrolling area, while the optimized ones are not quite that affected. Indeed the algorithm in Test 4 seems a real candidate for a good ZX scrolling game, using all SP1 power.

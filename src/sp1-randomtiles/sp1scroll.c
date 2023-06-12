@@ -17,7 +17,7 @@
 #define SCROLL_AREA_POS_ROW		0
 #define SCROLL_AREA_POS_COL		8
 #define SCROLL_AREA_WIDTH		16
-#define SCROLL_AREA_HEIGHT		16
+#define SCROLL_AREA_HEIGHT		24
 
 // the tiles that are used for drawing the map have this dimensions
 // there is a row of this height at the top of the offscreen to draw the
