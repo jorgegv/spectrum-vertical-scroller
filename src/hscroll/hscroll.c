@@ -7,22 +7,84 @@
 void scroll_right_1pixel( void ) __naked {
 __asm
 
-start:
+start1:
 	ld hl,16384	;; first screen line
-	ld de,32	;; increment for next line
-
 	ld a,192	;; number of lines
 
-line:
+line1:
 	ld b,32
 	or a
-loop_line:
+loop_line1:
 	rr (hl)
 	inc hl
-	djnz loop_line
+	djnz loop_line1
 
 	dec a
-	jp nz, line
+	jp nz, line1
+	ret
+
+__endasm;
+}
+
+void scroll_right_2pixel( void ) __naked {
+__asm
+
+start2:
+	ld hl,16384+31	;; first screen line
+	ld a,192	;; number of lines
+
+line2:
+	ld b,31
+
+	ex af,af	;; save line counter
+loop_line2:
+	ld de,hl	;; save HL
+	ld c,(hl)
+	dec hl
+	ld a,(hl)
+	rr a		;; repeat twice for 2 pixel scroll; 3, 4, etc.
+	rr c
+	or a		;; reset C flag
+	rr a
+	rr c
+	ld hl,de	;; restore HL
+	ld (hl),a
+	dec hl
+	djnz loop_line2
+
+	ld a,(hl)	;; the leftmost byte is special
+	rra
+	rra
+	ld (hl),a
+
+	ld de,63	;; add 63 for end of next line
+	add hl,de
+
+	ex af,af	;; continue with line counter
+	dec a
+	jp nz, line2
+	ret
+
+__endasm;
+}
+
+void scroll_right_4pixel( void ) __naked {
+__asm
+
+start4:
+	ld hl,16384	;; first screen line
+	ld c,192	;; number of lines
+
+line4:
+	ld b,32
+	xor a
+loop_line4:
+	rrd		;; rrd (hl)
+	inc hl
+	djnz loop_line4
+
+	dec c
+	jp nz, line4
 	ret
 
 __endasm;
@@ -39,7 +101,9 @@ void main( void ) {
     while (1) {
 //    	intrinsic_halt();
     	zx_border( INK_RED );
-        scroll_right_1pixel();
+//        scroll_right_1pixel();
+        scroll_right_2pixel();
+//	scroll_right_4pixel();
     	zx_border( INK_WHITE );
     }
 }
