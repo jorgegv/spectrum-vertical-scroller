@@ -1,4 +1,4 @@
-// zcc +zx -lndos -o hscroll -create-app hscroll.c
+// zcc +zx -lndos -m -o hscroll -create-app hscroll.c
 
 #include <stdio.h>
 #include <conio.h>
@@ -37,27 +37,38 @@ line2:
 	ld b,31
 
 	ex af,af	;; save line counter
+
+	;; process the byte at (HL)
 loop_line2:
-	ld de,hl	;; save HL
-	ld c,(hl)
+	ld de,hl	;; save pointer in DE for later
+
+	ld c,(hl)	;; C = current byte
 	dec hl
-	ld a,(hl)
-	rr a		;; repeat twice for 2 pixel scroll; 3, 4, etc.
+	ld a,(hl)	;; A = byte to its left
+
+	;; repeat this block twice for 2 pixel scroll; 3 times for 3 pixel, etc.
+
+	rr a		;; take lowest bit of previous byte into CF
+	rr c		;; and store it into highest bit of current byte, rotating
+
+	rr a		;; repeat as needed
 	rr c
-	or a		;; reset C flag
-	rr a
-	rr c
-	ld hl,de	;; restore HL
-	ld (hl),a
-	dec hl
+
+	ld hl,de	;; restore pointer
+
+	ld (hl),c	;; store processed byte
+	dec hl		;; decrement pointer for next iteration
 	djnz loop_line2
 
 	ld a,(hl)	;; the leftmost byte is special
-	rra
-	rra
+
+	or a		;; CF = 0
+	rr a		;; same number of repetitions as the block above
+	rr a
+
 	ld (hl),a
 
-	ld de,63	;; add 63 for end of next line
+	ld de,63	;; add 32+31 for end of next line
 	add hl,de
 
 	ex af,af	;; continue with line counter
