@@ -46,24 +46,25 @@ loop_line2:
 	dec hl
 	ld a,(hl)	;; A = byte to its left
 
-	;; repeat this block twice for 2 pixel scroll; 3 times for 3 pixel, etc.
-
+	;; repeat the following block twice for 2 pixel scroll; 3 times for 3 pixel, etc.
 	rr a		;; take lowest bit of previous byte into CF
 	rr c		;; and store it into highest bit of current byte, rotating
 
 	rr a		;; repeat as needed
 	rr c
 
-	ld hl,de	;; restore pointer
+	ld (de),c	;; store processed byte
+			;; HL is already decremented for next iteration
 
-	ld (hl),c	;; store processed byte
-	dec hl		;; decrement pointer for next iteration
 	djnz loop_line2
 
 	ld a,(hl)	;; the leftmost byte is special
 
+	;; same number of repetitions as the block above
 	or a		;; CF = 0
-	rr a		;; same number of repetitions as the block above
+	rr a		
+
+	or a		;; CF = 0
 	rr a
 
 	ld (hl),a
