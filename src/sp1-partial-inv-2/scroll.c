@@ -133,7 +133,7 @@ void scroll_down_area( void ) {
 //    scroll_down_column_stack( offscreen_column_end_address[ i ] );	// ~2336 T-states
   intrinsic_ei();
   // adjust scroll counter
-  scroll_counter++;
+  scroll_counter += SCROLL_PIXELS;
 }
 
 // initialize scroll area
