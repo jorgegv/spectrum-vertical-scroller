@@ -66,7 +66,7 @@
 #define SCROLL_AREA_REAL_HEIGHT		( SCROLL_AREA_HEIGHT + SCROLL_AREA_TOP_TILE_HEIGHT )
 
 // the scroll speed, i.e. the number of pixels scrolled down on each round
-#define SCROLL_PIXELS			1
+#define SCROLL_PIXELS			8
 
 // SP1 scroll area
 struct sp1_Rect scroll_area = { SCROLL_AREA_POS_ROW, SCROLL_AREA_POS_COL, SCROLL_AREA_WIDTH, SCROLL_AREA_HEIGHT };
@@ -279,7 +279,7 @@ void scroll_down_area( void ) {
 //    scroll_down_column_stack( offscreen_column_end_address[ i ] );	// ~2336 T-states
   intrinsic_ei();
   // adjust scroll counter
-  scroll_counter++;
+  scroll_counter += SCROLL_PIXELS;
 }
 
 /////////////////////////////
