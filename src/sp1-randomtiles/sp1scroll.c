@@ -156,7 +156,8 @@ void main( void ) {
 //      zx_border(INK_BLACK);
 
       // draw tiles
-      if ( ! ( i++ % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) ) {
+      i += SCROLL_PIXELS;
+      if ( ! ( i % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) ) {
         draw_tile_on_top( tile, c * 2 );
         if ( ++c == 8 )
           c = 0;
