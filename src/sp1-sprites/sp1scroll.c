@@ -48,7 +48,7 @@
 #define SCROLL_AREA_REAL_HEIGHT		( SCROLL_AREA_HEIGHT + SCROLL_AREA_TOP_TILE_HEIGHT )
 
 // the scroll speed, i.e. the number of pixels scrolled down on each round
-#define SCROLL_PIXELS			1
+#define SCROLL_PIXELS			8
 
 // SP1 scroll area
 struct sp1_Rect scroll_area = { SCROLL_AREA_POS_ROW, SCROLL_AREA_POS_COL, SCROLL_AREA_WIDTH, SCROLL_AREA_HEIGHT };
@@ -401,7 +401,8 @@ void main( void ) {
 //      zx_border(INK_BLACK);
 
       // draw tiles
-      if ( ! ( i++ % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) ) {
+      i += SCROLL_PIXELS;
+      if ( ! ( i % (SCROLL_AREA_TOP_TILE_HEIGHT * 8 ) ) ) {
         draw_tile_on_top_row( diamond_tile, c * 2 );
         if ( ++c == 8 )
           c = 0;
