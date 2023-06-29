@@ -1,12 +1,26 @@
+#include <stdint.h>
+
 #include "build.h"
 
+void draw_initial_scroll_area( void ) {
+    uint8_t i;
+    for ( i = 0; i <= SCROLL_AREA_WIDTH; i += SCROLL_MAP_TILE_WIDTH )
+        tile_draw_offscreen_2x2( diamond_tile, i, i );
+}
+
+
 void main( void ) {
-    init_screen_address_tables();
-    init_sp1_tile_map();
     init_perfmeter();
+    init_screen_address_tables();
+    init_tile_map();
+
+    draw_initial_scroll_area();
 
     reset_perfmeter();
     while (1) {
+        offscreen_scroll_right_1pixel();
+        invalidate_scroll_area();
+        redraw_scroll_area();
     	do_perf_accounting();
     }
 }

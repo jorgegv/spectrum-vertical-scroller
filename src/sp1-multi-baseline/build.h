@@ -8,6 +8,8 @@
 #include "config.h"
 #include "perf.h"
 #include "offscreen.h"
-#include "scroll.h"
+#include "screen.h"
+#include "tile.h"
+#include "graphics.h"
 
 #endif // _BUILD_H
