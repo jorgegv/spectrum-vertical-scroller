@@ -13,8 +13,8 @@ extern uint8_t offscreen[];
 uint8_t *offscreen_cell_address( uint8_t row, uint8_t col );
 
 // scrolling functions
-void offscreen_scroll_right_1pixel( void );
-void offscreen_scroll_right_2pixel( void );
-void offscreen_scroll_right_4pixel( void );
+void offscreen_scroll_right_1px( void );
+void offscreen_scroll_right_2px( void );
+void offscreen_scroll_right_4px( void );
 
 #endif // _OFFSCREEN_H

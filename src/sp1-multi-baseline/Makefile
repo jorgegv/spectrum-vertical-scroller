@@ -10,7 +10,7 @@ OBJS		= $(SRCS_C:.c=.o) $(SRCS_ASM:.asm=.o)
 
 # targets
 .SILENT:
-.PHONY: clean run graphics build
+.PHONY: clean run graphics build config
 
 %.o: %.c
 	$(ZCC) $(CFLAGS) -c $*.c
@@ -22,7 +22,7 @@ main.tap: $(OBJS)
 	$(ZCC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o main -create-app
 
 clean:
-	-rm -f *.tap *.o *.bin *.map *.lis main
+	-rm -f *.tap *.o *.bin *.map *.lis main config.h
 	if [ -d graphics ]; then $(MAKE) -s -C graphics clean ; fi
 
 run:
@@ -31,5 +31,8 @@ run:
 graphics:
 	$(MAKE) -s -C graphics
 
-build: clean
+build: clean config
 	$(MAKE) -s -j8 main.tap
+
+config:
+	./config.sh > config.h

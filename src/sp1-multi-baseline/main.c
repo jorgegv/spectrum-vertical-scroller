@@ -4,8 +4,8 @@
 
 void draw_initial_scroll_area( void ) {
     uint8_t i;
-    for ( i = 0; i <= SCROLL_AREA_WIDTH; i += SCROLL_MAP_TILE_WIDTH )
-        tile_draw_offscreen_2x2( diamond_tile, i, i );
+    for ( i = 0; i < SCROLL_AREA_WIDTH; i += SCROLL_MAP_TILE_WIDTH )
+        tile_draw_offscreen_2x2( diamond_tile, SCROLL_MAP_TILE_HEIGHT + i, SCROLL_MAP_TILE_WIDTH + i );
 }
 
 
@@ -18,7 +18,7 @@ void main( void ) {
 
     reset_perfmeter();
     while (1) {
-        offscreen_scroll_right_1pixel();
+        offscreen_scroll_right_1px();
         invalidate_scroll_area();
         redraw_scroll_area();
     	do_perf_accounting();

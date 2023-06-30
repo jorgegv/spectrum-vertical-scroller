@@ -17,29 +17,38 @@ uint8_t *offscreen_cell_address( uint8_t row, uint8_t col ) {
 
 // scrolls the offscreen 1 pixel to the right
 
-void offscreen_scroll_right_1pixel( void ) __naked {
+void offscreen_scroll_right_1px( void ) __naked {
 __asm
 
 	ld hl,_offscreen			;; first screen line
 	ld a,SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; number of lines
+	ld de,SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; needed for quick sum
 
 line_1px:
-	ld b,SCROLL_AREA_EXTENDED_WIDTH
+	push hl					;; save start address
 
+	ld b,SCROLL_AREA_EXTENDED_WIDTH		;; initialize line counter
 	or a	;; CF = 0
+
 loop_line_1px:
 	rr (hl)
-	inc hl
+	push af					;; save C flag
+	add hl,de				;; jump to next column
+	pop af					;; restore C flag
 	djnz loop_line_1px
 
-	dec a
+	pop hl					;; restore start address
+	inc hl					;; ...and one line down
+
+	dec a					;; loop next line
 	jp nz, line_1px
+
 	ret
 
 __endasm;
 }
 
-void offscreen_scroll_right_2pixel( void ) __naked {
+void offscreen_scroll_right_2px( void ) __naked {
 __asm
 
 	ld hl,_offscreen + SCROLL_AREA_EXTENDED_WIDTH - 1	;; first screen line
@@ -59,7 +68,7 @@ loop_line_2px:
 	dec hl
 	ld a,(hl)	;; A = byte to its left
 
-	;; repeat the following block twice for 2 pixel scroll; 3 times for 3 pixel, etc.
+	;; repeat the following block twice for 2 px scroll; 3 times for 3 px, etc.
 	rr a		;; take lowest bit of previous byte into CF
 	rr c		;; and store it into highest bit of current byte, rotating
 
@@ -82,7 +91,7 @@ loop_line_2px:
 __endasm;
 }
 
-void offscreen_scroll_right_4pixel( void ) __naked {
+void offscreen_scroll_right_4px( void ) __naked {
 __asm
 
 	ld hl,_offscreen				;; first screen line
