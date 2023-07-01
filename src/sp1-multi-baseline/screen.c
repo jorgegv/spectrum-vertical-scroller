@@ -39,10 +39,7 @@ struct sp1_Rect scroll_area = {
     .height	= SCROLL_AREA_HEIGHT,
 };
 
-void invalidate_scroll_area( void ) {
-    sp1_Invalidate( &scroll_area );
-}
-
 void redraw_scroll_area( void ) {
+    sp1_Invalidate( &scroll_area );
     sp1_UpdateNow();
 }

@@ -18,8 +18,8 @@ void main( void ) {
 
     reset_perfmeter();
     while (1) {
-        offscreen_scroll_right_1px();
-        invalidate_scroll_area();
+//        offscreen_scroll_right_1px();
+        offscreen_scroll_right_2px();
         redraw_scroll_area();
     	do_perf_accounting();
     }

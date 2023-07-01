@@ -10,7 +10,7 @@
 ## Configuration variables
 #############################################
 
-# Sscroll area dimensions and position, in char cells
+# Scroll area dimensions and position, in char cells
 SCROLL_AREA_TOP=4
 SCROLL_AREA_LEFT=8
 SCROLL_AREA_WIDTH=16
