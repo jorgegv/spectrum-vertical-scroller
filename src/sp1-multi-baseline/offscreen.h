@@ -12,9 +12,12 @@ extern uint8_t offscreen[];
 // These are extended coords, i.e. [ 0 .. (SCROLL_AREA_EXTENDED_WIDTH - 1) ], etc.
 uint8_t *offscreen_cell_address( uint8_t row, uint8_t col );
 
-// scrolling functions
-void offscreen_scroll_right_1px( void );
-void offscreen_scroll_right_2px( void );
-void offscreen_scroll_right_4px( void );
+// scrolling driver functions
+// number of pixels to scroll in each direction is passed as a parameter
+// the driver functions select the fastest scroll routine according to num_pix
+void offscreen_scroll_right_pixels( uint16_t num_pix );
+void offscreen_scroll_left_pixels( uint16_t num_pix );
+void offscreen_scroll_up_pixels( uint16_t num_pix );
+void offscreen_scroll_down_pixels( uint16_t num_pix );
 
 #endif // _OFFSCREEN_H

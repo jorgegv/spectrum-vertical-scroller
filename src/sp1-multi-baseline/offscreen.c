@@ -15,7 +15,52 @@ uint8_t *offscreen_cell_address( uint8_t row, uint8_t col ) {
 // SCROLLING FUNCTIONS
 ///////////////////////////////////////////////
 
-// scrolls the offscreen 1 pixel to the right
+// internal function prototypes
+void offscreen_scroll_right_1px( void );
+void offscreen_scroll_right_2px( void );
+void offscreen_scroll_right_4px( void );
+void offscreen_scroll_right_8px( void );
+void offscreen_scroll_right_Npx( uint16_t num_pix ) __z88dk_callee;
+void offscreen_scroll_left_1px( void );
+void offscreen_scroll_left_2px( void );
+void offscreen_scroll_left_4px( void );
+void offscreen_scroll_left_8px( void );
+void offscreen_scroll_left_Npx( uint16_t num_pix ) __z88dk_callee;
+void offscreen_scroll_up_Npx( uint16_t num_pix ) __z88dk_callee;
+void offscreen_scroll_down_Npx( uint16_t num_pix ) __z88dk_callee;
+
+///////////////////////////
+// Driver functions
+///////////////////////////
+
+void offscreen_scroll_right_pixels( uint16_t num_pix ) {
+    if ( num_pix & 0x01 )
+    	offscreen_scroll_right_1px();
+    if ( num_pix & 0x02 )
+    	offscreen_scroll_right_Npx( 2 );
+    if ( num_pix & 0x04 )
+    	offscreen_scroll_right_4px();
+    if ( num_pix & 0x08 )
+    	offscreen_scroll_right_8px();
+
+}
+
+void offscreen_scroll_left_pixels( uint16_t num_pix ) {
+}
+
+void offscreen_scroll_up_pixels( uint16_t num_pix ) {
+//    offscreen_scroll_up_Npx( num_pix );	// TBD
+}
+
+void offscreen_scroll_down_pixels( uint16_t num_pix ) {
+//    offscreen_scroll_down_Npx( num_pix );	// TBD
+}
+
+//////////////////
+// SCROLL RIGHT //
+//////////////////
+
+// scroll the offscreen 1 pixel to the right
 // this technique is done left to right
 void offscreen_scroll_right_1px( void ) __naked {
 __asm
@@ -57,9 +102,11 @@ end_line_1px:
 __endasm;
 }
 
-// scrolls the offscreen 2 pixel to the right
+// scroll the offscreen 2 pixels to the right
 // this technique is done right to left
 // this routine is slower than running 2 calls to offscreen_scroll_right_1px() in sequence (!)
+// it also introduces some garbage on the left, but it assumed that the left edge is redrawn
+// periodically, and before the garbage enters the visible area
 void offscreen_scroll_right_2px( void ) __naked {
 __asm
 
@@ -111,6 +158,9 @@ loop_line_2px:
 __endasm;
 }
 
+// scroll the offscreen 4 pixels to the right
+// this technique uses rrd instruction to shift 4 bits through the
+// accumulator in a single instruction
 void offscreen_scroll_right_4px( void ) __naked {
 __asm
 
@@ -134,6 +184,95 @@ loop_line_4px:
 
 	dec c					;; iterate next line
 	jp nz, line_4px
+	ret
+
+__endasm;
+}
+
+// scroll the offscreen 8 pixels (1 column) to the right
+// this technique is done right to left
+// we scroll a full column on each iteration
+// it also introduces some garbage on the left, but it assumed that the left edge is redrawn
+// periodically, and before the garbage enters the visible area
+void offscreen_scroll_right_8px( void ) __naked {
+__asm
+
+	;; HL = src, DE = dst
+
+        ld de,_offscreen + ( SCROLL_AREA_EXTENDED_WIDTH - 1 ) * SCROLL_AREA_EXTENDED_HEIGHT_LINES       ;; top of last col
+        ld hl,_offscreen + ( SCROLL_AREA_EXTENDED_WIDTH - 2 ) * SCROLL_AREA_EXTENDED_HEIGHT_LINES       ;; top of previous col
+
+        ld a, SCROLL_AREA_EXTENDED_WIDTH		;; number of columns
+
+column_8px:
+        push hl						;; save previous col top addr
+
+REPT SCROLL_AREA_EXTENDED_HEIGHT_LINES
+	ldi						;; mods BC,DE,HL
+ENDR
+
+	;; now HL points to the top of the current column
+	ld de, -2 * SCROLL_AREA_EXTENDED_HEIGHT_LINES
+	add hl,de					;; set HL back 2 cols
+	pop de						;; DE = previous col top addr (saved above)
+
+	dec a						;; iterate column counter
+	jp nz,column_8px
+
+	ret
+	
+__endasm;
+}
+
+// scroll the offscreen N pixels to the right
+// works the same as for 1px scroll, but repeating N times on each line
+void offscreen_scroll_right_Npx( uint16_t num_pix ) __naked __z88dk_callee {
+__asm
+
+	pop hl					;; save retaddr
+	pop bc					;; C = num_pix (param)
+	push hl					;; push retaddr again
+
+	ld hl,_offscreen			;; first screen line
+	ld a,SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; number of lines
+	ld de,SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; needed for quick sum
+
+pre_n_line_1px:
+	push bc					;; save C (num_pix) for later
+
+n_line_1px:
+	push hl					;; save line start address
+
+	ld b,SCROLL_AREA_EXTENDED_WIDTH		;; initialize line counter
+	or a					;; CF = 0
+
+n_loop_line_1px:
+	rr (hl)					;; bring in CF flag as MSB, then CF = LSB
+	jp nc, n_next_loop_no_carry		;; duplicate loop closing depending on C
+
+n_next_loop_with_carry:
+	add hl,de				;; modifies CF flag
+	scf					;; CF = 1
+	djnz n_loop_line_1px
+	jp n_end_line_1px
+
+n_next_loop_no_carry:
+	add hl,de				;; modifies CF flag
+	or a					;; CF = 0
+	djnz n_loop_line_1px
+
+n_end_line_1px:
+	pop hl					;; restore start address
+
+	dec c					;; iterate number of scrolled pixels
+	jp nz, n_line_1px
+
+	pop bc					;; if finished with this line, restore C = num_pix
+
+	inc hl					;; ...one line down
+	dec a					;; iterate next line
+	jp nz, pre_n_line_1px
+
 	ret
 
 __endasm;
