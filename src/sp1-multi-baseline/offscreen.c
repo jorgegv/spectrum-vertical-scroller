@@ -42,10 +42,17 @@ void offscreen_scroll_right_pixels( uint16_t num_pix ) {
     	offscreen_scroll_right_4px();
     if ( num_pix & 0x08 )
     	offscreen_scroll_right_8px();
-
 }
 
 void offscreen_scroll_left_pixels( uint16_t num_pix ) {
+    if ( num_pix & 0x01 )
+    	offscreen_scroll_left_1px();
+    if ( num_pix & 0x02 )
+    	offscreen_scroll_left_Npx( 2 );
+    if ( num_pix & 0x04 )
+    	offscreen_scroll_left_4px();
+    if ( num_pix & 0x08 )
+    	offscreen_scroll_left_8px();
 }
 
 void offscreen_scroll_up_pixels( uint16_t num_pix ) {
@@ -207,6 +214,7 @@ __asm
 column_8px:
         push hl						;; save previous col top addr
 
+        ;; FIXME: this can be done with LDD and will save a few instructions im the loop!
 REPT SCROLL_AREA_EXTENDED_HEIGHT_LINES
 	ldi						;; mods BC,DE,HL
 ENDR
@@ -217,7 +225,7 @@ ENDR
 	pop de						;; DE = previous col top addr (saved above)
 
 	dec a						;; iterate column counter
-	jp nz,column_8px
+	jp nz, column_8px
 
 	ret
 	
@@ -272,6 +280,226 @@ n_end_line_1px:
 	inc hl					;; ...one line down
 	dec a					;; iterate next line
 	jp nz, pre_n_line_1px
+
+	ret
+
+__endasm;
+}
+
+//////////////////
+// SCROLL LEFT //
+//////////////////
+
+// scroll the offscreen 1 pixel to the left
+// this technique is done right to left
+void offscreen_scroll_left_1px( void ) __naked {
+__asm
+
+	ld hl,_offscreen + ( SCROLL_AREA_EXTENDED_WIDTH - 1 ) * SCROLL_AREA_EXTENDED_HEIGHT_LINES       ;; top of last col
+	ld a,SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; number of lines
+	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; needed for quick sum
+
+line_1px_left:
+	push hl					;; save line start address
+
+	or a					;; C = 0
+	ld b,SCROLL_AREA_EXTENDED_WIDTH		;; initialize line counter
+
+loop_line_1px_left:
+	rl (hl)					;; bring in C flag as MSB, then C = LSB
+	jp nc, next_loop_no_carry_left		;; duplicate loop closing depending on C
+
+next_loop_with_carry_left:
+	add hl,de				;; modifies C flag
+	scf					;; C = 1
+	djnz loop_line_1px_left
+	jp end_line_1px_left
+
+next_loop_no_carry_left:
+	add hl,de				;; modifies C flag
+	or a					;; C = 0
+	djnz loop_line_1px_left
+
+end_line_1px_left:
+	pop hl					;; restore start address
+	inc hl					;; ...one line down
+
+	dec a					;; iterate next line
+	jp nz, line_1px_left
+
+	ret
+
+__endasm;
+}
+
+// scroll the offscreen 2 pixels to the left
+// this technique is done left to right
+// this routine is slower than running 2 calls to offscreen_scroll_left_1px() in sequence (!)
+// it also introduces some garbage on the right, but it assumed that the right edge is redrawn
+// periodically, and before the garbage enters the visible area
+void offscreen_scroll_left_2px( void ) __naked {
+__asm
+
+	ld hl,_offscreen					;; start of first screen line
+	ld a,SCROLL_AREA_EXTENDED_HEIGHT_LINES			;; number of lines
+	ld de,SCROLL_AREA_EXTENDED_HEIGHT_LINES			;; bytes to add for next column
+								;; needed for quick sum
+
+line_2px_left:
+	push af					;; save line counter
+	push de					;; save quick sum
+
+	ld b,SCROLL_AREA_EXTENDED_WIDTH
+
+loop_line_2px_left:
+
+	;; process byte at (HL)
+
+	ld c,(hl)				;; C = current byte
+	push hl					;; save ptr to current byte for later
+	add hl,de				;; HL = ptr to right byte
+	ld a,(hl)				;; A = right byte
+
+	;; repeat the following block twice for 2 px scroll; 3 times for 3 px, etc.
+	rl a					;; take MSB of next byte into CF
+	rl c					;; and store it into LSB of current byte, rotating
+
+	rl a					;; repeat as needed
+	rl c
+
+	ex (sp),hl				;; HL = ptr to current byte again
+						;; and save ptr to right byte
+
+	ld (hl),c				;; store processed byte
+	pop hl					;; HL = ptr to left byte
+
+	djnz loop_line_2px_left
+
+	ld de,1 - SCROLL_AREA_EXTENDED_WIDTH * SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; add for start of next line
+	add hl,de
+
+	pop de					;; restore quick sum
+	pop af					;; restore line counter
+
+	dec a					;; iterate next line
+	jp nz, line_2px_left
+	ret
+
+__endasm;
+}
+
+// scroll the offscreen 4 pixels to the left
+// this technique uses rld instruction to shift 4 bits through the
+// accumulator in a single instruction
+void offscreen_scroll_left_4px( void ) __naked {
+__asm
+
+	ld hl,_offscreen + ( SCROLL_AREA_EXTENDED_WIDTH - 1 ) * SCROLL_AREA_EXTENDED_HEIGHT_LINES       ;; top of last col
+	ld c,SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; number of lines
+	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; save for quick sum
+
+line_4px_left:
+	push hl					;; save start address
+
+	ld b,SCROLL_AREA_EXTENDED_WIDTH
+	xor a					;; A = 0
+
+loop_line_4px_left:
+	rld		;; rld (hl)
+	add hl,de				;; next column
+	djnz loop_line_4px_left
+
+	pop hl					;; restore start address
+	inc hl					;; ...one line down
+
+	dec c					;; iterate next line
+	jp nz, line_4px_left
+	ret
+
+__endasm;
+}
+
+// scroll the offscreen 8 pixels (1 column) to the left
+// this technique is done left to right
+// we scroll a full column on each iteration
+// it also introduces some garbage on the right, but it assumed that the right edge is redrawn
+// periodically, and before the garbage enters the visible area
+void offscreen_scroll_left_8px( void ) __naked {
+__asm
+
+	;; HL = src, DE = dst
+
+        ld de,_offscreen					;; top of first col
+        ld hl,_offscreen + SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; top of next col
+
+        ld a, SCROLL_AREA_EXTENDED_WIDTH		;; number of columns
+
+column_8px_left:
+        push hl						;; save next col top addr
+
+REPT SCROLL_AREA_EXTENDED_HEIGHT_LINES
+	ldi						;; mods BC,DE,HL
+ENDR
+
+	;; now HL points to the top of the current column
+	pop de						;; DE = next col top addr (saved above)
+
+	dec a						;; iterate column counter
+	jp nz, column_8px_left
+
+	ret
+	
+__endasm;
+}
+
+// scroll the offscreen N pixels to the left
+// works the same as for 1px scroll, but repeating N times on each line
+void offscreen_scroll_left_Npx( uint16_t num_pix ) __naked __z88dk_callee {
+__asm
+
+	pop hl						;; save retaddr
+	pop bc						;; C = num_pix (param)
+	push hl						;; push retaddr again
+
+	ld hl,_offscreen + ( SCROLL_AREA_EXTENDED_WIDTH - 1 ) * SCROLL_AREA_EXTENDED_HEIGHT_LINES			;; first screen line
+	ld a,SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; number of lines
+	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; needed for quick sum
+
+pre_n_line_1px_left:
+	push bc						;; save C (num_pix) for later
+
+n_line_1px_left:
+	push hl						;; save line start address
+
+	ld b,SCROLL_AREA_EXTENDED_WIDTH			;; initialize line counter
+	or a						;; CF = 0
+
+n_loop_line_1px_left:
+	rl (hl)						;; bring in CF flag as MSB, then CF = LSB
+	jp nc, n_next_loop_no_carry_left		;; duplicate loop closing depending on C
+
+n_next_loop_with_carry_left:
+	add hl,de					;; modifies CF flag
+	scf						;; CF = 1
+	djnz n_loop_line_1px_left
+	jp n_end_line_1px_left
+
+n_next_loop_no_carry_left:
+	add hl,de					;; modifies CF flag
+	or a						;; CF = 0
+	djnz n_loop_line_1px_left
+
+n_end_line_1px_left:
+	pop hl						;; restore start address
+
+	dec c						;; iterate number of scrolled pixels
+	jp nz, n_line_1px_left
+
+	pop bc						;; if finished with this line, restore C = num_pix
+
+	inc hl						;; ...one line down
+	dec a						;; iterate next line
+	jp nz, pre_n_line_1px_left
 
 	ret
 
