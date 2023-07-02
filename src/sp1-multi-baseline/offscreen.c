@@ -48,7 +48,8 @@ next_loop_no_carry:
 end_line_1px:
 	pop hl					;; restore start address
 	inc hl					;; ...one line down
-	dec a					;; loop next line
+
+	dec a					;; iterate next line
 	jp nz, line_1px
 
 	ret
@@ -102,7 +103,8 @@ loop_line_2px:
 
 	pop de					;; restore quick sum
 	pop af					;; restore line counter
-	dec a
+
+	dec a					;; iterate next line
 	jp nz, line_2px
 	ret
 
@@ -112,18 +114,25 @@ __endasm;
 void offscreen_scroll_right_4px( void ) __naked {
 __asm
 
-	ld hl,_offscreen				;; first screen line
-	ld c,SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; number of lines
+	ld hl,_offscreen			;; first screen line
+	ld c,SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; number of lines
+	ld de,SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; save for quick sum
 
 line_4px:
+	push hl					;; save start address
+
 	ld b,SCROLL_AREA_EXTENDED_WIDTH
-	xor a
+	xor a					;; A = 0
+
 loop_line_4px:
 	rrd		;; rrd (hl)
-	inc hl
+	add hl,de				;; next column
 	djnz loop_line_4px
 
-	dec c
+	pop hl					;; restore start address
+	inc hl					;; ...one line down
+
+	dec c					;; iterate next line
 	jp nz, line_4px
 	ret
 
