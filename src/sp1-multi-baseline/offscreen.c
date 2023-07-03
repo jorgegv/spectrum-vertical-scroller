@@ -60,7 +60,7 @@ void offscreen_scroll_up_pixels( uint16_t num_pix ) {
 }
 
 void offscreen_scroll_down_pixels( uint16_t num_pix ) {
-//    offscreen_scroll_down_Npx( num_pix );	// TBD
+    offscreen_scroll_down_Npx( num_pix );
 }
 
 //////////////////
@@ -285,7 +285,7 @@ __endasm;
 }
 
 //////////////////
-// SCROLL LEFT //
+// SCROLL LEFT  //
 //////////////////
 
 // scroll the offscreen 1 pixel to the left
@@ -501,6 +501,47 @@ n_end_line_1px_left:
 
 	ret
 
+__endasm;
+}
+
+//////////////////
+// SCROLL LEFT  //
+//////////////////
+
+// scroll the offscreen N pixels down
+// works bottom to up, right to left
+void offscreen_scroll_down_Npx( uint16_t num_pix ) __naked __z88dk_callee {
+__asm
+    pop hl      ;; save retaddr
+    pop bc      ;; C = num_pix
+    push hl     ;; restore retaddr
+
+    ld hl,_offscreen + OFFSCREEN_BOTTOM_LINE_END_OFFSET	;; HL = bottom line right (dst)
+    ld de,hl						;; save dst addr
+
+    ld b,0xff						;; BC = negative offset, num_pix lines above
+    ld a,c						;; we can do this because C is always <= 8
+    neg
+    ld c,a
+    add hl,bc    					;; HL = num_pix lines before (src)
+
+    ld a,SCROLL_AREA_EXTENDED_WIDTH			;; column iterator
+
+loop_down_column:
+
+REPT SCROLL_AREA_EXTENDED_HEIGHT_LINES
+    ldd							;; tramsfer the bytes
+ENDR
+
+    ;; DE now contains addr of top column byte
+    ; adjust src and dst for next column
+    dec de						;; dst = bottom of prev column
+    dec hl						;; adjust src likewise
+
+    dec a						;; iterate column loop
+    jp nz, loop_down_column
+
+    ret
 __endasm;
 }
 
