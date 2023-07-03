@@ -117,7 +117,7 @@ __endasm;
 void offscreen_scroll_right_2px( void ) __naked {
 __asm
 
-	ld hl,_offscreen + ( SCROLL_AREA_EXTENDED_WIDTH - 1 ) * SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; end of first screen line
+	ld hl,_offscreen + OFFSCREEN_TOP_LINE_END_OFFSET	;; end of first screen line
 	ld a,SCROLL_AREA_EXTENDED_HEIGHT_LINES			;; number of lines
 	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; bytes to substract for previous column
 								;; needed for quick sum
@@ -206,8 +206,8 @@ __asm
 
 	;; HL = src, DE = dst
 
-        ld de,_offscreen + ( SCROLL_AREA_EXTENDED_WIDTH - 1 ) * SCROLL_AREA_EXTENDED_HEIGHT_LINES       ;; top of last col
-        ld hl,_offscreen + ( SCROLL_AREA_EXTENDED_WIDTH - 2 ) * SCROLL_AREA_EXTENDED_HEIGHT_LINES       ;; top of previous col
+        ld de,_offscreen + OFFSCREEN_TOP_LINE_END_OFFSET	;; top of last col
+        ld hl,_offscreen + OFFSCREEN_TOP_LINE_END_OFFSET - SCROLL_AREA_EXTENDED_HEIGHT_LINES       ;; top of previous col
 
         ld a, SCROLL_AREA_EXTENDED_WIDTH		;; number of columns
 
@@ -295,9 +295,9 @@ __endasm;
 void offscreen_scroll_left_1px( void ) __naked {
 __asm
 
-	ld hl,_offscreen + ( SCROLL_AREA_EXTENDED_WIDTH - 1 ) * SCROLL_AREA_EXTENDED_HEIGHT_LINES       ;; top of last col
-	ld a,SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; number of lines
-	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; needed for quick sum
+	ld hl,_offscreen + OFFSCREEN_TOP_LINE_END_OFFSET	;; top of last col
+	ld a,SCROLL_AREA_EXTENDED_HEIGHT_LINES			;; number of lines
+	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; needed for quick sum
 
 line_1px_left:
 	push hl					;; save line start address
@@ -394,9 +394,9 @@ __endasm;
 void offscreen_scroll_left_4px( void ) __naked {
 __asm
 
-	ld hl,_offscreen + ( SCROLL_AREA_EXTENDED_WIDTH - 1 ) * SCROLL_AREA_EXTENDED_HEIGHT_LINES       ;; top of last col
-	ld c,SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; number of lines
-	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; save for quick sum
+	ld hl,_offscreen + OFFSCREEN_TOP_LINE_END_OFFSET	;; top of last col
+	ld c,SCROLL_AREA_EXTENDED_HEIGHT_LINES			;; number of lines
+	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; save for quick sum
 
 line_4px_left:
 	push hl					;; save start address
@@ -457,13 +457,13 @@ __endasm;
 void offscreen_scroll_left_Npx( uint16_t num_pix ) __naked __z88dk_callee {
 __asm
 
-	pop hl						;; save retaddr
-	pop bc						;; C = num_pix (param)
-	push hl						;; push retaddr again
+	pop hl							;; save retaddr
+	pop bc							;; C = num_pix (param)
+	push hl							;; push retaddr again
 
-	ld hl,_offscreen + ( SCROLL_AREA_EXTENDED_WIDTH - 1 ) * SCROLL_AREA_EXTENDED_HEIGHT_LINES			;; first screen line
-	ld a,SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; number of lines
-	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; needed for quick sum
+	ld hl,_offscreen + OFFSCREEN_TOP_LINE_END_OFFSET	;; first screen line
+	ld a,SCROLL_AREA_EXTENDED_HEIGHT_LINES			;; number of lines
+	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; needed for quick sum
 
 pre_n_line_1px_left:
 	push bc						;; save C (num_pix) for later
