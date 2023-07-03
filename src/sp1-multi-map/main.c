@@ -2,12 +2,10 @@
 
 #include "build.h"
 
-struct tile_s diamond = { 2, 2, &diamond_tile[0] };
-
-void draw_initial_scroll_area( void ) {
+void draw_initial_scroll_map( void ) {
     uint8_t i;
-    for ( i = 0; i < SCROLL_AREA_WIDTH; i += SCROLL_MAP_TILE_WIDTH )
-        tile_draw_offscreen( SCROLL_MAP_TILE_HEIGHT + i, SCROLL_MAP_TILE_WIDTH + i, &diamond );
+//    for ( i = 0; i < SCROLL_AREA_WIDTH; i += SCROLL_MAP_TILE_WIDTH )
+//        tile_draw_offscreen( SCROLL_MAP_TILE_HEIGHT + i, SCROLL_MAP_TILE_WIDTH + i, &diamond );
 }
 
 
@@ -16,7 +14,7 @@ void main( void ) {
     init_screen_address_tables();
     init_tile_map();
 
-    draw_initial_scroll_area();
+    draw_initial_scroll_map();
 
     reset_perfmeter();
     while (1) {
