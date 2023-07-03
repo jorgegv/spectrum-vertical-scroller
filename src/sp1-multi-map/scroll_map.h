@@ -3,8 +3,26 @@
 
 #include <stdint.h>
 
+// a global scroll_map object exists, but it should be manipulated only via
+// these functions
 void init_scroll_map( void );
-void scroll_map_set_viewport( uint8_t row, uint8_t col );
+
+// sets the viewport coordinates
+// Map coordinates are specified in pixels
+void scroll_map_set_viewport_xy( uint16_t x, uint16_t y );
+
+// full redraw of the viewport, only needed at startup, or if the hero
+// teleports to another part of the map :-)
+void scroll_map_draw_viewport( void );
+
+// utility functions to draw the hidden areas just before entering into view
+// these functions should be called in sequence: draw-hidden-xxxx -> scroll-offscreen -> set-new-viewport-pos
+void scroll_map_draw_hidden_top_row( void );
+void scroll_map_draw_hidden_bottom_row( void );
+void scroll_map_draw_hidden_left_col( void );
+void scroll_map_draw_hidden_right_col( void );
+
+// gets the tile addr for the given map coordinate
 struct tile_s *scroll_map_get_tile_at( uint8_t row, uint8_t col );
 
 #endif // _SCROLL_MAP_H

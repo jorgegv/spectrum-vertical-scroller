@@ -36,5 +36,6 @@
 #include "screen.h"
 #include "tile.h"
 #include "graphics.h"
+#include "scroll_map.h"
 
 #endif // _BUILD_H
