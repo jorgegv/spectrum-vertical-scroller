@@ -197,7 +197,7 @@ __endasm;
 }
 
 // scroll the offscreen 8 pixels (1 column) to the right
-// this technique is done right to left
+// this technique is done right to left, bottom to top
 // we scroll a full column on each iteration
 // it also introduces some garbage on the left, but it assumed that the left edge is redrawn
 // periodically, and before the garbage enters the visible area
@@ -206,23 +206,20 @@ __asm
 
 	;; HL = src, DE = dst
 
-        ld de,_offscreen + OFFSCREEN_TOP_LINE_END_OFFSET	;; top of last col
-        ld hl,_offscreen + OFFSCREEN_TOP_LINE_END_OFFSET - SCROLL_AREA_EXTENDED_HEIGHT_LINES       ;; top of previous col
+        ld de,_offscreen + OFFSCREEN_BOTTOM_LINE_END_OFFSET	;; bottom of last col
+        ld hl,_offscreen + OFFSCREEN_BOTTOM_LINE_END_OFFSET - SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; bottom of previous col
 
         ld a, SCROLL_AREA_EXTENDED_WIDTH		;; number of columns
 
 column_8px:
-        push hl						;; save previous col top addr
+        push hl						;; save next col top addr
 
-        ;; FIXME: this can be done with LDD and will save a few instructions im the loop!
 REPT SCROLL_AREA_EXTENDED_HEIGHT_LINES
-	ldi						;; mods BC,DE,HL
+	ldd						;; mods BC,DE,HL
 ENDR
 
 	;; now HL points to the top of the current column
-	ld de, -2 * SCROLL_AREA_EXTENDED_HEIGHT_LINES
-	add hl,de					;; set HL back 2 cols
-	pop de						;; DE = previous col top addr (saved above)
+	pop de						;; DE = next col top addr (saved above)
 
 	dec a						;; iterate column counter
 	jp nz, column_8px
@@ -231,6 +228,7 @@ ENDR
 	
 __endasm;
 }
+
 
 // scroll the offscreen N pixels to the right
 // works the same as for 1px scroll, but repeating N times on each line

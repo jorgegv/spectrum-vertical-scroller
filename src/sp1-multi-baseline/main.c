@@ -18,7 +18,7 @@ void main( void ) {
 
     reset_perfmeter();
     while (1) {
-        offscreen_scroll_left_pixels( 2 );
+        offscreen_scroll_right_pixels( 8 );
         redraw_scroll_area();
     	do_perf_accounting();
     }
