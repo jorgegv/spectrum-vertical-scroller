@@ -24,6 +24,12 @@ void main( void ) {
             scroll_map_draw_hidden_right_col();
         offscreen_scroll_left_pixels( 1 );
         viewport_x++;
+
+        if ( ! ( viewport_y % SCROLL_MAP_TILE_HEIGHT_PIX ) )
+            scroll_map_draw_hidden_bottom_row();
+        offscreen_scroll_up_pixels( 1 );
+        viewport_y++;
+
         scroll_map_set_viewport_xy( viewport_x, viewport_y );
 
         redraw_scroll_area();
