@@ -6,11 +6,17 @@
 uint8_t blank_tile_2x2_data[ 32 ] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 struct tile_s blank_tile_2x2 = { 2, 2, blank_tile_2x2_data };
 
-// diamond tile
-struct tile_s diamond = { 2, 2, diamond_tile };
+// other tiles
+struct tile_s diamond	= { 2, 2, diamond_tile };
+struct tile_s clubs	= { 2, 2, clubs_tile };
+struct tile_s spades	= { 2, 2, spades_tile };
+struct tile_s hearts	= { 2, 2, hearts_tile };
 
-struct tile_s *tile_bank[ 1 ] = {
-    &diamond,
+struct tile_s *tile_bank[ 4 ] = {
+    &diamond,	// 'A'
+    &clubs,	// 'B'
+    &spades,	// 'C'
+    &hearts,	// 'D'
 };
 
 // the scroll map data - must be SCROLL_MAP_WIDTH * SCROLL_MAP_HEIGHT chars
@@ -18,28 +24,28 @@ struct tile_s *tile_bank[ 1 ] = {
 // a letter A-Z is translated to tile[ code - 65 ] (A=0, B=1, C=2, etc.)
 uint8_t scrollmap_data[] =
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    "AA A A A  A   A  A       A A A A  A    A A     A"
-    "A A A A   A   A  A  AAAA   A A A  A    A       A"
-    "A  A A A  A   A    A    A    A A  A    A   A   A"
-    "A   A A   A        A    A      A  A    A     A A"
-    "A    A A  A        A    A        A    A  A     A"
-    "A     A    A       A    A        A    A        A"
-    "A AAAAA     A       AAAA        A     A   A    A"
-    "A      AA    A                 A     A         A"
-    "A        A    AA             AA      A  A    A A"
-    "A  A   A  A     AAAA     AAAA       A          A"
-    "A    A     A        AAAAA         AA     A     A"
-    "A    A      AA                 AAA         A   A"
-    "A             AAA          AAAA     A  A     A A"
-    "A  AAAAA         AAAAAAAAAA                    A"
-    "A     AAAAA                           AAA      A"
-    "A    AAAAAAA     AAA       AAA       A   A AAA A"
-    "A   AA  A  AA   A   A     A   A     A     A    A"
-    "A   AA AA AAA        A   A     A   A         AAA"
-    "A   AAAAAAAAA         AAA       AAA       AAA  A"
-    "A   AAAAAAAAA                         AAAA     A"
-    "A   A A A A A   AAAAA       AAAAAAAAAA        AA"
-    "A                    AAAAAAA                   A"
+    "AB A C D  B   C  D       C C C C  B    A B     A"
+    "A B A C   B   C  D  AAAA   C C C  B    A       A"
+    "A  C A C  B   C    A    A    C C  B    A   C   A"
+    "A   C A   B        A    A      C  B    A     D A"
+    "A    D A  B        A    A        B    A  A     A"
+    "A     D    B       A    A        B    A        A"
+    "A AAAAA     B       AAAA        B     A   B    A"
+    "A      AA    B                 B     A         A"
+    "A        A    BB             BB      A  C    D A"
+    "A  B   B  A     BBBB     BBBB       A          A"
+    "A    B     A        BBBBB         AA     A     A"
+    "A    B      AA                 AAA         B   A"
+    "A             AAA          AAAA     C  D     A A"
+    "A  BBBBB         AAAAAAAAAA                    A"
+    "A     CCCCC                           CCC      A"
+    "A    CCCCCCC     AAA       BBB       C   C CCC A"
+    "A   CC AAA CC   A   A     B   B     C     C    A"
+    "A   CC AAA CC        A   A     B   B         BBA"
+    "A   CCCCCCCCC         AAA       BBB       CCC  A"
+    "A   CCCCCCCCC                         DDDD     A"
+    "A   D D D D D   AAAAA       BBBBBCCCCC        AA"
+    "A                    DDDDAAA                   A"
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 ;
 

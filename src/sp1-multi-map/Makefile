@@ -30,8 +30,10 @@ run:
 
 graphics:
 	$(MAKE) -s -C graphics
+	cp graphics/*.c .
+	$(MAKE) -s -C graphics clean
 
-build: clean config
+build: clean config graphics
 	$(MAKE) -s -j8 main.tap
 
 config:
