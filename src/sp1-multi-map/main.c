@@ -55,8 +55,12 @@ void scroll_dir( uint8_t dir, uint8_t num_pix ) {
     }
 }
 
-// adjust SCROLL_PATH_SIZE if needed
-#define SCROLL_PATH_SIZE       ( 48 * 8 )
+#define SCROLL_STEP		8
+#define SCROLL_PATH_SIZE	( 48 * 8  / SCROLL_STEP)
+
+#if ( SCROLL_STEP == 1 )
+
+// path for 1-pixel scrolling
 uint8_t scroll_path[] = {
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
@@ -68,6 +72,52 @@ uint8_t scroll_path[] = {
     "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
 };
 
+#elif ( SCROLL_STEP == 2 )
+
+// path for 2-pixel scrolling
+uint8_t scroll_path[] = {
+    "AAAAAAAAAAAAAAAAAAAAAAAA"
+    "BBBBBBBBBBBBBBBBBBBBBBBB"
+    "CCCCCCCCCCCCCCCCCCCCCCCC"
+    "DDDDDDDDDDDDDDDDDDDDDDDD"
+    "EEEEEEEEEEEEEEEEEEEEEEEE"
+    "FFFFFFFFFFFFFFFFFFFFFFFF"
+    "GGGGGGGGGGGGGGGGGGGGGGGG"
+    "HHHHHHHHHHHHHHHHHHHHHHHH"
+};
+
+#elif ( SCROLL_STEP == 4 )
+
+// path for 4-pixel scrolling
+uint8_t scroll_path[] = {
+    "AAAAAAAAAAAA"
+    "BBBBBBBBBBBB"
+    "CCCCCCCCCCCC"
+    "DDDDDDDDDDDD"
+    "EEEEEEEEEEEE"
+    "FFFFFFFFFFFF"
+    "GGGGGGGGGGGG"
+    "HHHHHHHHHHHH"
+};
+
+#elif ( SCROLL_STEP == 8 )
+
+// path for 8-pixel scrolling
+uint8_t scroll_path[] = {
+    "AAAAAA"
+    "BBBBBB"
+    "CCCCCC"
+    "DDDDDD"
+    "EEEEEE"
+    "FFFFFF"
+    "GGGGGG"
+    "HHHHHH"
+};
+
+#else
+    #error "SCROLL_STEP must be defined with value 1, 2, 4 or 8"
+#endif
+    
 void main( void ) {
     uint16_t i;
 
@@ -84,14 +134,10 @@ void main( void ) {
     reset_perfmeter();
     while (1) {
         for ( i=0; i < SCROLL_PATH_SIZE; i++ ) {
-            scroll_dir( directions[ scroll_path[ i ] - 'A' ], 1 );
+            scroll_dir( directions[ scroll_path[ i ] - 'A' ], SCROLL_STEP );
             scroll_map_set_viewport_xy( viewport_x, viewport_y );
             redraw_scroll_area();
             do_perf_accounting();
         }
-//        scroll_dir( scroll_path[0], 1 );
-//        scroll_map_set_viewport_xy( viewport_x, viewport_y );
-//        redraw_scroll_area();
-//        do_perf_accounting();
     }
 }
