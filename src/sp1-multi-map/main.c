@@ -22,7 +22,7 @@ uint16_t viewport_x, viewport_y;
 
 void scroll_dir( uint8_t dir, uint8_t num_pix ) {
     if ( dir & DIR_UP ) {
-        if ( viewport_y > num_pix ) {
+        if ( viewport_y >= SCROLL_MAP_TILE_HEIGHT_PIX + num_pix ) {
             if ( ! ( viewport_y % SCROLL_MAP_TILE_HEIGHT_PIX ) )
                 scroll_map_draw_hidden_top_row();
             offscreen_scroll_down_pixels( num_pix );
@@ -30,7 +30,7 @@ void scroll_dir( uint8_t dir, uint8_t num_pix ) {
         }
     }
     if ( dir & DIR_DOWN ) {
-        if ( viewport_y < SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX - num_pix ) {
+        if ( viewport_y < SCROLL_MAP_HEIGHT_PIX - SCROLL_MAP_TILE_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX - num_pix ) {
             if ( ! ( viewport_y % SCROLL_MAP_TILE_HEIGHT_PIX ) )
                 scroll_map_draw_hidden_bottom_row();
             offscreen_scroll_up_pixels( num_pix );
@@ -38,7 +38,7 @@ void scroll_dir( uint8_t dir, uint8_t num_pix ) {
         }
     }
     if ( dir & DIR_LEFT ) {
-        if ( viewport_x > num_pix ) {
+        if ( viewport_x >= SCROLL_MAP_TILE_WIDTH_PIX + num_pix ) {
             if ( ! ( viewport_x % SCROLL_MAP_TILE_WIDTH_PIX ) )
                 scroll_map_draw_hidden_left_col();
             offscreen_scroll_right_pixels( num_pix );
@@ -46,7 +46,7 @@ void scroll_dir( uint8_t dir, uint8_t num_pix ) {
         }
     }
     if ( dir & DIR_RIGHT ) {
-        if ( viewport_x < SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX - num_pix ) {
+        if ( viewport_x < SCROLL_MAP_WIDTH_PIX - SCROLL_MAP_TILE_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX - num_pix ) {
             if ( ! ( viewport_x % SCROLL_MAP_TILE_WIDTH_PIX ) )
                 scroll_map_draw_hidden_right_col();
             offscreen_scroll_left_pixels( num_pix );
@@ -55,8 +55,8 @@ void scroll_dir( uint8_t dir, uint8_t num_pix ) {
     }
 }
 
-#define SCROLL_STEP		8
-#define SCROLL_PATH_SIZE	( 48 * 8  / SCROLL_STEP)
+#define SCROLL_STEP		1
+//#define SCROLL_PATH_SIZE	( 48 * 8  / SCROLL_STEP)
 
 #if ( SCROLL_STEP == 1 )
 
@@ -119,25 +119,28 @@ uint8_t scroll_path[] = {
 #endif
     
 void main( void ) {
-    uint16_t i;
+    uint8_t *p,dir;
 
     init_perfmeter();
     init_screen_address_tables();
     init_tile_map();
 
     // initial setup and draw
-    viewport_x = 32;
+    viewport_x = 16;
     viewport_y = 96;
     scroll_map_set_viewport_xy( viewport_x, viewport_y );
     scroll_map_draw_viewport();
 
     reset_perfmeter();
     while (1) {
-        for ( i=0; i < SCROLL_PATH_SIZE; i++ ) {
-            scroll_dir( directions[ scroll_path[ i ] - 'A' ], SCROLL_STEP );
+        p = scroll_path;
+        while ( dir = *p++ ) {
+            scroll_dir( directions[ dir - 'A'], SCROLL_STEP );
             scroll_map_set_viewport_xy( viewport_x, viewport_y );
             redraw_scroll_area();
             do_perf_accounting();
+            gotoxy( 0, 22 );
+            printf( "VX:%-3d, VY:%-3d",viewport_x,viewport_y );
         }
     }
 }
