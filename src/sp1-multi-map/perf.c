@@ -44,7 +44,7 @@ void do_perf_accounting( void ) {
 
     // if one second has passed, show FPS marker and reset perfmeter
     if ( global_frame_counter - last_frame_counter >= FRAMES_PER_SECOND ) {
-        gotoxy( 0, 23 );
+        gotoxy( 40, 23 );
         printf( "FPS: %-2d", main_loop_counter );
         reset_perfmeter();
     }
