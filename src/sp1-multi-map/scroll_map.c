@@ -50,17 +50,6 @@ uint8_t scrollmap_data[] =
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 ;
 
-// main scroll map definition
-struct scroll_map_s {
-    uint8_t width;
-    uint8_t height;
-    uint8_t *data;
-    struct {
-        uint16_t x;
-        uint16_t y;
-    } viewport_pos;
-};
-
 struct scroll_map_s scroll_map = {
     SCROLL_MAP_WIDTH,
     SCROLL_MAP_HEIGHT,
@@ -201,3 +190,39 @@ void scroll_map_draw_viewport( void ) {
                 scroll_map_get_tile_at( row + i, col + j )
             );
 }
+
+void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
+    if ( dir & DIR_UP ) {
+        if ( scroll_map.viewport_pos.y >= num_pix ) {
+            if ( ! ( scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX ) )
+                scroll_map_draw_hidden_top_row();
+            offscreen_scroll_down_pixels( num_pix );
+            scroll_map.viewport_pos.y -= num_pix;
+        }
+    }
+    if ( dir & DIR_DOWN ) {
+        if ( scroll_map.viewport_pos.y < SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX - num_pix ) {
+            if ( ! ( scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX ) )
+                scroll_map_draw_hidden_bottom_row();
+            offscreen_scroll_up_pixels( num_pix );
+            scroll_map.viewport_pos.y += num_pix;
+        }
+    }
+    if ( dir & DIR_LEFT ) {
+        if ( scroll_map.viewport_pos.x >= num_pix ) {
+            if ( ! ( scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX ) )
+                scroll_map_draw_hidden_left_col();
+            offscreen_scroll_right_pixels( num_pix );
+            scroll_map.viewport_pos.x -= num_pix;
+        }
+    }
+    if ( dir & DIR_RIGHT ) {
+        if ( scroll_map.viewport_pos.x < SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX - num_pix ) {
+            if ( ! ( scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX ) )
+                scroll_map_draw_hidden_right_col();
+            offscreen_scroll_left_pixels( num_pix );
+            scroll_map.viewport_pos.x += num_pix;
+        }
+    }
+}
+
