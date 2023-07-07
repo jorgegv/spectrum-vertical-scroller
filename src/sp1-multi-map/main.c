@@ -14,7 +14,6 @@ uint8_t directions[8] = {
 };
 
 #define SCROLL_STEP		1
-//#define SCROLL_PATH_SIZE	( 48 * 8  / SCROLL_STEP)
 
 #if ( SCROLL_STEP == 1 )
 
@@ -67,7 +66,7 @@ uint8_t scroll_path[] = {
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
 */
 
-/*
+//*/
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
@@ -92,11 +91,11 @@ uint8_t scroll_path[] = {
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
     "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
-*/
+//*/
 /*
     "ACACACACACACACACACACACACACACACACACAC"
 */
-///*
+/*
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
@@ -106,6 +105,9 @@ uint8_t scroll_path[] = {
     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+*/
+/*
+    "CCCCCCCCCCCCCCCC"
     "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
     "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
     "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
@@ -117,7 +119,7 @@ uint8_t scroll_path[] = {
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
     "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
-//*/
+*/
 };
 
 #elif ( SCROLL_STEP == 2 )
@@ -189,17 +191,16 @@ void main( void ) {
 //    scroll_map_set_viewport_xy( 640, 0 );
 
     // initial setup and draw
-    scroll_map_set_viewport_xy( 0, 32 );
+    scroll_map_set_viewport_xy( 0, 48 );
     scroll_map_draw_viewport();
 
     reset_perfmeter();
     while (1) {
         p = scroll_path;
-        while ( dir = *p++ ) {
+        while ( dir = *p++ ) {	// walk path
             scroll_map_scroll_viewport( directions[ dir - 'A'], SCROLL_STEP );
             redraw_scroll_area();
             do_perf_accounting();
-        }
-        while (1);
+        } // loop forever
     }
 }
