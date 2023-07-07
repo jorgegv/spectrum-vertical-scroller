@@ -86,7 +86,9 @@ void scroll_map_set_viewport_xy( uint16_t x, uint16_t y ) {
 }
 
 struct tile_s *scroll_map_get_tile_at( uint8_t row, uint8_t col ) {
-    uint8_t tile_code = scroll_map.data[ row * SCROLL_MAP_WIDTH + col ];
+    static uint8_t tile_code;
+
+    tile_code = scroll_map.data[ row * SCROLL_MAP_WIDTH + col ];
     switch ( tile_code ) {
         case ' ':
             return &blank_tile_2x2;
@@ -98,15 +100,21 @@ struct tile_s *scroll_map_get_tile_at( uint8_t row, uint8_t col ) {
 }
 
 void scroll_map_draw_hidden_top_row( void ) {
-    uint8_t i;
+    static uint8_t i,offset,map_offset;
+    static uint16_t row,col,width;
+
     // scroll map coordinates
-    uint16_t row = scroll_map.viewport_pos.y / SCROLL_MAP_TILE_HEIGHT_PIX - 1;
-    uint16_t col = scroll_map.viewport_pos.x / SCROLL_MAP_TILE_WIDTH_PIX;
-    uint16_t width = SCROLL_AREA_EXTENDED_WIDTH / SCROLL_MAP_TILE_WIDTH;
+    row = scroll_map.viewport_pos.y / SCROLL_MAP_TILE_HEIGHT_PIX - 1;
+    col = scroll_map.viewport_pos.x / SCROLL_MAP_TILE_WIDTH_PIX;
+    width = SCROLL_AREA_EXTENDED_WIDTH / SCROLL_MAP_TILE_WIDTH;
+
     // offscreen cell offset
-    uint8_t offset = 0;
+    offset = 0;
+
     // map cell offset
-    uint8_t map_offset = 1;
+    map_offset = 1;
+
+    // adjust offsets and number of tiles to draw
     if ( scroll_map.viewport_pos.x < SCROLL_MAP_TILE_WIDTH_PIX ) {
         offset = SCROLL_MAP_TILE_WIDTH;
         map_offset = 0;
@@ -115,6 +123,7 @@ void scroll_map_draw_hidden_top_row( void ) {
     if ( scroll_map.viewport_pos.x >= SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX - SCROLL_MAP_TILE_WIDTH_PIX ) {
         width--;
     }    
+
 //    gotoxy( 0,20 );
 //    printf( "TOP: r=%-2d c=%-2d w=%-2d o=%-2d", row, col, width, offset );
     for ( i = 0; i < width; i++ )
@@ -126,15 +135,21 @@ void scroll_map_draw_hidden_top_row( void ) {
 }
 
 void scroll_map_draw_hidden_bottom_row( void ) {
-    uint8_t i;
+    static uint8_t i,offset,map_offset;
+    static uint16_t row,col,width;
+
     // scroll map coordinates
-    uint16_t row = scroll_map.viewport_pos.y / SCROLL_MAP_TILE_HEIGHT_PIX + SCROLL_AREA_HEIGHT / SCROLL_MAP_TILE_HEIGHT;
-    uint16_t col = scroll_map.viewport_pos.x / SCROLL_MAP_TILE_WIDTH_PIX;
-    uint16_t width = SCROLL_AREA_EXTENDED_WIDTH / SCROLL_MAP_TILE_WIDTH;
+    row = scroll_map.viewport_pos.y / SCROLL_MAP_TILE_HEIGHT_PIX + SCROLL_AREA_HEIGHT / SCROLL_MAP_TILE_HEIGHT;
+    col = scroll_map.viewport_pos.x / SCROLL_MAP_TILE_WIDTH_PIX;
+    width = SCROLL_AREA_EXTENDED_WIDTH / SCROLL_MAP_TILE_WIDTH;
+
     // offscreen cell offset
-    uint8_t offset = 0;
+    offset = 0;
+
     // map cell offset
-    uint8_t map_offset = 1;
+    map_offset = 1;
+
+    // adjust offsets and number of tiles to draw
     if ( scroll_map.viewport_pos.x < SCROLL_MAP_TILE_WIDTH_PIX ) {
         offset = SCROLL_MAP_TILE_WIDTH;
         map_offset = 0;
@@ -143,6 +158,7 @@ void scroll_map_draw_hidden_bottom_row( void ) {
     if ( scroll_map.viewport_pos.x >= SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX - SCROLL_MAP_TILE_WIDTH_PIX ) {
         width--;
     }    
+
 //    gotoxy( 0,21 );
 //    printf( "BTM: r=%-2d c=%-2d w=%-2d o=%-2d", row, col, width, offset );
     for ( i = 0; i < width; i++ )
@@ -154,15 +170,21 @@ void scroll_map_draw_hidden_bottom_row( void ) {
 }
 
 void scroll_map_draw_hidden_left_col( void ) {
-    uint8_t i;
+    static uint8_t i,offset,map_offset;
+    static uint16_t row,col,height;
+
     // scroll map coordinates
-    uint16_t row = scroll_map.viewport_pos.y / SCROLL_MAP_TILE_HEIGHT_PIX;
-    uint16_t col = scroll_map.viewport_pos.x / SCROLL_MAP_TILE_WIDTH_PIX - 1;
-    uint16_t height = SCROLL_AREA_EXTENDED_HEIGHT / SCROLL_MAP_TILE_HEIGHT;
+    row = scroll_map.viewport_pos.y / SCROLL_MAP_TILE_HEIGHT_PIX;
+    col = scroll_map.viewport_pos.x / SCROLL_MAP_TILE_WIDTH_PIX - 1;
+    height = SCROLL_AREA_EXTENDED_HEIGHT / SCROLL_MAP_TILE_HEIGHT;
+
     // offscreen cell offset
-    uint8_t offset = 0;
+    offset = 0;
+
     // map cell offset
-    uint8_t map_offset = 1;
+    map_offset = 1;
+
+    // adjust offsets and number of tiles to draw
     if ( scroll_map.viewport_pos.y < SCROLL_MAP_TILE_HEIGHT_PIX ) {
         offset = SCROLL_MAP_TILE_HEIGHT;
         map_offset = 0;
@@ -171,6 +193,7 @@ void scroll_map_draw_hidden_left_col( void ) {
     if ( scroll_map.viewport_pos.y >= SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX - SCROLL_MAP_TILE_HEIGHT_PIX ) {
         height--;
     }    
+
 //    gotoxy( 0,22 );
 //    printf( "LFT: r=%-2d c=%-2d h=%-2d o=%-2d", row, col, height, offset );
     for ( i = 0; i < height ; i++ )
@@ -182,15 +205,21 @@ void scroll_map_draw_hidden_left_col( void ) {
 }
 
 void scroll_map_draw_hidden_right_col( void ) {
-    uint8_t i;
+    static uint8_t i,offset,map_offset;
+    static uint16_t row,col,height;
+
     // scroll map coordinates
-    uint16_t row = scroll_map.viewport_pos.y / SCROLL_MAP_TILE_HEIGHT_PIX;
-    uint16_t col = scroll_map.viewport_pos.x / SCROLL_MAP_TILE_WIDTH_PIX + SCROLL_AREA_WIDTH / SCROLL_MAP_TILE_WIDTH;
-    uint16_t height = SCROLL_AREA_EXTENDED_HEIGHT / SCROLL_MAP_TILE_HEIGHT;
+    row = scroll_map.viewport_pos.y / SCROLL_MAP_TILE_HEIGHT_PIX;
+    col = scroll_map.viewport_pos.x / SCROLL_MAP_TILE_WIDTH_PIX + SCROLL_AREA_WIDTH / SCROLL_MAP_TILE_WIDTH;
+    height = SCROLL_AREA_EXTENDED_HEIGHT / SCROLL_MAP_TILE_HEIGHT;
+
     // offscreen cell offset
-    uint8_t offset = 0;
+    offset = 0;
+
     // map cell offset
-    uint8_t map_offset = 1;
+    map_offset = 1;
+
+    // adjust offsets and number of tiles to draw
     if ( scroll_map.viewport_pos.y < SCROLL_MAP_TILE_HEIGHT_PIX ) {
         offset = SCROLL_MAP_TILE_HEIGHT;
         map_offset = 0;
@@ -199,6 +228,7 @@ void scroll_map_draw_hidden_right_col( void ) {
     if ( scroll_map.viewport_pos.y >= SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX - SCROLL_MAP_TILE_HEIGHT_PIX ) {
         height--;
     }
+
 //    gotoxy( 0,23 );
 //    printf( "RGT: r=%-2d c=%-2d h=%-2d o=%-2d", row, col, height, offset );
     for ( i = 0; i < height; i++ )
@@ -213,10 +243,14 @@ void scroll_map_draw_hidden_right_col( void ) {
 // SCROLL_MAP_TILE_HEIGHT_PIX and SCROLL_MAP_TILE_WIDTH_PIX (for the moment)
 
 void scroll_map_draw_viewport( void ) {
-    uint8_t i,j;
+    static uint8_t i,j;
+    static uint16_t row,col;
+
     // scroll map coordinates
-    uint16_t row = scroll_map.viewport_pos.y / SCROLL_MAP_TILE_HEIGHT_PIX;
-    uint16_t col = scroll_map.viewport_pos.x / SCROLL_MAP_TILE_WIDTH_PIX;
+    row = scroll_map.viewport_pos.y / SCROLL_MAP_TILE_HEIGHT_PIX;
+    col = scroll_map.viewport_pos.x / SCROLL_MAP_TILE_WIDTH_PIX;
+
+    // draw viewport
     for ( j = 0; j < SCROLL_AREA_WIDTH / SCROLL_MAP_TILE_WIDTH; j++ )
         for ( i = 0; i < SCROLL_AREA_HEIGHT / SCROLL_MAP_TILE_HEIGHT; i++ )
             tile_draw_offscreen(	// offscreen cell coordinates
@@ -224,6 +258,9 @@ void scroll_map_draw_viewport( void ) {
                 ( j + 1 ) * SCROLL_MAP_TILE_WIDTH,
                 scroll_map_get_tile_at( row + i, col + j )
             );
+
+    // draw hidden areas surrounding the viewport, if the current position
+    // is not on the corners
     if ( row > 0 )
         scroll_map_draw_hidden_top_row();
     if ( row > SCROLL_MAP_HEIGHT / SCROLL_MAP_TILE_HEIGHT - SCROLL_AREA_HEIGHT / SCROLL_MAP_TILE_HEIGHT - 1 )
@@ -295,4 +332,3 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
     }
 
 }
-

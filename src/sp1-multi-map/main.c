@@ -169,7 +169,7 @@ uint8_t scroll_path[] = {
 #endif
     
 void main( void ) {
-    uint8_t *p,dir;
+    static uint8_t *p,dir;
 
     init_perfmeter();
     init_screen_address_tables();
