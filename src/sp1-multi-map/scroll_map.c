@@ -22,7 +22,7 @@ struct tile_s *tile_bank[ 4 ] = {
 // the scroll map data - must be SCROLL_MAP_WIDTH * SCROLL_MAP_HEIGHT chars
 // a space represents the blank tile above
 // a letter A-Z is translated to tile[ code - 65 ] (A=0, B=1, C=2, etc.)
-uint8_t scrollmap_data[] =
+uint8_t _scrollmap_data[] =
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     "AB A C D  B   C  D       C C C C  B    A B     A"
     "A B A C   B   C  D  AAAA   C C C  B    A       A"
@@ -47,6 +47,25 @@ uint8_t scrollmap_data[] =
     "A   D D D D D   AAAAA       BBBBBCCCCC        AA"
     "A                    DDDDAAA                   A"
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+;
+
+uint8_t scrollmap_data[] =
+    "AAAAAAAAAAAAAAAAAAAAAAAA"
+    "A A  A A         A  A  A"
+    "A A  A  A       A      A"
+    "A A  A   A     A      AA"
+    "A AAAA    A   A     AAAA"
+    "A A        A A      A  A"
+    "A  A        A     AAA AA"
+    "A   A  A          A    A"
+    "A    A          AAA   AA"
+    "A     A         A      A"
+    "A      A      AAA      A"
+    "A       A   AAA       AA"
+    "A        A  A          A"
+    "AA        AAA         AA"
+    "A       A     A A A    A"
+    "AAAAAAAAAAAAAAAAAAAAAAAA"
 ;
 
 struct scroll_map_s scroll_map = {

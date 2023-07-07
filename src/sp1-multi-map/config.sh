@@ -26,10 +26,8 @@ SCROLL_MAP_TILE_HEIGHT=2
 
 # Scroll map definitions
 # Sizes are in TILEs!
-SCROLL_MAP_WIDTH=48
-SCROLL_MAP_HEIGHT=24
-SCROLL_MAP_VIEWPORT_INITIAL_ROW=4
-SCROLL_MAP_VIEWPORT_INITIAL_COL=6
+SCROLL_MAP_WIDTH=24
+SCROLL_MAP_HEIGHT=16
 
 #############################################
 ## End of configuration variables
