@@ -42,7 +42,7 @@ uint8_t scroll_path[] = {
     "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
     "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
 */
-///*
+/*
     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
@@ -53,8 +53,8 @@ uint8_t scroll_path[] = {
     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
-//*/
-///*
+*/
+/*
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
@@ -65,7 +65,7 @@ uint8_t scroll_path[] = {
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
-//*/
+*/
 
 /*
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
@@ -93,6 +93,7 @@ uint8_t scroll_path[] = {
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
     "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
 */
+    "ACACACACACACACACACACACACACAC"
 };
 
 #elif ( SCROLL_STEP == 2 )
@@ -148,12 +149,23 @@ void main( void ) {
     init_screen_address_tables();
     init_tile_map();
 
-    // initial setup and draw
+
+    // horizontal checks
 //    scroll_map_set_viewport_xy( 0, 0 );
 //    scroll_map_set_viewport_xy( 0, 16 );
 //    scroll_map_set_viewport_xy( 0, 32 );
-    scroll_map_set_viewport_xy( 0, 240 );
+//    scroll_map_set_viewport_xy( 0, 240 );
 //    scroll_map_set_viewport_xy( 0, 256 );
+
+    // vertical checks
+//    scroll_map_set_viewport_xy( 0, 0 );
+//    scroll_map_set_viewport_xy( 16, 0 );
+//    scroll_map_set_viewport_xy( 32, 0 );
+//    scroll_map_set_viewport_xy( 624, 0 );
+//    scroll_map_set_viewport_xy( 640, 0 );
+
+    // initial setup and draw
+    scroll_map_set_viewport_xy( 0, 48 );
     scroll_map_draw_viewport();
 
     reset_perfmeter();
@@ -164,6 +176,6 @@ void main( void ) {
             redraw_scroll_area();
             do_perf_accounting();
         }
-//        while (1);
+        while (1);
     }
 }
