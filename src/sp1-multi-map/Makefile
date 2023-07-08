@@ -10,7 +10,7 @@ OBJS		= $(SRCS_C:.c=.o) $(SRCS_ASM:.asm=.o)
 
 # targets
 .SILENT:
-.PHONY: clean run graphics build config
+.PHONY: clean run graphics build config map
 
 %.o: %.c
 	$(ZCC) $(CFLAGS) -c $*.c
@@ -22,7 +22,7 @@ main.tap: $(OBJS)
 	$(ZCC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o main -create-app
 
 clean:
-	-rm -f *.tap *.o *.bin *.map *.lis main config.h
+	-rm -f *.tap *.o *.bin *.map *.lis main config.h scroll_map_data.*
 	if [ -d graphics ]; then $(MAKE) -s -C graphics clean ; fi
 
 run:
@@ -36,5 +36,8 @@ graphics:
 build: clean config graphics
 	$(MAKE) -s -j8 main.tap
 
-config:
-	./config.sh > config.h
+map:
+	./create-map.sh
+
+config: map
+	./create-config.sh
