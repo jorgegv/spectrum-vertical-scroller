@@ -14,5 +14,13 @@ extern uint8_t wallv_tile[];
 extern uint8_t cornerbr_tile[];
 extern uint8_t cornertl_tile[];
 extern uint8_t cornertr_tile[];
+extern uint8_t walltt_tile[];
+extern uint8_t walltb_tile[];
+extern uint8_t walltl_tile[];
+extern uint8_t walltr_tile[];
+extern uint8_t wallhre_tile[];
+extern uint8_t wallhle_tile[];
+extern uint8_t wallvte_tile[];
+extern uint8_t wallvbe_tile[];
 
 #endif // _GRAPHICS_H
