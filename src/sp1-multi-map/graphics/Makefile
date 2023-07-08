@@ -1,6 +1,6 @@
 .SILENT:
 
-all: ball diamond.c clubs.c spades.c hearts.c wallh.c wallv.c cornerbl.c cornerbr.c cornertl.c cornertr.c
+all: ball diamond.c clubs.c spades.c hearts.c wallh.c wallv.c cornerbl.c cornerbr.c cornertl.c cornertr.c walltt.c walltb.c walltl.c walltr.c wallhre.c wallhle.c wallvte.c wallvbe.c sand.c flower.c
 
 %.c: %.asm
 	# compile to binary

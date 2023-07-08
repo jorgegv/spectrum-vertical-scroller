@@ -17,6 +17,16 @@ struct tile_s wallv	= { 2, 2, wallv_tile };
 struct tile_s cornerbr	= { 2, 2, cornerbr_tile };
 struct tile_s cornertl	= { 2, 2, cornertl_tile };
 struct tile_s cornertr	= { 2, 2, cornertr_tile };
+struct tile_s walltt	= { 2, 2, walltt_tile };
+struct tile_s walltb	= { 2, 2, walltb_tile };
+struct tile_s walltl	= { 2, 2, walltl_tile };
+struct tile_s walltr	= { 2, 2, walltr_tile };
+struct tile_s wallhre	= { 2, 2, wallhre_tile };
+struct tile_s wallhle	= { 2, 2, wallhle_tile };
+struct tile_s wallvte	= { 2, 2, wallvte_tile };
+struct tile_s wallvbe	= { 2, 2, wallvbe_tile };
+struct tile_s sand	= { 2, 2, sand_tile };
+struct tile_s flower	= { 2, 2, flower_tile };
 
 struct tile_s *tile_bank[] = {
     &diamond,	// A
@@ -29,6 +39,16 @@ struct tile_s *tile_bank[] = {
     &cornerbr,	// H
     &cornertl,	// I
     &cornertr,	// J
+    &walltt,	// K
+    &walltb,	// L
+    &walltl,	// M
+    &walltr,	// N
+    &wallhre,	// O
+    &wallhle,	// P
+    &wallvte,	// Q
+    &wallvbe,	// R
+    &sand,	// S
+    &flower,	// T
 };
 
 void init_scroll_map( void ) {
