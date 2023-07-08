@@ -19,64 +19,6 @@ struct tile_s *tile_bank[ 4 ] = {
     &hearts,	// 'D'
 };
 
-// the scroll map data - must be SCROLL_MAP_WIDTH * SCROLL_MAP_HEIGHT chars
-// a space represents the blank tile above
-// a letter A-Z is translated to tile[ code - 65 ] (A=0, B=1, C=2, etc.)
-uint8_t scrollmap_data[] =
-    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    "AB A C D  B   C  D       C C C C  B    A B     A"
-    "A B A C   B   C  D  AAAA   C C C  B    A       A"
-    "A  C A C  B   C    A    A    C C  B    A   C   A"
-    "A   C A   B        A    A      C  B    A     D A"
-    "A    D A  B        A    A        B    A  A     A"
-    "A     D    B       A    A        B    A        A"
-    "A AAAAA     B       AAAA        B     A   B    A"
-    "A      AA    B                 B     A         A"
-    "A        A    BB             BB      A  C    D A"
-    "A  B   B  A     BBBB     BBBB       A          A"
-    "A    B     A        BBBBB         AA     A     A"
-    "A    B      AA                 AAA         B   A"
-    "A             AAA          AAAA     C  D     A A"
-    "A  BBBBB         AAAAAAAAAA                    A"
-    "A     CCCCC                           CCC      A"
-    "A    CCCCCCC     AAA       BBB       C   C CCC A"
-    "A   CC AAA CC   A   A     B   B     C     C    A"
-    "A   CC AAA CC        A   A     B   B         BBA"
-    "A   CCCCCCCCC         AAA       BBB       CCC  A"
-    "A   CCCCCCCCC                         DDDD     A"
-    "A   D D D D D   AAAAA       BBBBBCCCCC        AA"
-    "A                    DDDDAAA                   A"
-    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-;
-
-/*
-uint8_t scrollmap_data[] =
-    "AAAAAAAAAAAAAAAAAAAAAAAA"
-    "A A  A A         A  A  A"
-    "A A  A  A       A      A"
-    "A A  A   A     A      AA"
-    "A AAAA    A   A     AAAA"
-    "A A        A A      A  A"
-    "A  A        A     AAA AA"
-    "A   A  A          A    A"
-    "A    A          AAA   AA"
-    "A     A         A      A"
-    "A      A      AAA      A"
-    "A       A   AAA       AA"
-    "A        A  A          A"
-    "AA        AAA         AA"
-    "A       A     A A A    A"
-    "AAAAAAAAAAAAAAAAAAAAAAAA"
-;
-*/
-
-struct scroll_map_s scroll_map = {
-    SCROLL_MAP_WIDTH,
-    SCROLL_MAP_HEIGHT,
-    &scrollmap_data[0],
-    { 0, 0 },		// viewport position
-};
-
 void init_scroll_map( void ) {
 }
 
@@ -263,11 +205,11 @@ void scroll_map_draw_viewport( void ) {
     // is not on the corners
     if ( row > 0 )
         scroll_map_draw_hidden_top_row();
-    if ( row > SCROLL_MAP_HEIGHT / SCROLL_MAP_TILE_HEIGHT - SCROLL_AREA_HEIGHT / SCROLL_MAP_TILE_HEIGHT - 1 )
+    if ( row <= SCROLL_MAP_HEIGHT / SCROLL_MAP_TILE_HEIGHT - SCROLL_AREA_HEIGHT / SCROLL_MAP_TILE_HEIGHT )
         scroll_map_draw_hidden_bottom_row();
     if ( col > 0 )
         scroll_map_draw_hidden_left_col();
-    if ( col > SCROLL_MAP_WIDTH / SCROLL_MAP_TILE_WIDTH - SCROLL_AREA_WIDTH / SCROLL_MAP_TILE_WIDTH - 1 )
+    if ( col <= SCROLL_MAP_WIDTH / SCROLL_MAP_TILE_WIDTH - SCROLL_AREA_WIDTH / SCROLL_MAP_TILE_WIDTH )
         scroll_map_draw_hidden_right_col();
 }
 
