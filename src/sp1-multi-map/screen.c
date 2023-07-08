@@ -28,7 +28,8 @@ void init_tile_map( void ) {
     for ( c = 0; c < SCROLL_AREA_WIDTH; c++ )
       for ( r = 0; r < SCROLL_AREA_HEIGHT; r++ )
         sp1_PrintAt( SCROLL_AREA_TOP + r, SCROLL_AREA_LEFT + c,          // screen position
-          ( ( (r+c) % 2) ? PAPER_BLACK : PAPER_RED ) | INK_WHITE | BRIGHT,      // attr
+          PAPER_YELLOW | INK_BLACK,
+//          ( ( (r+c) % 2) ? PAPER_BLACK : PAPER_RED ) | INK_WHITE | BRIGHT,      // attr
           ( uint16_t ) offscreen_cell_address( SCROLL_MAP_TILE_HEIGHT + r, SCROLL_MAP_TILE_WIDTH + c ) );       // pointer
 }
 

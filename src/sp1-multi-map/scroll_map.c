@@ -11,12 +11,24 @@ struct tile_s diamond	= { 2, 2, diamond_tile };
 struct tile_s clubs	= { 2, 2, clubs_tile };
 struct tile_s spades	= { 2, 2, spades_tile };
 struct tile_s hearts	= { 2, 2, hearts_tile };
+struct tile_s wallh	= { 2, 2, wallh_tile };
+struct tile_s cornerbl	= { 2, 2, cornerbl_tile };
+struct tile_s wallv	= { 2, 2, wallv_tile };
+struct tile_s cornerbr	= { 2, 2, cornerbr_tile };
+struct tile_s cornertl	= { 2, 2, cornertl_tile };
+struct tile_s cornertr	= { 2, 2, cornertr_tile };
 
-struct tile_s *tile_bank[ 4 ] = {
-    &diamond,	// 'A'
-    &clubs,	// 'B'
-    &spades,	// 'C'
-    &hearts,	// 'D'
+struct tile_s *tile_bank[] = {
+    &diamond,	// A
+    &clubs,	// B
+    &spades,	// C
+    &hearts,	// D
+    &wallh,	// E
+    &cornerbl,	// F
+    &wallv,	// G
+    &cornerbr,	// H
+    &cornertl,	// I
+    &cornertr,	// J
 };
 
 void init_scroll_map( void ) {
