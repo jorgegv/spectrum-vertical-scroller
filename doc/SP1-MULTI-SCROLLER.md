@@ -62,6 +62,26 @@ The animated demos and TAP files are ones provided in my previous post.
 
 ## Scroll map management
 
+- A scrolling system is a viewport over a bigger map that can't fit in the view, so the need appears for scrolling over it, i.e. moving a window or "viewport" over it in small steps.
+- The visible zone of the map is determined at all times by the position of the viewport over the global map
+- Scrolling can be done at 1-pixel resolution, so the viewport coordinates must be held in pixels, not in tiles or character cells
+- 8-bit pixel coordinates are enough for just 1 full screen, so we must use 16-bit for each viewport coordinate (X and Y)
+- So maximum size of the global map is 65536x65536 pixels. That's 8192 character cells in each dimension, so it seems pretty enough for a Spectrum game :-)
+- With this schema, 3 coordinate systems need to be taken into account:
+    - The viewport coordinates: high resolution coordinate system with 16-bit per coordinate
+    - The map coordinates: measures the position of tiles in the map, also 16-bit per coordinate
+    - The SP1 coordinates: these are the screen-cell coordinates, our familiar 32x24 cell array. 8-bit per coordinate
+
+- The global map is built with tiles of a regular size (can be 8x8, 16x16, 16x24, etc.). All tiles must be the same size.
+- Horizontal and vertical tile dimensions do not need to be the same, but it helps with map drawing. In our examples, our map is made of 16x16-pixel tiles (2x2 chars)
+- The map is stored as a linear byte array of size MAP_WIDTH x MAP_HEIGHT (dimensions in tiles).
+- Each map position in the array stores a 1-byte tile id and represents the tile at map position (ROW,COL). So for example, if the map size is 20 rows x 30 columns, the tile id for map position (4,5) is stored at position (4 x 30 + 5) = 125.
+- There is a global tile table which maps the tile id to the tile data, so that it can be easily used by a tile drawing routine.
+
+- The virtual framebuffer (the offscreen) is not the same size of the viewport, but instead it has a hidden surrounding band which is 1-tile wide all over the perimeter of the viewport. This is where new tiles are drawn (to memory) before coming into view by the scrolling process. It's the same concept that was seen in my previous SP1 vertical scroller examples for the "hidden top row", but applied to all directions (top, left, bottom, right).
+- The scrolling routines for each direction detect when new graphics are needed in the hidden band (because they are going to bring it into view with the next scroll operation), and will call the proper map functions to get tile data and draw it to the proper position in the hidden band.
+- Example: if we are going to show a 16x24-cell scrolling viewport, with 2x2-cell tiles, the offscreen will be 20x28 cells (16+2+2, 20+2+2).
+
 
 
 ## Assembler optimizations for scroll routines
