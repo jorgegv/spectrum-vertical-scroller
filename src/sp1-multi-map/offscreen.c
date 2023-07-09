@@ -172,25 +172,22 @@ void offscreen_scroll_right_4px( void ) __naked {
 __asm
 
 	ld hl,_offscreen			;; first screen line
-	ld c,SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; number of lines
+	ld b,SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; number of lines
 	ld de,SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; save for quick sum
 
 line_4px:
 	push hl					;; save start address
 
-	ld b,SCROLL_AREA_EXTENDED_WIDTH
 	xor a					;; A = 0
 
-loop_line_4px:
+REPT SCROLL_AREA_EXTENDED_WIDTH
 	rrd		;; rrd (hl)
 	add hl,de				;; next column
-	djnz loop_line_4px
+ENDR
 
 	pop hl					;; restore start address
 	inc hl					;; ...one line down
-
-	dec c					;; iterate next line
-	jp nz, line_4px
+	djnz line_4px				;; iterate next line
 	ret
 
 __endasm;
@@ -393,25 +390,22 @@ void offscreen_scroll_left_4px( void ) __naked {
 __asm
 
 	ld hl,_offscreen + OFFSCREEN_TOP_LINE_END_OFFSET	;; top of last col
-	ld c,SCROLL_AREA_EXTENDED_HEIGHT_LINES			;; number of lines
+	ld b,SCROLL_AREA_EXTENDED_HEIGHT_LINES			;; number of lines
 	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; save for quick sum
 
 line_4px_left:
 	push hl					;; save start address
 
-	ld b,SCROLL_AREA_EXTENDED_WIDTH
 	xor a					;; A = 0
 
-loop_line_4px_left:
+REPT SCROLL_AREA_EXTENDED_WIDTH
 	rld		;; rld (hl)
 	add hl,de				;; next column
-	djnz loop_line_4px_left
+ENDR
 
 	pop hl					;; restore start address
 	inc hl					;; ...one line down
-
-	dec c					;; iterate next line
-	jp nz, line_4px_left
+	djnz line_4px_left				;; iterate next line
 	ret
 
 __endasm;
