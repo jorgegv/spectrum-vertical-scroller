@@ -13,7 +13,7 @@ uint8_t directions[8] = {
     DIR_LEFT | DIR_DOWN,	// 'H'
 };
 
-#define SCROLL_STEP		4
+#define SCROLL_STEP		1
 
 #if ( SCROLL_STEP == 1 )
 

@@ -77,28 +77,34 @@ __asm
 	ld de,SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; needed for quick sum
 
 line_1px:
-	push hl					;; save line start address
+	ld bc,hl				;; save line start address
 
 	or a					;; C = 0
-	ld b,SCROLL_AREA_EXTENDED_WIDTH		;; initialize line counter
 
-loop_line_1px:
+MACRO SCROLL_RIGHT_1PX
+	LOCAL next_loop_no_carry,next_loop_with_carry,next_byte
+
 	rr (hl)					;; bring in C flag as MSB, then C = LSB
 	jp nc, next_loop_no_carry		;; duplicate loop closing depending on C
 
 next_loop_with_carry:
 	add hl,de				;; modifies C flag
 	scf					;; C = 1
-	djnz loop_line_1px
-	jp end_line_1px
+	jp next_byte
 
 next_loop_no_carry:
 	add hl,de				;; modifies C flag
 	or a					;; C = 0
-	djnz loop_line_1px
 
-end_line_1px:
-	pop hl					;; restore start address
+next_byte:
+
+ENDM
+
+REPT SCROLL_AREA_EXTENDED_WIDTH
+	SCROLL_RIGHT_1PX
+ENDR
+
+	ld hl,bc				;; restore start address
 	inc hl					;; ...one line down
 
 	dec a					;; iterate next line
@@ -299,28 +305,34 @@ __asm
 	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES		;; needed for quick sum
 
 line_1px_left:
-	push hl					;; save line start address
+	ld bc,hl				;; save line start address
 
 	or a					;; C = 0
-	ld b,SCROLL_AREA_EXTENDED_WIDTH		;; initialize line counter
 
-loop_line_1px_left:
-	rl (hl)					;; bring in C flag as MSB, then C = LSB
-	jp nc, next_loop_no_carry_left		;; duplicate loop closing depending on C
+MACRO SCROLL_LEFT_1PX
+        LOCAL next_loop_no_carry,next_loop_with_carry,next_byte
 
-next_loop_with_carry_left:
-	add hl,de				;; modifies C flag
-	scf					;; C = 1
-	djnz loop_line_1px_left
-	jp end_line_1px_left
+        rl (hl)                                 ;; bring in C flag as MSB, then C = LSB
+        jp nc, next_loop_no_carry               ;; duplicate loop closing depending on C
 
-next_loop_no_carry_left:
-	add hl,de				;; modifies C flag
-	or a					;; C = 0
-	djnz loop_line_1px_left
+next_loop_with_carry:
+        add hl,de                               ;; modifies C flag
+        scf                                     ;; C = 1
+        jp next_byte
 
-end_line_1px_left:
-	pop hl					;; restore start address
+next_loop_no_carry:
+        add hl,de                               ;; modifies C flag
+        or a                                    ;; C = 0
+
+next_byte:
+
+ENDM
+
+REPT SCROLL_AREA_EXTENDED_WIDTH
+        SCROLL_LEFT_1PX
+ENDR
+
+	ld hl,bc				;; restore start address
 	inc hl					;; ...one line down
 
 	dec a					;; iterate next line
