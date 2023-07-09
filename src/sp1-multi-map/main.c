@@ -123,18 +123,16 @@ uint8_t scroll_path[] = {
     // walls map walk
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
-    "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
-    "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
     "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
     "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
-    "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
+    "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
 };
 
 #elif ( SCROLL_STEP == 2 )
@@ -144,18 +142,16 @@ uint8_t scroll_path[] = {
     // walls map walk
     "AAAAAAAAAAAAAAAA"
     "AAAAAAAAAAAAAAAA"
-    "AAAAAAAAAAAAAAAA"
     "BBBBBBBBBBBBBBBB"
     "CCCCCCCCCCCCCCCC"
     "CCCCCCCCCCCCCCCC"
-    "CCCCCCCCCCCCCCCC"
-    "EEEEEEEEEEEEEEEE"
+    "DDDDDDDDDDDDDDDD"
     "EEEEEEEEEEEEEEEE"
     "EEEEEEEEEEEEEEEE"
     "FFFFFFFFFFFFFFFF"
     "GGGGGGGGGGGGGGGG"
     "GGGGGGGGGGGGGGGG"
-    "GGGGGGGGGGGGGGGG"
+    "HHHHHHHHHHHHHHHH"
 };
 
 #elif ( SCROLL_STEP == 4 )
@@ -165,18 +161,16 @@ uint8_t scroll_path[] = {
     // walls map walk
     "AAAAAAAA"
     "AAAAAAAA"
-    "AAAAAAAA"
     "BBBBBBBB"
     "CCCCCCCC"
     "CCCCCCCC"
-    "CCCCCCCC"
-    "EEEEEEEE"
+    "DDDDDDDD"
     "EEEEEEEE"
     "EEEEEEEE"
     "FFFFFFFF"
     "GGGGGGGG"
     "GGGGGGGG"
-    "GGGGGGGG"
+    "HHHHHHHH"
 };
 
 #elif ( SCROLL_STEP == 8 )
@@ -186,18 +180,16 @@ uint8_t scroll_path[] = {
     // walls map walk
     "AAAA"
     "AAAA"
-    "AAAA"
     "BBBB"
     "CCCC"
     "CCCC"
-    "CCCC"
-    "EEEE"
+    "DDDD"
     "EEEE"
     "EEEE"
     "FFFF"
     "GGGG"
     "GGGG"
-    "GGGG"
+    "HHHH"
 };
 
 #else
@@ -228,7 +220,7 @@ void main( void ) {
 
     // initial setup and draw
 //    scroll_map_set_viewport_xy( 0, 48 );
-    scroll_map_set_viewport_xy( 0, 0 );
+    scroll_map_set_viewport_xy( 0, 32 );
     scroll_map_draw_viewport();
 
     reset_perfmeter();
