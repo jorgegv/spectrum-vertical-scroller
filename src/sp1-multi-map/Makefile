@@ -4,13 +4,13 @@ CFLAGS		= -vn -m --list --c-code-in-asm -compiler=sdcc
 LDFLAGS		= -lndos -lsp1-zx -lmath32
 
 # sources
-SRCS_C		= $(wildcard *.c)
+SRCS_C		= $(wildcard *.c) $(wildcard tiles/*.c) $(wildcard sprites/*.c)
 SRCS_ASM	= $(wildcard *.asm)
 OBJS		= $(SRCS_C:.c=.o) $(SRCS_ASM:.asm=.o)
 
 # targets
 .SILENT:
-.PHONY: clean run graphics build config map
+.PHONY: clean run tiles sprites build config map
 
 %.o: %.c
 	$(ZCC) $(CFLAGS) -c $*.c
@@ -24,16 +24,19 @@ main.tap: $(OBJS)
 clean:
 	-rm -f *.tap *.o *.bin *.map *.lis main config.h scroll_map_data.*
 	if [ -d graphics ]; then $(MAKE) -s -C graphics clean ; fi
+	$(MAKE) -s -C sprites clean
+	$(MAKE) -s -C tiles clean
 
 run:
 	fuse main.tap
 
-graphics:
-	$(MAKE) -s -C graphics
-	cp graphics/*.c .
-	$(MAKE) -s -C graphics clean
+tiles:
+	$(MAKE) -s -C tiles
 
-build: clean config graphics
+sprites:
+	$(MAKE) -s -C sprites
+
+build: clean config tiles sprites
 	$(MAKE) -s -j8 main.tap
 
 map:
