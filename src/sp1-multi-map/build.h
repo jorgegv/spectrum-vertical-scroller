@@ -37,5 +37,6 @@
 #include "tile.h"
 #include "graphics.h"
 #include "scroll_map.h"
+#include "kbd.h"
 
 #endif // _BUILD_H

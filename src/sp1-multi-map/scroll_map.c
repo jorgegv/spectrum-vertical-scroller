@@ -253,6 +253,14 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
     // only then we can do the scroll (all that are requested)
     // if we do not do it in this order, scroll won't work correctly
 
+    // Also, when redrawing the borders, we need to scroll them right (for
+    // top and bottom) or down (for left and right) because of the
+    // fractional coordinates: e.g.  for scroll right: if pos_x is multiple
+    // of TILE_WIDTH (->forces redraw of left border), then we need to
+    // scroll down the left border that has just been drawn by ( pos_y %
+    // TILE_HEIGHT) pixels, so that the just redrawn border is pixel aligned
+    // with what's inside the viewport
+
     // first, check if borders need to be redrawn
     if ( dir & DIR_UP ) {
         if ( scroll_map.viewport_pos.y >= num_pix ) {
@@ -281,24 +289,28 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
 
     // after, do scroll if needed and update viewport coords
     if ( dir & DIR_UP ) {
+        // FIX: scroll right top hidden row by viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
         if ( scroll_map.viewport_pos.y >= num_pix ) {
             offscreen_scroll_down_pixels( num_pix );
             scroll_map.viewport_pos.y -= num_pix;
         }
     }
     if ( dir & DIR_DOWN ) {
+        // FIX: scroll right bottom hidden row by viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
         if ( scroll_map.viewport_pos.y <= SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX - num_pix ) {
             offscreen_scroll_up_pixels( num_pix );
             scroll_map.viewport_pos.y += num_pix;
         }
     }
     if ( dir & DIR_LEFT ) {
+        // FIX: scroll down left hidden column by viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
         if ( scroll_map.viewport_pos.x >= num_pix ) {
             offscreen_scroll_right_pixels( num_pix );
             scroll_map.viewport_pos.x -= num_pix;
         }
     }
     if ( dir & DIR_RIGHT ) {
+        // FIX: scroll down right hidden column by viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
         if ( scroll_map.viewport_pos.x <= SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX - num_pix ) {
             offscreen_scroll_left_pixels( num_pix );
             scroll_map.viewport_pos.x += num_pix;

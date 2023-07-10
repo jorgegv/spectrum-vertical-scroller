@@ -121,7 +121,7 @@ uint8_t scroll_path[] = {
     "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
 */
     // walls map walk
-    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    "AAAAAAAAAAAAAAA"
     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
@@ -197,12 +197,12 @@ uint8_t scroll_path[] = {
 #endif
     
 void main( void ) {
-    static uint8_t *p,dir;
+    static uint8_t *p,dir,kbd;
 
     init_perfmeter();
     init_screen_address_tables();
     init_tile_map();
-
+    init_kbd();
 
     // horizontal checks
 //    scroll_map_set_viewport_xy( 0, 0 );
@@ -225,11 +225,30 @@ void main( void ) {
 
     reset_perfmeter();
     while (1) {
+
+#if 0
+        // either this loop: read kbd and scroll according to QAOP-SP
+        kbd = kbd_read();
+        dir = 0;
+        dir |= ( kbd & in_UP ? DIR_UP : 0 );
+        dir |= ( kbd & in_DOWN ? DIR_DOWN : 0 );
+        dir |= ( kbd & in_LEFT ? DIR_LEFT : 0 );
+        dir |= ( kbd & in_RIGHT ? DIR_RIGHT : 0 );
+        if ( dir ) {
+            scroll_map_scroll_viewport( dir, SCROLL_STEP );
+            redraw_scroll_area();
+        }
+        do_perf_accounting();
+        gotoxy(0,23); printf("D:%d",dir );
+#else
+        // or this other: read 'path' and run the walk encoded there
         p = scroll_path;
         while ( dir = *p++ ) {	// walk path
             scroll_map_scroll_viewport( directions[ dir - 'A'], SCROLL_STEP );
             redraw_scroll_area();
             do_perf_accounting();
-        } // loop forever
-    }
+
+        }
+#endif
+    } // loop forever
 }
