@@ -81,27 +81,11 @@ line_1px:
 
 	or a					;; C = 0
 
-MACRO SCROLL_RIGHT_1PX
-	LOCAL next_loop_no_carry,next_loop_with_carry,next_byte
-
-	rr (hl)					;; bring in C flag as MSB, then C = LSB
-	jp nc, next_loop_no_carry		;; duplicate loop closing depending on C
-
-next_loop_with_carry:
-	add hl,de				;; modifies C flag
-	scf					;; C = 1
-	jp next_byte
-
-next_loop_no_carry:
-	add hl,de				;; modifies C flag
-	or a					;; C = 0
-
-next_byte:
-
-ENDM
-
 REPT SCROLL_AREA_EXTENDED_WIDTH
-	SCROLL_RIGHT_1PX
+	rr (hl)					;; bring in C flag as MSB, then C = LSB
+	ex af,af
+	add hl,de
+	ex af,af
 ENDR
 
 	ld hl,bc				;; restore start address
@@ -309,27 +293,11 @@ line_1px_left:
 
 	or a					;; C = 0
 
-MACRO SCROLL_LEFT_1PX
-        LOCAL next_loop_no_carry,next_loop_with_carry,next_byte
-
-        rl (hl)                                 ;; bring in C flag as MSB, then C = LSB
-        jp nc, next_loop_no_carry               ;; duplicate loop closing depending on C
-
-next_loop_with_carry:
-        add hl,de                               ;; modifies C flag
-        scf                                     ;; C = 1
-        jp next_byte
-
-next_loop_no_carry:
-        add hl,de                               ;; modifies C flag
-        or a                                    ;; C = 0
-
-next_byte:
-
-ENDM
-
 REPT SCROLL_AREA_EXTENDED_WIDTH
-        SCROLL_LEFT_1PX
+        rl (hl)                                 ;; bring in C flag as MSB, then C = LSB
+        ex af,af
+        add hl,de
+        ex af,af
 ENDR
 
 	ld hl,bc				;; restore start address
