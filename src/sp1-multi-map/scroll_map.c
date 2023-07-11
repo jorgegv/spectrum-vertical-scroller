@@ -268,7 +268,7 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
                 scroll_map_draw_hidden_top_row();
                 // scroll right top hidden row by viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
                 if ( scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX ) {
-                    offscreen_scroll_left_Npx_tile_row(
+                    offscreen_scroll_left_tile_row(
                         // start addr: top-left addr of top hidden row
                         &offscreen[ 0 ],
                         scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
@@ -283,7 +283,7 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
                 scroll_map_draw_hidden_bottom_row();
                 // scroll right bottom hidden row by viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
                 if ( scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX ) {
-                    offscreen_scroll_left_Npx_tile_row(
+                    offscreen_scroll_left_tile_row(
                         // start addr: top-left addr of bottom hidden row
                         &offscreen[ SCROLL_MAP_TILE_HEIGHT_PIX + SCROLL_AREA_HEIGHT_PIX ],
                         scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
@@ -298,7 +298,7 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
                 scroll_map_draw_hidden_left_col();
                 // scroll down left hidden column by viewport_pos.x % SCROLL_MAP_TILE_HEIGHT_PIX
                 if ( scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX ) {
-                    offscreen_scroll_up_Npx_tile_col(
+                    offscreen_scroll_up_tile_col(
                         // start addr: top-left addr of left hidden column
                         &offscreen[ 0 ],
                         scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX
@@ -313,7 +313,7 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
                 scroll_map_draw_hidden_right_col();
                 // scroll down right hidden column by viewport_pos.x % SCROLL_MAP_TILE_HEIGHT_PIX
                 if ( scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX ) {
-                    offscreen_scroll_up_Npx_tile_col(
+                    offscreen_scroll_up_tile_col(
                         // start addr: top-left addr of hidden right column
                         &offscreen[ ( SCROLL_AREA_EXTENDED_WIDTH - SCROLL_MAP_TILE_WIDTH ) * SCROLL_AREA_EXTENDED_HEIGHT_PIX ],
                         scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX

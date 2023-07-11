@@ -583,8 +583,55 @@ ENDR
 __endasm;
 }
 
+void offscreen_scroll_left_8px_tile_row( void *start, uint16_t num_pix ) __naked __smallc __z88dk_callee {
+__asm
+
+	pop hl		;; save ret addr
+	pop bc		;; C = num_pix
+	pop de		;; DE = start addr
+	push hl		;; push ret addr again
+
+	;; HL = src, DE = dst
+
+	push de
+	ld hl,de
+        ld de,SCROLL_AREA_EXTENDED_HEIGHT_LINES
+        add hl,de
+        pop de
+
+        ld a, SCROLL_AREA_EXTENDED_WIDTH	;; number of columns
+
+column_8px_left_tr:
+        push hl					;; save next col top addr
+        push hl
+
+REPT SCROLL_MAP_TILE_HEIGHT_PIX
+	ldi					;; mods BC,DE,HL
+ENDR
+
+	pop hl					;; HL = next col top addr
+	ld de, SCROLL_AREA_EXTENDED_HEIGHT_LINES
+	add hl,de				;; skip to next-next col
+	pop de					;; DE = next col addr
+	
+	dec a						;; iterate column counter
+	jp nz, column_8px_left_tr
+
+	ret
+	
+__endasm;
+}
+
+void offscreen_scroll_left_tile_row( void *start, uint16_t num_pix ) __smallc __z88dk_callee {
+    while ( num_pix > 8 ) {
+    	offscreen_scroll_left_8px_tile_row( start, num_pix );
+    	num_pix -= 8;
+    }
+    offscreen_scroll_left_Npx_tile_row( start, num_pix );
+}
+
 // scrolls down a vertical column of tiles N pixels (used to scroll the hidden borders)
-void offscreen_scroll_up_Npx_tile_col( void *start, uint16_t num_pix ) __naked __smallc __z88dk_callee {
+void offscreen_scroll_up_tile_col( void *start, uint16_t num_pix ) __naked __smallc __z88dk_callee {
 __asm
 	
     pop de      ;; save retaddr
