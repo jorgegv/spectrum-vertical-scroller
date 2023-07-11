@@ -222,11 +222,14 @@ void main( void ) {
 //    scroll_map_set_viewport_xy( 0, 48 );
     scroll_map_set_viewport_xy( 0, 32 );
     scroll_map_draw_viewport();
+    redraw_scroll_area();
+
+//    gotoxy( 0,22 ); printf("VX:%3d VY:%3d",scroll_map.viewport_pos.x,scroll_map.viewport_pos.y );
 
     reset_perfmeter();
     while (1) {
 
-#if 0
+#if 1
         // either this loop: read kbd and scroll according to QAOP-SP
         kbd = kbd_read();
         dir = 0;
@@ -237,9 +240,9 @@ void main( void ) {
         if ( dir ) {
             scroll_map_scroll_viewport( dir, SCROLL_STEP );
             redraw_scroll_area();
+//            gotoxy( 0,22 ); printf("VX:%3d VY:%3d",scroll_map.viewport_pos.x,scroll_map.viewport_pos.y );
         }
         do_perf_accounting();
-        gotoxy(0,23); printf("D:%d",dir );
 #else
         // or this other: read 'path' and run the walk encoded there
         p = scroll_path;
@@ -247,7 +250,6 @@ void main( void ) {
             scroll_map_scroll_viewport( directions[ dir - 'A'], SCROLL_STEP );
             redraw_scroll_area();
             do_perf_accounting();
-
         }
 #endif
     } // loop forever

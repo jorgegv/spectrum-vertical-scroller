@@ -486,9 +486,9 @@ n_end_line_1px_left:
 __endasm;
 }
 
-//////////////////
-// SCROLL LEFT  //
-//////////////////
+/////////////////////
+// SCROLL UP/DOWN  //
+/////////////////////
 
 // scroll the offscreen N pixels down
 // works bottom to up, right to left
@@ -553,3 +553,85 @@ ENDR
 __endasm;
 }
 
+//////////////////////////////////
+// Specialized scroll functions
+//////////////////////////////////
+
+void offscreen_scroll_left_Npx_tile_row( void *start, uint16_t num_pix ) __smallc __z88dk_callee;
+
+// scrolls right a horizontal row of tiles N pixels (used to scroll the hidden borders)
+void offscreen_scroll_left_Npx_tile_row( void *start, uint16_t num_pix ) __naked __z88dk_callee __smallc {
+__asm
+
+	pop de					;; save retaddr
+	pop bc					;; C = num_pix (param)
+	pop hl					;; HL = start addr of first line
+	push de					;; push retaddr again
+
+	ld de,( SCROLL_AREA_EXTENDED_WIDTH - 1 ) * SCROLL_AREA_EXTENDED_HEIGHT_PIX
+	add hl,de					;; right-most byte of the top line
+	ld a,SCROLL_MAP_TILE_HEIGHT_PIX			;; number of lines
+	ld de,-SCROLL_AREA_EXTENDED_HEIGHT_LINES	;; needed for quick sum
+
+pre_n_line_1px_tr:
+	push bc					;; save C (num_pix) for later
+
+n_line_1px_tr:
+	push hl					;; save line start address
+
+	or a					;; CF = 0
+
+REPT SCROLL_AREA_EXTENDED_WIDTH
+	rl (hl)					;; bring in CF flag as MSB, then CF = LSB
+	ex af,af				;; save CF
+	add hl,de
+	ex af,af				;; restore CF
+ENDR
+
+	pop hl					;; restore start address
+
+	dec c					;; iterate number of scrolled pixels
+	jp nz, n_line_1px_tr
+
+	pop bc					;; if finished with this line, restore C = num_pix
+
+	inc hl					;; ...one line down
+
+	dec a					;; iterate next line
+	jp nz, pre_n_line_1px_tr
+
+	ret
+
+__endasm;
+}
+
+void offscreen_scroll_up_Npx_tile_col( void *start, uint16_t num_pix ) __smallc __z88dk_callee;
+
+// scrolls down a vertical column of tiles N pixels (used to scroll the hidden borders)
+void offscreen_scroll_up_Npx_tile_col( void *start, uint16_t num_pix ) __naked __smallc __z88dk_callee {
+__asm
+	
+    pop de      ;; save retaddr
+    pop bc      ;; C = num_pix
+    pop hl	;; HL = start address
+    push de     ;; restore retaddr
+
+    ld de,hl						;; save dst addr
+    add hl,bc    					;; HL = num_pix lines before (src)
+
+    ld a,SCROLL_MAP_TILE_WIDTH				;; column iterator
+
+loop_down_column_tc:
+
+REPT SCROLL_AREA_EXTENDED_HEIGHT_LINES
+    ldi							;; transfer bytes
+ENDR
+
+    ;; with this setup, HL and DE are already set for prev column
+
+    dec a						;; iterate column loop
+    jp nz, loop_down_column_tc
+
+    ret
+__endasm;
+}

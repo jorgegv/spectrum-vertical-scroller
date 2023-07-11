@@ -20,4 +20,7 @@ void offscreen_scroll_left_pixels( uint16_t num_pix );
 void offscreen_scroll_up_pixels( uint16_t num_pix );
 void offscreen_scroll_down_pixels( uint16_t num_pix );
 
+void offscreen_scroll_left_Npx_tile_row( void *start, uint16_t num_pix ) __smallc __z88dk_callee;
+void offscreen_scroll_up_Npx_tile_col( void *start, uint16_t num_pix ) __smallc __z88dk_callee;
+
 #endif // _OFFSCREEN_H

@@ -264,53 +264,85 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
     // first, check if borders need to be redrawn
     if ( dir & DIR_UP ) {
         if ( scroll_map.viewport_pos.y >= num_pix ) {
-            if ( ! ( scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX ) )
+            if ( ! ( scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX ) ) {
                 scroll_map_draw_hidden_top_row();
+                // scroll right top hidden row by viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
+                if ( scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX ) {
+                    offscreen_scroll_left_Npx_tile_row(
+                        // start addr: top-left addr of top hidden row
+                        &offscreen[ 0 ],
+                        scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
+                    );
+                }
+            }
         }
     }
     if ( dir & DIR_DOWN ) {
         if ( scroll_map.viewport_pos.y <= SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX - num_pix ) {
-            if ( ! ( scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX ) )
+            if ( ! ( scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX ) ) {
                 scroll_map_draw_hidden_bottom_row();
+                // scroll right bottom hidden row by viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
+                if ( scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX ) {
+                    offscreen_scroll_left_Npx_tile_row(
+                        // start addr: top-left addr of bottom hidden row
+                        &offscreen[ SCROLL_MAP_TILE_HEIGHT_PIX + SCROLL_AREA_HEIGHT_PIX ],
+                        scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
+                    );
+                }
+            }
         }
     }
     if ( dir & DIR_LEFT ) {
         if ( scroll_map.viewport_pos.x >= num_pix ) {
-            if ( ! ( scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX ) )
+            if ( ! ( scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX ) ) {
                 scroll_map_draw_hidden_left_col();
+                // scroll down left hidden column by viewport_pos.x % SCROLL_MAP_TILE_HEIGHT_PIX
+                if ( scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX ) {
+                    offscreen_scroll_up_Npx_tile_col(
+                        // start addr: top-left addr of left hidden column
+                        &offscreen[ 0 ],
+                        scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX
+                    );
+                }
+            }
         }
     }
     if ( dir & DIR_RIGHT ) {
         if ( scroll_map.viewport_pos.x <= SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX - num_pix ) {
-            if ( ! ( scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX ) )
+            if ( ! ( scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX ) ) {
                 scroll_map_draw_hidden_right_col();
+                // scroll down right hidden column by viewport_pos.x % SCROLL_MAP_TILE_HEIGHT_PIX
+                if ( scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX ) {
+                    offscreen_scroll_up_Npx_tile_col(
+                        // start addr: top-left addr of hidden right column
+                        &offscreen[ ( SCROLL_AREA_EXTENDED_WIDTH - SCROLL_MAP_TILE_WIDTH ) * SCROLL_AREA_EXTENDED_HEIGHT_PIX ],
+                        scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX
+                    );
+                }
+            }
         }
     }
 
     // after, do scroll if needed and update viewport coords
     if ( dir & DIR_UP ) {
-        // FIX: scroll right top hidden row by viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
         if ( scroll_map.viewport_pos.y >= num_pix ) {
             offscreen_scroll_down_pixels( num_pix );
             scroll_map.viewport_pos.y -= num_pix;
         }
     }
     if ( dir & DIR_DOWN ) {
-        // FIX: scroll right bottom hidden row by viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
         if ( scroll_map.viewport_pos.y <= SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX - num_pix ) {
             offscreen_scroll_up_pixels( num_pix );
             scroll_map.viewport_pos.y += num_pix;
         }
     }
     if ( dir & DIR_LEFT ) {
-        // FIX: scroll down left hidden column by viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
         if ( scroll_map.viewport_pos.x >= num_pix ) {
             offscreen_scroll_right_pixels( num_pix );
             scroll_map.viewport_pos.x -= num_pix;
         }
     }
     if ( dir & DIR_RIGHT ) {
-        // FIX: scroll down right hidden column by viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX
         if ( scroll_map.viewport_pos.x <= SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX - num_pix ) {
             offscreen_scroll_left_pixels( num_pix );
             scroll_map.viewport_pos.x += num_pix;
