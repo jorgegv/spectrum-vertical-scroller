@@ -557,8 +557,6 @@ __endasm;
 // Specialized scroll functions
 //////////////////////////////////
 
-void offscreen_scroll_left_Npx_tile_row( void *start, uint16_t num_pix ) __smallc __z88dk_callee;
-
 // scrolls right a horizontal row of tiles N pixels (used to scroll the hidden borders)
 void offscreen_scroll_left_Npx_tile_row( void *start, uint16_t num_pix ) __naked __z88dk_callee __smallc {
 __asm
@@ -604,8 +602,6 @@ ENDR
 
 __endasm;
 }
-
-void offscreen_scroll_up_Npx_tile_col( void *start, uint16_t num_pix ) __smallc __z88dk_callee;
 
 // scrolls down a vertical column of tiles N pixels (used to scroll the hidden borders)
 void offscreen_scroll_up_Npx_tile_col( void *start, uint16_t num_pix ) __naked __smallc __z88dk_callee {
