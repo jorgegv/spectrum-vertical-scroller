@@ -240,25 +240,15 @@ pre_n_line_1px:
 n_line_1px:
 	push hl					;; save line start address
 
-	ld b,SCROLL_AREA_EXTENDED_WIDTH		;; initialize line counter
 	or a					;; CF = 0
 
-n_loop_line_1px:
+REPT SCROLL_AREA_EXTENDED_WIDTH
 	rr (hl)					;; bring in CF flag as MSB, then CF = LSB
-	jp nc, n_next_loop_no_carry		;; duplicate loop closing depending on C
+	ex af,af
+	add hl,de
+	ex af,af
+ENDR
 
-n_next_loop_with_carry:
-	add hl,de				;; modifies CF flag
-	scf					;; CF = 1
-	djnz n_loop_line_1px
-	jp n_end_line_1px
-
-n_next_loop_no_carry:
-	add hl,de				;; modifies CF flag
-	or a					;; CF = 0
-	djnz n_loop_line_1px
-
-n_end_line_1px:
 	pop hl					;; restore start address
 
 	dec c					;; iterate number of scrolled pixels
@@ -451,25 +441,15 @@ pre_n_line_1px_left:
 n_line_1px_left:
 	push hl						;; save line start address
 
-	ld b,SCROLL_AREA_EXTENDED_WIDTH			;; initialize line counter
 	or a						;; CF = 0
 
-n_loop_line_1px_left:
+REPT SCROLL_AREA_EXTENDED_WIDTH
 	rl (hl)						;; bring in CF flag as MSB, then CF = LSB
-	jp nc, n_next_loop_no_carry_left		;; duplicate loop closing depending on C
+	ex af,af
+	add hl,de
+	ex af,af
+ENDR
 
-n_next_loop_with_carry_left:
-	add hl,de					;; modifies CF flag
-	scf						;; CF = 1
-	djnz n_loop_line_1px_left
-	jp n_end_line_1px_left
-
-n_next_loop_no_carry_left:
-	add hl,de					;; modifies CF flag
-	or a						;; CF = 0
-	djnz n_loop_line_1px_left
-
-n_end_line_1px_left:
 	pop hl						;; restore start address
 
 	dec c						;; iterate number of scrolled pixels
