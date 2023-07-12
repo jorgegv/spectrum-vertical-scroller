@@ -96,20 +96,24 @@ void redraw_scroll_area( void ) {
 }
 
 void enable_hidden_band_view( void ) {
-    set_hidden_tile_band_attr( HIDDEN_BAND_VIEW_ATTR );
+    set_hidden_tile_band_attr( HIDDEN_BAND_VISIBLE_ATTR );
+    scroll_area_p = &scroll_area_debug;
+    redraw_scroll_area();
 }
 
 void disable_hidden_band_view( void ) {
-    set_hidden_tile_band_attr( DEFAULT_ATTR );
+    set_hidden_tile_band_attr( HIDDEN_BAND_INVISIBLE_ATTR );
+    redraw_scroll_area();
+    scroll_area_p = &scroll_area_nodebug;
 }
 
 void init_screen( void ) {
     init_screen_address_tables();
     init_tile_map();
 
-    scroll_area_p = ( debug_enabled ? &scroll_area_debug : &scroll_area_nodebug );
-
     if ( debug_enabled )
         enable_hidden_band_view();
+    else
+        disable_hidden_band_view();
 }
 

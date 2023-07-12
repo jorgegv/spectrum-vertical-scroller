@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "build.h"
 
@@ -231,6 +232,19 @@ void main( void ) {
 #if 1
         // either this loop: read kbd and scroll according to QAOP-SP
         kbd = kbd_read();
+
+        // check debug toggle
+        if ( kbd & KBD_IN_DEBUG ) {
+            msleep( 300 );
+            debug_enabled = ! debug_enabled;
+            if ( debug_enabled ) {
+                enable_hidden_band_view();
+            } else {
+                disable_hidden_band_view();
+            }
+        }
+
+        // check movements
         dir = 0;
         dir |= ( kbd & in_UP ? DIR_UP : 0 );
         dir |= ( kbd & in_DOWN ? DIR_DOWN : 0 );
