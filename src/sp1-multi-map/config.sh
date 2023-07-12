@@ -26,7 +26,7 @@ SCROLL_MAP_TILE_HEIGHT=2
 
 # the file which includes the scroll map - found in dir maps/
 # dimensions are automatically calculated from it
-SCROLL_MAP_FILE=walls.map
+SCROLL_MAP_FILE=walls.scrollmap
 
 #############################################
 ## End of configuration variables
