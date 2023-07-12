@@ -38,5 +38,6 @@
 #include "graphics.h"
 #include "scroll_map.h"
 #include "kbd.h"
+#include "debug.h"
 
 #endif // _BUILD_H

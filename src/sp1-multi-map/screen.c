@@ -15,12 +15,23 @@ void init_screen_address_tables( void ) {
     }
 }
 
+struct sp1_Rect full_screen = {
+    .row = 0,
+    .col = 0,
+    .width = 32,
+    .height = 24,
+};
+
 void init_tile_map( void ) {
     uint8_t r,c;
 
     // initialize SP1
     sp1_Initialize(SP1_IFLAG_MAKE_ROTTBL | SP1_IFLAG_OVERWRITE_TILES | SP1_IFLAG_OVERWRITE_DFILE,
-      PAPER_BLACK | INK_GREEN, ' ');
+      DEFAULT_ATTR, ' ');
+
+    // set default background and paper for all screen
+    sp1_Invalidate( &full_screen );
+    sp1_UpdateNow();
 
     // setup the SP1 tile map to point to the cells in the offscreen buffer
     // the top rows are reserved for drawing and not visible
@@ -28,62 +39,77 @@ void init_tile_map( void ) {
     for ( c = 0; c < SCROLL_AREA_WIDTH; c++ )
       for ( r = 0; r < SCROLL_AREA_HEIGHT; r++ )
         sp1_PrintAt( SCROLL_AREA_TOP + r, SCROLL_AREA_LEFT + c,          // screen position
-          PAPER_YELLOW | INK_BLACK,
-//          ( ( (r+c) % 2) ? PAPER_BLACK : PAPER_RED ) | INK_WHITE | BRIGHT,      // attr
+          SCROLL_AREA_ATTR,
           ( uint16_t ) offscreen_cell_address( SCROLL_MAP_TILE_HEIGHT + r, SCROLL_MAP_TILE_WIDTH + c ) );       // pointer
+}
 
-// if SCROLL_DEBUG is 1, we set the hidden band attributes so that graphics can be seen in them
-#if SCROLL_DEBUG
-
+void set_hidden_tile_band_attr( uint8_t attr ) {
+    uint8_t r,c;
     // top hidden bar
     for ( c = 0; c < SCROLL_AREA_EXTENDED_WIDTH; c++ )
       for ( r = 0; r < SCROLL_MAP_TILE_HEIGHT; r++ )
         sp1_PrintAt( SCROLL_AREA_EXTENDED_TOP + r, SCROLL_AREA_EXTENDED_LEFT + c,          // screen position
-          PAPER_WHITE | INK_BLACK | BRIGHT,
+          attr,
           ( uint16_t ) offscreen_cell_address( r, c ) );       // pointer
 
     // bottom hidden bar
     for ( c = 0; c < SCROLL_AREA_EXTENDED_WIDTH; c++ )
       for ( r = 0; r < SCROLL_MAP_TILE_HEIGHT; r++ )
         sp1_PrintAt( SCROLL_AREA_BOTTOM + 1 + r, SCROLL_AREA_EXTENDED_LEFT + c,          // screen position
-          PAPER_WHITE | INK_BLACK | BRIGHT,
+          attr,
           ( uint16_t ) offscreen_cell_address( SCROLL_MAP_TILE_HEIGHT + SCROLL_AREA_HEIGHT + r, c ) );       // pointer
 
     // left hidden bar
     for ( c = 0; c < SCROLL_MAP_TILE_WIDTH; c++ )
       for ( r = 0; r < SCROLL_AREA_EXTENDED_HEIGHT; r++ )
         sp1_PrintAt( SCROLL_AREA_EXTENDED_TOP + r, SCROLL_AREA_EXTENDED_LEFT + c,          // screen position
-          PAPER_WHITE | INK_BLACK | BRIGHT,
+          attr,
           ( uint16_t ) offscreen_cell_address( r, c ) );       // pointer
 
     // right hidden bar
     for ( c = 0; c < SCROLL_MAP_TILE_WIDTH; c++ )
       for ( r = 0; r < SCROLL_AREA_EXTENDED_HEIGHT; r++ )
         sp1_PrintAt( SCROLL_AREA_EXTENDED_TOP + r, SCROLL_AREA_RIGHT + 1 + c,          // screen position
-          PAPER_WHITE | INK_BLACK | BRIGHT,
+          attr,
           ( uint16_t ) offscreen_cell_address( r, SCROLL_MAP_TILE_WIDTH + SCROLL_AREA_WIDTH + c ) );       // pointer
-
-#endif
-
 }
 
-#if SCROLL_DEBUG
-struct sp1_Rect scroll_area = {
+struct sp1_Rect scroll_area_debug = {
     .row	= SCROLL_AREA_EXTENDED_TOP,
     .col	= SCROLL_AREA_EXTENDED_LEFT,
     .width	= SCROLL_AREA_EXTENDED_WIDTH,
     .height	= SCROLL_AREA_EXTENDED_HEIGHT,
 };
-#else
-struct sp1_Rect scroll_area = {
+
+struct sp1_Rect scroll_area_nodebug = {
     .row	= SCROLL_AREA_TOP,
     .col	= SCROLL_AREA_LEFT,
     .width	= SCROLL_AREA_WIDTH,
     .height	= SCROLL_AREA_HEIGHT,
 };
-#endif
+
+struct sp1_Rect *scroll_area_p;
 
 void redraw_scroll_area( void ) {
-    sp1_Invalidate( &scroll_area );
+    sp1_Invalidate( scroll_area_p );
     sp1_UpdateNow();
 }
+
+void enable_hidden_band_view( void ) {
+    set_hidden_tile_band_attr( HIDDEN_BAND_VIEW_ATTR );
+}
+
+void disable_hidden_band_view( void ) {
+    set_hidden_tile_band_attr( DEFAULT_ATTR );
+}
+
+void init_screen( void ) {
+    init_screen_address_tables();
+    init_tile_map();
+
+    scroll_area_p = ( debug_enabled ? &scroll_area_debug : &scroll_area_nodebug );
+
+    if ( debug_enabled )
+        enable_hidden_band_view();
+}
+

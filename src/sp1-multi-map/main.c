@@ -200,8 +200,7 @@ void main( void ) {
     static uint8_t *p,dir,kbd;
 
     init_perfmeter();
-    init_screen_address_tables();
-    init_tile_map();
+    init_screen();
     init_kbd();
 
     // horizontal checks

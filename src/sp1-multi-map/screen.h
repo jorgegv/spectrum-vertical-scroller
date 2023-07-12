@@ -4,8 +4,13 @@
 extern uint8_t *scroll_area_screen_line_address[];
 extern uint8_t *scroll_area_screen_line_end_address[];
 
-void init_screen_address_tables( void );
-void init_tile_map( void );
+void init_screen( void );
 void redraw_scroll_area( void );
+void enable_hidden_band_view( void );
+void disable_hidden_band_view( void );
+
+#define DEFAULT_ATTR		( PAPER_WHITE | INK_BLACK )
+#define HIDDEN_BAND_VIEW_ATTR	( PAPER_WHITE | INK_BLACK | BRIGHT )
+#define SCROLL_AREA_ATTR	( PAPER_YELLOW | INK_BLACK )
 
 #endif // _SCREEN_H
