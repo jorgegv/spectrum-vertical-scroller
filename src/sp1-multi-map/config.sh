@@ -28,6 +28,9 @@ SCROLL_MAP_TILE_HEIGHT=2
 # dimensions are automatically calculated from it
 SCROLL_MAP_FILE=walls.scrollmap
 
+# DEBUG
+SCROLL_DEBUG=1
+
 #############################################
 ## End of configuration variables
 #############################################
