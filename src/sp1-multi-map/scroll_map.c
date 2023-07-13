@@ -164,7 +164,7 @@ void scroll_map_draw_hidden_left_col( void ) {
         map_offset = 0;
         height--;
     }
-    if ( scroll_map.viewport_pos.y >= SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX - SCROLL_MAP_TILE_HEIGHT_PIX ) {
+    if ( scroll_map.viewport_pos.y >= SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX ) {
         height--;
     }    
 
@@ -199,7 +199,7 @@ void scroll_map_draw_hidden_right_col( void ) {
         map_offset = 0;
         height--;
     }
-    if ( scroll_map.viewport_pos.y >= SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX - SCROLL_MAP_TILE_HEIGHT_PIX ) {
+    if ( scroll_map.viewport_pos.y >= SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX ) {
         height--;
     }
 
