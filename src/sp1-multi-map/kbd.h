@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <input.h>
 
-extern struct in_UDK kbd;
+extern struct in_UDK kbd_config;
 
 #define KBD_IN_DEBUG	0x80
 #define KBD_IN_SPEED	0x40

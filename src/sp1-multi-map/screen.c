@@ -88,7 +88,7 @@ struct sp1_Rect scroll_area_nodebug = {
     .height	= SCROLL_AREA_HEIGHT,
 };
 
-struct sp1_Rect *scroll_area_p;
+struct sp1_Rect *scroll_area_p = &scroll_area_nodebug;
 
 void redraw_scroll_area( void ) {
     sp1_Invalidate( scroll_area_p );

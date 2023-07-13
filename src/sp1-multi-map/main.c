@@ -197,8 +197,26 @@ uint8_t scroll_path[] = {
     #error "SCROLL_STEP must be defined with value 1, 2, 4 or 8"
 #endif
     
+uint8_t scroll_step = SCROLL_STEP;
+uint8_t kbd_state = 0;
+
+void update_status_panel( void ) {
+    gotoxy( 52, 2 ); puts( "VIEWPORT:" );
+    gotoxy( 52, 3 ); printf( "   X: %-3d", scroll_map.viewport_pos.x);
+    gotoxy( 52, 4 ); printf( "   Y: %-3d", scroll_map.viewport_pos.y );
+    gotoxy( 52, 6 ); printf( "STEP: %dpx ", scroll_step );
+    gotoxy( 52, 8 ); printf( " KBD: 0x%02X", kbd_state );
+}
+
+void clear_status_panel( void ) {
+    uint8_t i;
+    for (i=2; i <= 8; i++ ) {
+        gotoxy( 52, i ); puts("            ");
+    }
+}
+
 void main( void ) {
-    static uint8_t *p,dir,kbd;
+    static uint8_t *p,dir;
 
     init_perfmeter();
     init_screen();
@@ -223,6 +241,8 @@ void main( void ) {
     scroll_map_set_viewport_xy( 0, 32 );
     scroll_map_draw_viewport();
     redraw_scroll_area();
+    if ( debug_enabled )
+        update_status_panel();
 
 //    gotoxy( 0,22 ); printf("VX:%3d VY:%3d",scroll_map.viewport_pos.x,scroll_map.viewport_pos.y );
 
@@ -230,31 +250,46 @@ void main( void ) {
     while (1) {
 
 #if 1
-        // either this loop: read kbd and scroll according to QAOP-SP
-        kbd = kbd_read();
+        // either this loop: read kbd and scroll according to QAOP
+        kbd_state = kbd_read();
 
-        // check debug toggle
-        if ( kbd & KBD_IN_DEBUG ) {
-            msleep( 300 );
-            debug_enabled = ! debug_enabled;
-            if ( debug_enabled ) {
-                enable_hidden_band_view();
-            } else {
-                disable_hidden_band_view();
+        if ( kbd_state ) {
+            // check debug toggle
+            if ( kbd_state & KBD_IN_DEBUG ) {
+                debug_enabled = ! debug_enabled;
+                if ( debug_enabled ) {
+                    enable_hidden_band_view();
+                    update_status_panel();
+                } else {
+                    disable_hidden_band_view();
+                    clear_status_panel();
+                }
+                msleep( 100 );
+            }
+
+            // check speed toggle
+            if ( kbd_state & KBD_IN_SPEED ) {
+                scroll_step *= 2;
+                if ( scroll_step > 8 )
+                    scroll_step = 1;
+                update_status_panel();
+                msleep( 100 );
+            }
+
+            // check movements
+            dir = 0;
+            dir |= ( kbd_state & in_UP ? DIR_UP : 0 );
+            dir |= ( kbd_state & in_DOWN ? DIR_DOWN : 0 );
+            dir |= ( kbd_state & in_LEFT ? DIR_LEFT : 0 );
+            dir |= ( kbd_state & in_RIGHT ? DIR_RIGHT : 0 );
+            if ( dir ) {
+                scroll_map_scroll_viewport( dir, scroll_step );
+                redraw_scroll_area();
+                if ( debug_enabled )
+                    update_status_panel();
             }
         }
 
-        // check movements
-        dir = 0;
-        dir |= ( kbd & in_UP ? DIR_UP : 0 );
-        dir |= ( kbd & in_DOWN ? DIR_DOWN : 0 );
-        dir |= ( kbd & in_LEFT ? DIR_LEFT : 0 );
-        dir |= ( kbd & in_RIGHT ? DIR_RIGHT : 0 );
-        if ( dir ) {
-            scroll_map_scroll_viewport( dir, SCROLL_STEP );
-            redraw_scroll_area();
-//            gotoxy( 0,22 ); printf("VX:%3d VY:%3d",scroll_map.viewport_pos.x,scroll_map.viewport_pos.y );
-        }
         do_perf_accounting();
 #else
         // or this other: read 'path' and run the walk encoded there
