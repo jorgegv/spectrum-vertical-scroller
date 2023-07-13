@@ -94,7 +94,7 @@ void scroll_map_draw_hidden_top_row( void ) {
         map_offset = 0;
         width--;
     }
-    if ( scroll_map.viewport_pos.x >= SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX - SCROLL_MAP_TILE_WIDTH_PIX ) {
+    if ( scroll_map.viewport_pos.x >= SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX ) {
         width--;
     }    
 
@@ -129,7 +129,7 @@ void scroll_map_draw_hidden_bottom_row( void ) {
         map_offset = 0;
         width--;
     }
-    if ( scroll_map.viewport_pos.x >= SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX - SCROLL_MAP_TILE_WIDTH_PIX ) {
+    if ( scroll_map.viewport_pos.x >= SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX ) {
         width--;
     }    
 
@@ -246,6 +246,7 @@ void scroll_map_draw_viewport( void ) {
 }
 
 void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
+    uint8_t real_num_pix;
 //    gotoxy( 0, 19 );
 //    printf( "VX:%-3d, VY:%-3d", scroll_map.viewport_pos.x, scroll_map.viewport_pos.y );
 
@@ -262,6 +263,7 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
     // with what's inside the viewport
 
     // first, check if borders need to be redrawn
+
     if ( dir & DIR_UP ) {
         if ( scroll_map.viewport_pos.y >= num_pix ) {
             if ( ! ( scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX ) ) {
@@ -277,6 +279,7 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
             }
         }
     }
+
     if ( dir & DIR_DOWN ) {
         if ( scroll_map.viewport_pos.y <= SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX - num_pix ) {
             if ( ! ( scroll_map.viewport_pos.y % SCROLL_MAP_TILE_HEIGHT_PIX ) ) {
@@ -292,6 +295,7 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
             }
         }
     }
+
     if ( dir & DIR_LEFT ) {
         if ( scroll_map.viewport_pos.x >= num_pix ) {
             if ( ! ( scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX ) ) {
@@ -307,6 +311,7 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
             }
         }
     }
+
     if ( dir & DIR_RIGHT ) {
         if ( scroll_map.viewport_pos.x <= SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX - num_pix ) {
             if ( ! ( scroll_map.viewport_pos.x % SCROLL_MAP_TILE_WIDTH_PIX ) ) {
@@ -323,29 +328,54 @@ void scroll_map_scroll_viewport( uint8_t dir, uint8_t num_pix ) {
         }
     }
 
-    // after, do scroll if needed and update viewport coords
+    // Afterwards, do scroll if needed and update viewport coords
+
+    // For the scroll engine to work efficiently, the coordinates have to be
+    // multiples of the scroll step (in pixels), and we need to ensure that. 
+    // E.g.  when scrolling 2px, ensure that coords are even.  When 4px,
+    // multiple of 4, etc.
+    
+    // If the current coordinates are not multiples of the desired scroll
+    // step (num_pix), then we adjust them positively in the movement
+    // direction.  E.g.  if viewport is at x=23,y=16 and we want to move the
+    // viewport to the right right in 4px steps, the first step will scroll
+    // it 4 + (23 % 4) = 7 pixels; subsequent moves will scroll just 4px,
+    // since the coordinates will then be aligned with the required scroll
+    // step granularity.
+
     if ( dir & DIR_UP ) {
         if ( scroll_map.viewport_pos.y >= num_pix ) {
-            offscreen_scroll_down_pixels( num_pix );
-            scroll_map.viewport_pos.y -= num_pix;
+            // adjust real movement if misaligned
+            real_num_pix = num_pix + scroll_map.viewport_pos.y % num_pix;
+            offscreen_scroll_down_pixels( real_num_pix );
+            scroll_map.viewport_pos.y -= real_num_pix;
         }
     }
+
     if ( dir & DIR_DOWN ) {
         if ( scroll_map.viewport_pos.y <= SCROLL_MAP_HEIGHT_PIX - SCROLL_AREA_HEIGHT_PIX - num_pix ) {
-            offscreen_scroll_up_pixels( num_pix );
-            scroll_map.viewport_pos.y += num_pix;
+            // adjust real movement if misaligned
+            real_num_pix = num_pix + scroll_map.viewport_pos.y % num_pix;
+            offscreen_scroll_up_pixels( real_num_pix);
+            scroll_map.viewport_pos.y += real_num_pix;
         }
     }
+
     if ( dir & DIR_LEFT ) {
         if ( scroll_map.viewport_pos.x >= num_pix ) {
-            offscreen_scroll_right_pixels( num_pix );
-            scroll_map.viewport_pos.x -= num_pix;
+            // adjust real movement if misaligned
+            real_num_pix = num_pix + scroll_map.viewport_pos.x % num_pix;
+            offscreen_scroll_right_pixels( real_num_pix );
+            scroll_map.viewport_pos.x -= real_num_pix;
         }
     }
+
     if ( dir & DIR_RIGHT ) {
         if ( scroll_map.viewport_pos.x <= SCROLL_MAP_WIDTH_PIX - SCROLL_AREA_WIDTH_PIX - num_pix ) {
-            offscreen_scroll_left_pixels( num_pix );
-            scroll_map.viewport_pos.x += num_pix;
+            // adjust real movement if misaligned
+            real_num_pix = num_pix + scroll_map.viewport_pos.x % num_pix;
+            offscreen_scroll_left_pixels( real_num_pix );
+            scroll_map.viewport_pos.x += real_num_pix;
         }
     }
 
