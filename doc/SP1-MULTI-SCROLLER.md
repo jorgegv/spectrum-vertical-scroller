@@ -62,29 +62,41 @@ The animated demos and TAP files are ones provided in my previous post.
 
 ## Scroll map management
 
-- A scrolling system is a viewport over a bigger map that can't fit in the view, so the need appears for scrolling over it, i.e. moving a window or "viewport" over it in small steps.
-- The visible zone of the map is determined at all times by the position of the viewport over the global map
-- Scrolling can be done at 1-pixel resolution, so the viewport coordinates must be held in pixels, not in tiles or character cells
-- 8-bit pixel coordinates are only enough for just 1 full screen, so we must use 16-bit for each viewport coordinate (X and Y)
-- Maximum size of the global map is then 65536x65536 pixels. That's 8192 character cells in each dimension, so it seems pretty enough for a Spectrum game :-)
+A scrolling system can conceptually be seen as a viewport over a bigger map that can't fit in the view, so the need appears for moving the "viewport" over it in small steps. The visible zone of the map is then determined at all times by the position of the viewport over the global map.
 
-- The global map is built with tiles of the same size, not necessarily square. E.g. they can be 1x1 character cells (8x8 pixels), 2x2 (16x16 pixels), 3x2 (16x24 pixels), etc.). Tile dimensions are integer numbers of cells. Horizontal and vertical tile dimensions do not need to be the same, but it helps with map drawing. In our examples, our map is made of 16x16-pixel tiles (2x2 chars)
-- The map is stored as a linear byte array of size MAP_WIDTH x MAP_HEIGHT (dimensions in tiles).
-- Each map position in the array stores a 1-byte tile id and represents the tile at map position (ROW,COL). So for example, if the map size is 20 rows x 30 columns, the tile id for map position (4,5) is stored at position (4 x 30 + 5) = 125 in the map byte array.
-- There is a global tile table which maps the tile id to the tile data, so that it can be easily used by a tile drawing routine.
+We want to do smooth scrolling, so we should be able to do it at 1-pixel resolution. For this reason the viewport coordinates must be held in pixels, and not in tiles or character cells. If using 8 bit integers as pixel coordinates, we could only represent 1 full Spectrum screen (256x192), so we must use 16-bit for viewport coordinates X and Y. When using 16-bit coordinates, the maximum size of the global map is then 65536x65536 pixels. That's 8192 character cells in each dimension, so it seems pretty enough for a Spectrum game :-)
 
-- With this schema, 3 coordinate systems need to be taken into account:
-    - The viewport coordinates: high resolution coordinate system with 16-bit per coordinate.
-    - The map coordinates: measures the position of tiles in the map, also 16-bit per coordinate.
-    - The Screen/SP1 coordinates: these are the screen-cell coordinates, our familiar 32x24 cell array. 8-bit per coordinate.
-- In the previous coordinate systems, if we were using 2x2-cell (16x16 pixel) tiles, an example map could be:
+The global map is built with tiles of the same size; e.g. they can be 1x1 character cells (8x8 pixels), 2x2 (16x16 pixels), 3x2 (16x24 pixels), etc. Tile dimensions are integer numbers of cells. Horizontal and vertical tile dimensions do not need to be the same, but it helps with map drawing. In our examples, our map is made of 16x16-pixel tiles (2x2 chars)
+
+The map is stored as a linear byte array of size MAP_WIDTH x MAP_HEIGHT (with dimensions in tiles). Each map position in the array stores a 1-byte tile id and represents the tile at map position (ROW,COL). So for example, if the map size is 20 tile rows x 30 tile columns, the tile id for map position (4,5) is stored at position (4 x 30 + 5) = 125 in the map byte array. There is a global tile table which maps the tile id to the tile data, so that it can be easily used by a tile drawing routine.
+
+With this schema, 3 coordinate systems need to be taken into account, and coordinates converted back and forth between them:
+
+    - The Viewport coordinates: high resolution coordinate system with 16 bits per coordinate - Pixels
+    - The Map coordinates: measures the position of tiles in the map, also 16 bits per coordinate, since we saw that the map can be up to 8192x8192. - Tiles
+    - The Screen/SP1 coordinates: these are the screen-cell coordinates, our familiar 32x24 cell array (8 bits per coordinate) - Cells.
+
+In the previous coordinate systems, if we were using 2x2-cell (16x16 pixel) tiles, an example map could be:
+
     - Map coordinates: 48x24 tiles (WxH)
     - Viewport coordinates: 768x384 pixels (WxH)
     - Screen/SP1 coordinates: 96x48 cells (WxH)
 
-- The virtual framebuffer (the offscreen) is not the same size of the viewport, but bigger. It has an additional hidden surrounding band which is 1-tile wide all over the perimeter of the viewport. This is where new tiles are drawn (to memory) before coming into view by the scrolling process. It's the same concept that was seen in my previous SP1 vertical scroller examples for the "hidden top row", but applied to all directions (top, left, bottom, right).
-- The scrolling routines for each direction detect when new graphics are needed in the hidden band (because they are going to bring it into view with the next scroll operation), and will call the proper map functions to get tile data and draw it to the proper position in the hidden band.
-- Example: if we are going to show a 16x24-cell scrolling viewport, with 2x2-cell tiles, the offscreen will be 20x28 cells (16+2+2, 20+2+2).
+Since we are going to scroll map data into view from different directions, the virtual framebuffer (the offscreen) needs to be bigger than the viewport. It has a hidden band of tiles surrounding the visible area, which is 1-tile wide all over the perimeter of the viewport. This is where new tiles are drawn (to memory) before coming into view by the scrolling process. It's the same concept that was seen in my previous SP1 vertical scroller examples for the "hidden top row", but applied to all directions (top, left, bottom, right).
+
+We need then to detect when some new graphics are going to be brought inside the visible area, and update the hidden bands with new graphics. This graphics are created by selecting the tiles from the relevant map coordinates and drawing them on the hidden bands before doing the scroll operation. The scrolling routines for each direction detect when new graphics are needed in the hidden band, and will call the proper map functions to get tile data and draw it to the proper position in the hidden band.
+
+Example: if we want to show a 16x24-cell scrolling viewport on screen, and our map uses 2x2-cell tiles, the offscreen will be 20x28 cells (16+2+2, 20+2+2): a 16x24 window plus a 2-cell wide band around it.
+
+The hidden bands are only updated ocassionally, and only if the scrolling function detects that the new scrolling movement will bring graphics data from that band inside the viewport.
+
+Example: if the viewport is at position (X=16,Y=32) and we want to move the viewport UP 1 pixel, this means that the pixels at Y=31 will scroll down and become Y=32 (if we move the viewport UP, then we need to scroll DOWN :-) ). This condition is detected by the scroll routine and will redraw the top hidden band using the tiles at the associated map positions, before attempting to scroll down.
+
+Since the hidden top tile band is 16 pixels high in our example, this operation does not need to be done for each 1-pixel scroll movement: the top hidden band has been fully redrawn and can be scrolled down 16 times before needing another redraw. The performance impact of redrawing the hidden bands is then quite low, since it only needs to be done on average 1/16 of the times the scrolling routine is invoked.
+
+This ensures the illusion of a continuous movement over the map, even though we are drawing it in small tile-sized increments.
+
+You can find a demo of this map scrolling system in the `src/sp1-multi-map` folder or you can download the TAP file. You can move the viewport with QAOP, enable/disable the debug panel and hidden band display with D, and toggle the scroll speed with S.
 
 ## Assembler optimizations for scroll routines
 
@@ -96,4 +108,6 @@ The animated demos and TAP files are ones provided in my previous post.
 ## Partial-2 optimization
 
 ## Attribute scrolling
+
+- This only makes sense when scrolling in 8px steps
 
