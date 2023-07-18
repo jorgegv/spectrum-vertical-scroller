@@ -1,5 +1,6 @@
 #include <arch/zx/spectrum.h>
 #include <intrinsic.h>
+#include <input.h>
 
 #include "offscreen.h"
 #include "sprite.h"
@@ -25,15 +26,20 @@ void main( void ) {
 //    asm_offscreen_show_frame_stack();
 //    while (1);
 
-    for ( i = 1; i < 4; i++ ) {
+    for ( i = 1; i <= 3; i++ ) {
         generate_shifted_sprite( &ball_sprite, i * 2 );
     }
 //    dump_sprite( &ball_sprite);
     
+
+    // scroll testing loop
+
     // do some magic with virtual screen
     i = 0;
     while( 1 ) {
         // adjust scrolling window
+
+
         if ( ! current_scroll_offset_line-- ) {
             current_scroll_offset_line = SCROLL_EXTRA_LINES - 1;
             offscreen_scroll_down();
@@ -43,7 +49,8 @@ void main( void ) {
 //            draw_sprite_column( (uint8_t *)( &ball_sprite.cells[3][0] ), &ball_sprite.save_buffer[0], &offscreen[0] );
 //            draw_sprite_column( (uint8_t *)( &ball_sprite.cells[3][2] ), &ball_sprite.save_buffer[16], &offscreen[1] );
 //            draw_sprite_column( (uint8_t *)( &ball_sprite.cells[3][4] ), &ball_sprite.save_buffer[32], &offscreen[2] );
-            draw_sprite( &ball_sprite, 18, 32 );
+            draw_sprite( &ball_sprite, 16 + i, 0 );
+
 
             if ( ++i == SCROLL_COLS )
                 i = 0;
@@ -62,6 +69,26 @@ void main( void ) {
         zx_border( INK_BLACK );
     }
 
+/*
+        // sprite testing main loop
+        while (1) {
+            for ( i = 0; i < 48; i += 2 ) {
+                draw_sprite( &ball_sprite, 16 + i, 0 );
+                intrinsic_halt();
+                asm_offscreen_show_frame_stack();
+                in_Wait(10);
+                erase_sprite( &ball_sprite, 16 + i, 0 );
+            }
+            for ( i = 0; i < 48; i += 2 ) {
+                draw_sprite( &ball_sprite, 16 + 48 - i, 0 );
+                intrinsic_halt();
+                asm_offscreen_show_frame_stack();
+                in_Wait(10);
+                erase_sprite( &ball_sprite, 16 + 48 - i, 0 );
+            }
+        }
+*/
+
     // end of program
-    while(1);
+//    while(1);
 }

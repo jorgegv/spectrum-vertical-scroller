@@ -32,6 +32,7 @@ void dump_sprite( struct sprite_graphic_s *s );
 void draw_sprite_column( uint8_t *sprite_data, uint8_t *sprite_buffer, uint8_t *framebuffer_addr, uint16_t lines ) __smallc  __z88dk_callee;
 void erase_sprite_column( uint8_t *sprite_buffer, uint8_t *framebuffer_addr, uint16_t lines ) __smallc  __z88dk_callee;
 void draw_sprite( struct sprite_graphic_s *s, uint8_t x, uint8_t y );
+void erase_sprite( struct sprite_graphic_s *s, uint8_t x, uint8_t y );
 
 //extern uint8_t ball_sprite[];
 //extern struct  sprite_cell_s ball_sprite_data[];

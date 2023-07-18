@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <intrinsic.h>
 #include <stdlib.h>
+#include <conio.h>
 
 #include "offscreen.h"
 #include "sprite.h"
@@ -58,15 +59,27 @@ void draw_sprite( struct sprite_graphic_s *s, uint8_t x, uint8_t y ) {
     uint8_t col, shift_index, n_rows, n_lines, shift_col;
     uint8_t *addr;
 
-    shift_index = x % PRESHIFT_BITS_MASK;
-    shift_col = x >> PRESHIFT_BITS;
+    // calculate which shift table to use
+    shift_index = ( x % 8 ) / PRESHIFT_BITS;
+
+    // column to draw on
+    shift_col = x / 8;
+
+    // start addr of col
     addr = offscreen_line_address[ y ] + shift_col;
     n_rows = s->rows;
     n_lines = n_rows * 8;
 
+//    gotoxy( 0,21 );
+//    printf("x: %-3d y:%-3d\n",x,y);
+//    printf("shift_index: %d shift_col: %d addr: 0x%04x lines:%-2d\n",
+//    	shift_index, shift_col,addr,n_lines );
+
     col = s->cols;
+    // if shift index != 0 then we need to draw extra right column
+    if ( shift_index ) col++;
     while( col-- ) {
-        draw_sprite_column( (uint8_t *)&s->cells[ shift_index ][ col * n_rows ], s->save_buffer, addr + col, n_lines );
+        draw_sprite_column( (uint8_t *)&s->cells[ shift_index ][ col * n_rows ], &s->save_buffer[ col * n_lines ], addr + col, n_lines );
     }
 }
 
@@ -131,11 +144,11 @@ loop_draw_line:
 					;; DE: sprite data addr + 1
 	ld (hl),a			;; save to framebuffer
 
-	ld bc,de			;; restore BC: sprite data addr
-	pop de				;; restore DE: sprite buffer addr + 1
+	ld bc,de			;; restore BC: sprite data addr + 1
+	pop de				;; restore DE: sprite buffer addr
 
 	;; adjust for next iteration
-	add hl,SCROLL_COLS	;; HL: next framebuffer line
+	add hl,SCROLL_COLS		;; HL: next framebuffer line
 	inc bc				;; BC: next sprite data line
 					;; it was already +1, so +1 more
 	inc de				;; DE: next sprite buffer line
@@ -172,13 +185,41 @@ loop_erase_line:
 	ld (hl),a
 
 	;; loop
-	add hl,SCROLL_COLS	;; adjust framebuffer addr
+	add hl,SCROLL_COLS		;; adjust framebuffer addr
 	inc de				;; adjust sprite buffer addr
 	ex de,hl			;; put them as needed again
 
 	djnz loop_erase_line
 	ret
 __endasm;
+}
+
+void erase_sprite( struct sprite_graphic_s *s, uint8_t x, uint8_t y ) {
+    uint8_t col, shift_index, n_rows, n_lines, shift_col;
+    uint8_t *addr;
+
+    // calculate which shift table to use
+    shift_index = ( x % 8 ) / PRESHIFT_BITS;
+
+    // column to draw on
+    shift_col = x / 8;
+
+    // start addr of col
+    addr = offscreen_line_address[ y ] + shift_col;
+    n_rows = s->rows;
+    n_lines = n_rows * 8;
+
+//    gotoxy( 0,21 );
+//    printf("x: %-3d y:%-3d\n",x,y);
+//    printf("shift_index: %d shift_col: %d addr: 0x%04x lines:%-2d\n",
+//    	shift_index, shift_col,addr,n_lines );
+
+    col = s->cols;
+    // if shift index != 0 then we need to draw extra right column
+    if ( shift_index ) col++;
+    while( col-- ) {
+//        erase_sprite_column( &s->save_buffer[ col * n_lines ], addr + col, n_lines );
+    }
 }
 
 
@@ -195,16 +236,17 @@ void generate_shifted_sprite( struct sprite_graphic_s *s, uint8_t ofs ) {
         while ( row-- ) {
             line = 8;
             while ( line-- ) {
+            	// pixel shifting
             	// calculate the shifted value
             	shifted = s->cells[ 0 ][ ( col * n_rows ) + row ].lines[ line ].pixels >> ofs;
             	// if we are not on the first column, shift in the lower bits from the column on the left
             	if ( col )
 		    shifted |= ( s->cells[ 0 ][ ( ( col - 1 ) * n_rows ) + row ].lines[ line ].pixels & ( 0xFF >> ( 8 - ofs ) ) ) << ( 8 - ofs );
 		// if we are on the leftmost column, the new MSBs that enter are already 0, so no need to touch them
-
 		// store shifted value
                 s->cells[ ofs / PRESHIFT_BITS ][ ( col * n_rows ) + row ].lines[ line ].pixels = shifted;
                     
+                // mask shifting
             	// calculate the shifted value
 		shifted = ~( ( ~s->cells[ 0 ][ ( col * n_rows ) + row ].lines[ line ].mask ) >> ofs );
             	// if we are not on the first column, shift in the lower bits from the column on the left
@@ -213,7 +255,6 @@ void generate_shifted_sprite( struct sprite_graphic_s *s, uint8_t ofs ) {
 		else
 		    // if we are on the leftmost column, the new MSBs that enter are 0, but they needs to be 1 so flip them
 		    shifted |= ( 0xFF >> ( 8 - ofs ) ) << ( 8 - ofs );
-
 		// store shifted value
                 s->cells[ ofs / PRESHIFT_BITS ][ ( col * n_rows ) + row ].lines[ line ].mask = shifted;
             }
