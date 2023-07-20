@@ -41,7 +41,7 @@ struct  sprite_cell_s ball_sprite_cells[] = {
 
 };
 
-uint8_t ball_sprite_buffer[48];
+uint8_t ball_sprite_buffer[48]; // 8 bytes * 6 cells ( 4 sprite + 2 right blank col)
 
 struct sprite_graphic_s ball_sprite = {
     .rows		= 2,
@@ -56,7 +56,7 @@ struct sprite_graphic_s ball_sprite = {
 };
 
 void draw_sprite( struct sprite_graphic_s *s, uint8_t x, uint8_t y ) {
-    uint8_t col, shift_index, n_rows, n_lines, shift_col;
+    uint8_t col, shift_index, n_rows, n_lines, shift_col,i;
     uint8_t *addr;
 
     // calculate which shift table to use
@@ -78,124 +78,41 @@ void draw_sprite( struct sprite_graphic_s *s, uint8_t x, uint8_t y ) {
     col = s->cols;
     // if shift index != 0 then we need to draw extra right column
     if ( shift_index ) col++;
-    while( col-- ) {
-        draw_sprite_column( (uint8_t *)&s->cells[ shift_index ][ col * n_rows ], &s->save_buffer[ col * n_lines ], addr + col, n_lines );
+    for ( i = 0; i < col; i++ ) {
+        draw_sprite_column( (uint8_t *)&s->cells[ shift_index ][ i * n_rows ], &s->save_buffer[ i * n_lines ], addr + i, n_lines );
     }
 }
 
 void draw_sprite_column( uint8_t *sprite_data,
                         uint8_t *sprite_buffer,
                         uint8_t *framebuffer_addr,
-                        uint16_t lines ) __smallc  __z88dk_callee __naked {
-__asm
+                        uint16_t lines ) __smallc  __z88dk_callee {
+    while ( lines-- ) {
+    	// save framebuffer content to sprite buffer
+    	*sprite_buffer = *framebuffer_addr;
 
+    	// apply mask [0] and put graphics [1] to framebuffer
+    	*framebuffer_addr = ( *framebuffer_addr & sprite_data[0] ) | sprite_data[1];
 
-;; trashes all regs
-
-	exx
-	pop bc				;; retaddr
-	exx
-
-	pop bc
-	ld a,c
-	pop hl				;; HL: framebuffer addr
-	pop de				;; DE: sprite buffer addr
-	pop bc				;; BC: sprite data addr
-
-	exx
-	push bc				;; restore retaddr
-	exx
-
-	;; A: number of lines
-
-loop_draw_line:
-	;; When entering loop iteration:
-	;; A: current loop counter
-	;; HL: current framebuffer addr
-	;; DE: current sprite buffer addr
-	;; BC: current sprite data addr
-
-	push af				;; save the line counter
-
-	;; save the background
-	ld a,(hl)
-	ex de,hl
-	ld (hl),a			;; now:
-					;; DE: framebuffer addr
-					;; HL: sprite buffer addr
-					;; A: original framebuffer data
-
-	;; draw sprite pixels
-	push hl				;; save sprite buffer addr
-
-	ld hl,bc			;; HL: sprite data addr
-					;; DE: framebuffer addr
-					;; BC: sprite data addr
-	ld b,(hl)			;; B: mask data
-	inc hl
-	ld c,(hl)			;; C: pixel data
-					;; HL: sprite data addr + 1
-					
-					;; A already contains original framebuffer data
-	and b				;; apply mask to screen data
-	or c				;; put the sprite pixels
-
-	ex de,hl			;; HL: framebuffer addr
-					;; DE: sprite data addr + 1
-	ld (hl),a			;; save to framebuffer
-
-	ld bc,de			;; restore BC: sprite data addr + 1
-	pop de				;; restore DE: sprite buffer addr
-
-	;; adjust for next iteration
-	add hl,SCROLL_COLS		;; HL: next framebuffer line
-	inc bc				;; BC: next sprite data line
-					;; it was already +1, so +1 more
-	inc de				;; DE: next sprite buffer line
-
-	;; loop
-	pop af
-	dec a
-	jp nz,loop_draw_line
-	ret
-__endasm;
+    	// adjust pointers
+    	sprite_buffer++;			// next byte for buffer
+    	framebuffer_addr += SCROLL_COLS;	// next line
+    	sprite_data += 2;			// add 2 for mask and pixels
+    }
 }
 
 void erase_sprite_column( uint8_t *sprite_buffer,
                         uint8_t *framebuffer_addr,
-                        uint16_t lines ) __smallc  __z88dk_callee __naked {
-__asm
-;; trashes all regs
-
-	pop af				;; retaddr
-	pop bc				;; B: number of lines
-	pop de				;; DE: framebuffer addr
-	pop hl				;; HL: sprite buffer addr
-	push af				;; restore retaddr
-
-	;; B: number of lines
-
-loop_erase_line:
-	;; When entering loop iteration:
-	;; HL: sprite buffer addr
-	;; DE: framebuffer addr
-
-	ld a,(hl)
-	ex de,hl	;; now: DE: sprite buffer addr, HL: frame buffer addr
-	ld (hl),a
-
-	;; loop
-	add hl,SCROLL_COLS		;; adjust framebuffer addr
-	inc de				;; adjust sprite buffer addr
-	ex de,hl			;; put them as needed again
-
-	djnz loop_erase_line
-	ret
-__endasm;
+                        uint16_t lines ) __smallc  __z88dk_callee {
+    while ( lines-- ) {
+    	// apply mask [0] and put graphics [1] to framebuffer
+    	*framebuffer_addr = *sprite_buffer++;
+    	framebuffer_addr += SCROLL_COLS;	// next line
+    }
 }
 
 void erase_sprite( struct sprite_graphic_s *s, uint8_t x, uint8_t y ) {
-    uint8_t col, shift_index, n_rows, n_lines, shift_col;
+    uint8_t col, shift_index, n_rows, n_lines, shift_col, i;
     uint8_t *addr;
 
     // calculate which shift table to use
@@ -217,8 +134,8 @@ void erase_sprite( struct sprite_graphic_s *s, uint8_t x, uint8_t y ) {
     col = s->cols;
     // if shift index != 0 then we need to draw extra right column
     if ( shift_index ) col++;
-    while( col-- ) {
-//        erase_sprite_column( &s->save_buffer[ col * n_lines ], addr + col, n_lines );
+    for ( i = 0; i < col; i++ ) {
+        erase_sprite_column( &s->save_buffer[ i * n_lines ], addr + i, n_lines );
     }
 }
 

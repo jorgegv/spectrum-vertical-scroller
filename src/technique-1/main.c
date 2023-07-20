@@ -7,6 +7,12 @@
 
 uint8_t ball_tile[ 8 ] = { 0x38, 0x44, 0x92, 0xba, 0x92, 0x44, 0x38, 0x00 };
 
+void wait_key( void ) {
+    in_WaitForKey();
+    in_Wait( 100 );
+    in_WaitForNoKey();
+}
+
 void main( void ) {
     uint8_t i;
 
@@ -32,6 +38,7 @@ void main( void ) {
 //    dump_sprite( &ball_sprite);
     
 
+/*
     // scroll testing loop
 
     // do some magic with virtual screen
@@ -68,26 +75,39 @@ void main( void ) {
 
         zx_border( INK_BLACK );
     }
+*/
 
-/*
+///*
         // sprite testing main loop
         while (1) {
             for ( i = 0; i < 48; i += 2 ) {
-                draw_sprite( &ball_sprite, 16 + i, 0 );
+//                zx_border( INK_GREEN );
+                draw_sprite( &ball_sprite, 16 + i, 2 );
                 intrinsic_halt();
                 asm_offscreen_show_frame_stack();
                 in_Wait(10);
-                erase_sprite( &ball_sprite, 16 + i, 0 );
+//                wait_key();
+
+//                zx_border( INK_RED );
+                erase_sprite( &ball_sprite, 16 + i, 2 );
+//                asm_offscreen_show_frame_stack();
+//                wait_key();
             }
             for ( i = 0; i < 48; i += 2 ) {
+//                zx_border( INK_MAGENTA );
                 draw_sprite( &ball_sprite, 16 + 48 - i, 0 );
                 intrinsic_halt();
                 asm_offscreen_show_frame_stack();
                 in_Wait(10);
+//                wait_key();
+
+//                zx_border( INK_YELLOW );
                 erase_sprite( &ball_sprite, 16 + 48 - i, 0 );
+//                asm_offscreen_show_frame_stack();
+//                wait_key();
             }
         }
-*/
+//*/
 
     // end of program
 //    while(1);
